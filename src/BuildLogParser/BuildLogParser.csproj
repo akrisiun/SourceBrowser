@@ -4,6 +4,12 @@
     <ProjectGuid>{57002F26-8D15-4CF7-A53D-61AE8CC5E836}</ProjectGuid>
     <AssemblyName>Microsoft.SourceBrowser.BuildLogParser</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>HtmlGenerator_1_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <Import Project="..\..\Common.props" />
   <ItemGroup>
     <Reference Include="Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -21,6 +27,9 @@
       <Project>{f13cd277-e86b-4bc6-9e93-39ed055a46db}</Project>
       <Name>Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HtmlGenerator_1_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="..\..\Common.targets" />
 </Project>

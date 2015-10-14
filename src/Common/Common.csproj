@@ -4,6 +4,15 @@
     <ProjectGuid>{F13CD277-E86B-4BC6-9E93-39ED055A46DB}</ProjectGuid>
     <AssemblyName>Microsoft.SourceBrowser.Common</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <OutputPath>..\..\bin\Microsoft.SourceBrowser.Common\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>HtmlGenerator_1_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <Import Project="..\..\Common.props" />
   <PropertyGroup>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -29,6 +38,9 @@
     <Compile Include="ProcessLaunchService.cs" />
     <Compile Include="RangeUtilities.cs" />
     <Compile Include="TextUtilities.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HtmlGenerator_1_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="..\..\Common.targets" />
 </Project>
