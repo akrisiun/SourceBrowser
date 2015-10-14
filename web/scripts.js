@@ -4,8 +4,7 @@ var useSolutionExplorer = true;
 var anchorSplitChar = ",";
 
 var externalUrlMap = [
-    "http://referencesource.microsoft.com/",
-    "http://source.roslyn.io/"
+    "http://referencesource.microsoft.com/"
 ];
 
 var supportedFileExtensions = [
@@ -24,7 +23,8 @@ function redirectLocation(frame, newLocation) {
         return;
     }
 
-    frame.location.replace(newLocation);
+	alert(newLocation);
+    // frame.location.replace(newLocation);
 }
 
 function setHash(newHash) {
@@ -50,12 +50,13 @@ function processHash() {
     var anchor = document.location.hash;
     if (anchor) {
         anchor = anchor.slice(1);
+        anchorDir = anchor.slice(2);
 
         if (!anchor) {
             if (top.location.pathname != "/") {
-                redirectLocation(top, "/");
+                return;
+                // redirectLocation(top, "/");
             }
-
             return;
         }
 
@@ -82,6 +83,12 @@ function processHash() {
         if (startsWithIgnoreCase(anchor, "EmptyArrayAllocation")) {
             redirectLocation(n, "/mscorlib/R/EmptyArrayAllocation.html");
             return;
+        }
+
+        dir = "";
+        if (startsWith(anchor, "dir=")) {
+            dir = anchor.slice(2);
+            anchoranchor.slice(3);
         }
 
         if (startsWith(anchor, "q=")) {

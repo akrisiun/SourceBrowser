@@ -4,8 +4,7 @@ var useSolutionExplorer = true;
 var anchorSplitChar = ",";
 
 var externalUrlMap = [
-    "http://referencesource.microsoft.com/",
-    "http://source.roslyn.io/"
+    "http://referencesource.microsoft.com/"
 ];
 
 var supportedFileExtensions = [
@@ -24,7 +23,8 @@ function redirectLocation(frame, newLocation) {
         return;
     }
 
-    frame.location.replace(newLocation);
+	alert(newLocation);
+    // frame.location.replace(newLocation);
 }
 
 function setHash(newHash) {
@@ -32,7 +32,7 @@ function setHash(newHash) {
         newHash = newHash.slice(1);
     }
 
-    top.history.replaceState(null, top.document.title, '#' + newHash);
+    // top.history.replaceState(null, top.document.title, '#' + newHash);
 }
 
 function onHashChanged(e) {
@@ -50,38 +50,44 @@ function processHash() {
     var anchor = document.location.hash;
     if (anchor) {
         anchor = anchor.slice(1);
+        anchorDir = anchor.slice(2);
 
         if (!anchor) {
-            if (top.location.pathname != "/") {
-                redirectLocation(top, "/");
+            if (top.location.pathname != "?/") {
+                redirectLocation(top, "?/");
             }
-
             return;
         }
 
         if (startsWithIgnoreCase(anchor, "MSBuildProperty=")) {
-            redirectLocation(n, "/MSBuildProperties/R/" + anchor.slice("MSBuildProperty=".length) + ".html");
+            redirectLocation(n, "?/MSBuildProperties/R/" + anchor.slice("MSBuildProperty=".length) + ".html");
             return;
         }
 
         if (startsWithIgnoreCase(anchor, "MSBuildItem=")) {
-            redirectLocation(n, "/MSBuildItems/R/" + anchor.slice("MSBuildItem=".length) + ".html");
+            redirectLocation(n, "?/MSBuildItems/R/" + anchor.slice("MSBuildItem=".length) + ".html");
             return;
         }
 
         if (startsWithIgnoreCase(anchor, "MSBuildTarget=")) {
-            redirectLocation(n, "/MSBuildTargets/R/" + anchor.slice("MSBuildTarget=".length) + ".html");
+            redirectLocation(n, "?/MSBuildTargets/R/" + anchor.slice("MSBuildTarget=".length) + ".html");
             return;
         }
 
         if (startsWithIgnoreCase(anchor, "MSBuildTask=")) {
-            redirectLocation(n, "/MSBuildTasks/R/" + anchor.slice("MSBuildTask=".length) + ".html");
+            redirectLocation(n, "?/MSBuildTasks/R/" + anchor.slice("MSBuildTask=".length) + ".html");
             return;
         }
 
         if (startsWithIgnoreCase(anchor, "EmptyArrayAllocation")) {
-            redirectLocation(n, "/mscorlib/R/EmptyArrayAllocation.html");
+            redirectLocation(n, "?/mscorlib/R/EmptyArrayAllocation.html");
             return;
+        }
+
+        dir = "";
+        if (startsWith(anchor, "dir=")) {
+            dir = anchor.slice(2);
+            anchoranchor.slice(3);
         }
 
         if (startsWith(anchor, "q=")) {
@@ -112,7 +118,7 @@ function processHash() {
 
         potentialFile = decodeURIComponent(potentialFile);
 
-        if (potentialFile.charAt(0) == "/") {
+        if (potentialFile.charAt(0) == "?/") {
             potentialFile = potentialFile.slice(1);
         }
 
@@ -136,18 +142,18 @@ function processHash() {
             var pathParts = potentialFile.split("/");
             if (pathParts.length > 1) {
                 if (hashParts.length == 3 && hashParts[2] == "references") {
-                    redirectLocation(n, "/" + pathParts[0] + "/R/" + hashParts[1] + ".html");
+                    redirectLocation(n, "?/" + pathParts[0] + "/R/" + hashParts[1] + ".html");
                 }
                 else {
                     if (pathParts[0] != "MSBuildFiles" && pathParts[0] != "TypeScriptFiles") {
-                        redirectLocation(n, "/" + pathParts[0] + "/ProjectExplorer.html");
+                        redirectLocation(n, "?/" + pathParts[0] + "/ProjectExplorer.html");
                     }
                 }
             }
         } else if (hashParts.length == 1 && potentialFile.indexOf("/") == -1) {
-            redirectLocation(n, "/" + potentialFile + "/ProjectExplorer.html");
+            redirectLocation(n, "?/" + potentialFile + "/ProjectExplorer.html");
         } else if (hashParts.length == 2 && potentialFile.indexOf("/") == -1 && hashParts[1] == "namespaces") {
-            redirectLocation(n, "/" + potentialFile + "/namespaces.html");
+            redirectLocation(n, "?/" + potentialFile + "/namespaces.html");
         }
     } else if (useSolutionExplorer) {
         redirectLocation(n, "solutionexplorer.html");
@@ -165,19 +171,19 @@ function onPageLoaded() {
 
     var query = document.location.search;
     if (query && query.slice(0, 3) == "?q=") {
-        redirectLocation(top, "/#" + query.slice(1));
+        redirectLocation(top, "?/#" + query.slice(1));
         return;
     }
 
     var pathname = document.location.pathname;
     if (pathname.toLowerCase().slice(0, 11) == "/index.html") {
-        redirectLocation(top, "/");
+        redirectLocation(top, "?/");
         return;
     }
 
     if (pathname.length > 1) {
         setHash(pathname.slice(1) + location.hash);
-        redirectLocation(top, "/");
+        redirectLocation(top, "?/");
         return;
     }
 
@@ -197,7 +203,7 @@ function onHeaderLoad() {
         if (this.value != lastSearchString || (event && event.keyCode == 13)) {
             lastSearchString = this.value;
             if (!top.n.document.getElementById("symbols")) {
-                top.n.location = "results.html";
+                // top.n.location = "results.html";
                 setTimeout(onSearchChange, 50);
             }
 
@@ -244,7 +250,7 @@ function i(lineNumberCount) {
         if (projectPathLink) {
             projectPathLink.onclick = function () {
                 var assemblyName = getAssemblyName();
-                top.n.location = "/" + assemblyName + "/ProjectExplorer.html";
+                // top.n.location = "/" + assemblyName + "/ProjectExplorer.html";
                 setHash(assemblyName);
                 return false;
             }
@@ -342,13 +348,13 @@ function rewriteExternalLink(link) {
         return;
     }
 
-    if (endsWith(url, "/0000000000.html")) {
+    if (endsWith(url, "?/0000000000.html")) {
         var filePath = top.s.location.pathname.slice(1);
         filePath = getDisplayableFileName(filePath);
         filePath = "/#" + filePath + anchorSplitChar + link.id;
         link.href = filePath;
         link.onclick = function () {
-            redirectLocation(top.n, "/0000000000.html");
+            redirectLocation(top.n, "?/0000000000.html");
             return false;
         };
         return;
@@ -432,15 +438,15 @@ function ro() {
 
     var displayableFileName = getDisplayableFileName(top.s.location.pathname.slice(1));
     var newHash = displayableFileName + anchorSplitChar + symbolId + anchorSplitChar + "references";
-    if (startsWithIgnoreCase(path, "/MSBuildProperties")) {
+    if (startsWithIgnoreCase(path, "?/MSBuildProperties")) {
         newHash = "MSBuildProperty=" + symbolId;
-    } else if (startsWithIgnoreCase(path, "/MSBuildItems")) {
+    } else if (startsWithIgnoreCase(path, "?/MSBuildItems")) {
         newHash = "MSBuildItem=" + symbolId;
-    } else if (startsWithIgnoreCase(path, "/MSBuildTargets")) {
+    } else if (startsWithIgnoreCase(path, "?/MSBuildTargets")) {
         newHash = "MSBuildTarget=" + symbolId;
-    } else if (startsWithIgnoreCase(path, "/MSBuildTasks")) {
+    } else if (startsWithIgnoreCase(path, "?/MSBuildTasks")) {
         newHash = "MSBuildTask=" + symbolId;
-    } else if (startsWithIgnoreCase(path, "/mscorlib/R/EmptyArrayAllocation")) {
+    } else if (startsWithIgnoreCase(path, "?/mscorlib/R/EmptyArrayAllocation")) {
         newHash = "EmptyArrayAllocation";
     }
 
@@ -1037,7 +1043,7 @@ function redirectToIndex() {
 // this is called when the references file (/R/id.html) is loaded in the top frame
 function redirectToSymbolReferences() {
     var referencesFilePath = this.document.location.href;
-    var destination = referencesFilePath.replace("/R/", "/a.html" + "#");
+    var destination = referencesFilePath.replace("/R/", "?/a.html" + "#");
 
     // strip off the ".html" suffix
     destination = destination.slice(0, destination.length - 5);
@@ -1214,7 +1220,7 @@ function getDisplayableFileName(text) {
     text = encodeURIComponent(text);
     while (text.indexOf("%2F") > -1) {
         // don't escape slashes since they actually look nice in the URL unescaped
-        text = text.replace("%2F", "/");
+        text = text.replace("%2F", "?/");
     }
 
     return text;

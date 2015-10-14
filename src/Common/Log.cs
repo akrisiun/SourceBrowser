@@ -42,7 +42,7 @@ namespace Microsoft.SourceBrowser.Common
                 }
                 catch (Exception ex)
                 {
-                    Write($"Failed to write to ${filePath}: ${ex}.", ConsoleColor.Red);
+                    Write(String.Format("Failed to write to {%0}: {%1}.", filePath, ex), ConsoleColor.Red);
                 }
             }
         }

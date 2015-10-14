@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿using System;
+using System.Web.Http;
+using System.Web;
 
 namespace Microsoft.SourceBrowser.SourceIndexServer
 {

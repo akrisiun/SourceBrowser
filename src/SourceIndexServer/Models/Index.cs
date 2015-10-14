@@ -5,11 +5,16 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using Microsoft.SourceBrowser.Common;
+using System.IO;
+using IO = System.IO;
+using System.Net;
 
 namespace Microsoft.SourceBrowser.SourceIndexServer.Models
 {
     public class Index : IDisposable
     {
+        #region Properties 
+
         public const int MaxRawResults = 100;
 
         private static Index instance;
@@ -45,6 +50,8 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
         public double progress = 0.0;
         public string loadErrorMessage = null;
 
+        #endregion
+
         public static Index Instance
         {
             get
@@ -55,9 +62,22 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                     {
                         if (instance == null)
                         {
+                            if (!Start.Started)
+                                Start.PostUp();
+
                             instance = new Index();
                             var rootPath = HostingEnvironment.ApplicationPhysicalPath;
-                            Task.Run(() => IndexLoader.ReadIndex(instance, rootPath));
+                            var appPath = System.Configuration.ConfigurationManager.AppSettings["directory"];
+                            if (!string.IsNullOrWhiteSpace(appPath) && System.IO.Directory.Exists(appPath))
+                                rootPath = System.IO.Path.GetFullPath(appPath);
+
+                            var ctx = System.Web.HttpContext.Current;
+                            ctx.Trace.Write("rootPath=" + rootPath);
+                            instance.RootPath = rootPath;
+
+                            if (IO.File.Exists(Path.Combine(rootPath, indexFile)))
+                                Task.Run(() => IndexLoader.ReadIndex(instance, rootPath));
+
                             AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
                         }
                     }
@@ -76,11 +96,166 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
             }
         }
 
+        public string RootPath { get; private set; }
+        public string ProjPath { get; private set; }
+        public const string indexFile = "SolutionExplorer.html";
+
+        // TODO
+            //var urlPath = ctx.Request.Url.AbsolutePath;
+            //ctx.Trace.Write("urlPath=" + urlPath);
+            //var dir = ctx.Request.Params["dir"];
+            //if (!string.IsNullOrWhiteSpace(dir))
+            //{
+            //    if (dir.Contains("%"))
+            //        dir = WebUtility.HtmlDecode(dir);
+            //    dir = Path.Combine(rootPath, dir);
+            //    if (Directory.Exists(dir))
+            //        instance.ProjPath = dir;
+            //}
+
+        public void File(string file = "index.html")
+        {
+            var ctx = System.Web.HttpContext.Current;
+            var Request = ctx.Request;
+            var Response = ctx.Response;
+
+            string path = Request.Url.AbsolutePath;
+            string dir = Request.Params["dir"] ?? path;
+            var q = Request.Params["q"];
+            var symbol = Request.Params["symbol"];
+            
+            file = file ?? Request.Params["file"];
+
+            if (dir.StartsWith("/api/symbols/") || q != null)
+            {
+                Query query = null;
+                var qpath = this.ProjPath;
+                if (string.IsNullOrWhiteSpace(qpath))
+                    qpath = dir ?? ctx.Session["PATH"] as string;
+                if (qpath.Length > 0)
+                    this.ProjPath = qpath;
+
+                if (symbol != null)
+                    query = Get(symbol);
+                else if (q != null)
+                    query = Get(q);
+
+                var found = query.HasResults;
+                ResultsHtmlGenerator generator = new ResultsHtmlGenerator(query);
+                try
+                {
+                    string content = generator.Generate(null, this, null);
+                    Response.Write(content);
+                    Response.StatusCode = 400;
+                }
+                catch { Response.StatusCode = 300; }
+                
+                return;
+            }
+            if (file != null && file.EndsWith(".html"))
+            {
+                var fullFile = Path.Combine(RootPath, file);
+                if (!System.IO.File.Exists(fullFile) && dir.Length > 0 && !dir.Contains("."))
+                {
+                    dir = dir.Replace("/", @"\").TrimStart(@"\".ToCharArray());
+                    ctx.Session["PATH"] =  dir;
+                    this.ProjPath = dir;
+                    fullFile = Path.Combine(RootPath, dir, file);
+                }
+
+                if (System.IO.File.Exists(fullFile))
+                {
+                    Response.Write(System.IO.File.ReadAllText(fullFile));
+                    Response.StatusCode = 400;
+                    return;
+                }
+            }
+            var segments = Request.Url.Segments;
+            if (segments.Length > 0)
+            {
+                var last = segments[segments.Length - 1];
+                if (last.EndsWith(".css") || last.EndsWith(".js") 
+                    || last.EndsWith(".png")
+                    || last.EndsWith("index.html") || last.EndsWith("header.html")
+                    || last.EndsWith("overview.html")
+                    )
+                {
+                    if (last.EndsWith(".png"))
+                        last = @"content\icons\" + last;
+                    var fullFile = Path.Combine(HostingEnvironment.ApplicationPhysicalPath, last);
+                    var ext = Path.GetExtension(last);
+                    try
+                    {
+                        string content = System.IO.File.ReadAllText(fullFile);
+                        if (ext.Equals(".css"))
+                            Response.ContentType = "text/css";
+                        else if (ext.Equals(".js"))
+                            Response.ContentType = "text/javascript";
+                        else if (ext.Equals(".png"))
+                            Response.ContentType = "image/png";
+                        else
+                            Response.ContentType = "text/html";
+
+                        Response.Write(content);
+                        Response.StatusCode = 400;
+                    }
+                    catch { Response.StatusCode = 200; }
+
+                    if (last.EndsWith("index.html") && segments.Length > 1)
+                    {
+                        var pathName = Path.GetDirectoryName(dir).TrimStart(@"\".ToCharArray());
+                        ctx.Session["PATH"] = pathName;
+                        this.ProjPath = pathName;
+                    }
+                    return;
+                }
+                if (last.EndsWith(".html"))
+                { 
+                    dir = this.ProjPath ?? ctx.Session["PATH"] as string;
+                    var fullFile = Path.Combine(RootPath, dir ?? "", last);
+                    if (last.Equals("results.html") && !IO.File.Exists(fullFile))
+                        fullFile = Path.Combine(RootPath, dir ?? "", indexFile);
+
+                    try
+                    {
+                        Response.Write(System.IO.File.ReadAllText(fullFile));
+                        Response.StatusCode = 400;
+                    }
+                    catch { Response.StatusCode = 200; }
+                    return;
+                }
+            }
+
+            Response.Write("<br/>");
+            Response.Write(String.Format(@"dir={0}\{1}<br/>", RootPath, dir ?? ""));
+            Response.Write(String.Format(@"path={0}<br/>", path));
+            Response.Write(String.Format("file={0}<br/>", file ?? "-"));
+            Response.Write(String.Format("url={0}", Request.Url.PathAndQuery));
+        }
+
         public Query Get(string queryString)
         {
             if (!indexFinishedPopulating)
+            { 
+                var rootPath = Path.Combine(RootPath, ProjPath);
+                if (Directory.Exists(rootPath))
+                    IndexLoader.ReadIndex(this, rootPath);
+            }
+            if (!indexFinishedPopulating)
             {
                 string message = "Index is being rebuilt... " + string.Format("{0:0%}", progress);
+                if (queryString.Contains(@"\") || queryString.Contains("/"))
+                {
+                    var ctx = System.Web.HttpContext.Current;
+                    var dir = Path.Combine(RootPath, queryString);
+                    if (Directory.Exists(dir))
+                    {
+                        message = "#" + queryString + "SolutionExplorer.html";
+                        ctx.Response.Redirect(message);
+                        return Query.Empty(message);
+                    }
+                }
+
                 if (loadErrorMessage != null)
                 {
                     message = message + "<br />" + loadErrorMessage;
@@ -129,6 +304,8 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
 
             return query;
         }
+
+        #region Find
 
         public AssemblyInfo FindAssembly(string assemblyName)
         {
@@ -333,6 +510,8 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
             FindSymbols(query);
             return query.ResultSymbols;
         }
+
+        #endregion
 
         /// <summary>
         /// This defines the ordering of results based on the kind of symbol and other heuristics
