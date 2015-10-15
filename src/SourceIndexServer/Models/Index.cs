@@ -8,6 +8,7 @@ using Microsoft.SourceBrowser.Common;
 using System.IO;
 using IO = System.IO;
 using System.Net;
+using System.Xml.Linq;
 
 namespace Microsoft.SourceBrowser.SourceIndexServer.Models
 {
@@ -99,6 +100,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
         public string RootPath { get; private set; }
         public string ProjPath { get; private set; }
         public const string indexFile = "SolutionExplorer.html";
+        public const string outlineFile = "documentoutline.html";
 
         // TODO
             //var urlPath = ctx.Request.Url.AbsolutePath;
@@ -133,7 +135,10 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 if (string.IsNullOrWhiteSpace(qpath))
                     qpath = dir ?? ctx.Session["PATH"] as string;
                 if (qpath.Length > 0)
+                {
+                    qpath = qpath.Replace("/", "\\").TrimStart("\\".ToCharArray());
                     this.ProjPath = qpath;
+                }
 
                 if (symbol != null)
                     query = Get(symbol);
@@ -142,10 +147,29 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
 
                 var found = query.HasResults;
                 ResultsHtmlGenerator generator = new ResultsHtmlGenerator(query);
+                
+                var outlineFullFile = HostingEnvironment.ApplicationPhysicalPath + outlineFile;
+                XDocument outline = XDocument.Load(outlineFullFile, LoadOptions.PreserveWhitespace);
+                // html/body/div/#root
+                var root = outline.Root;
                 try
                 {
+                    Response.Write("<html>");
+                    var head = root.Element("head");
+                    Response.Write(head.ToString());
+                    var body = root.Element("body");
+                    Response.Write(@"<body onload=""onDocumentOutlineLoad();"">");
+                    Response.Write(body.Element("div").ToString());
+
+                    var divRoot = body.LastNode as XElement;
                     string content = generator.Generate(null, this, null);
+                    // divRoot.Add(content);
+                    Response.Write("\n<div id=\"Root\">\n");
+
                     Response.Write(content);
+                    
+                    Response.Write("\n</div>\n");
+                    Response.Write("\n</body></html>");
                     Response.StatusCode = 400;
                 }
                 catch { Response.StatusCode = 300; }
@@ -177,7 +201,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 if (last.EndsWith(".css") || last.EndsWith(".js") 
                     || last.EndsWith(".png")
                     || last.EndsWith("index.html") || last.EndsWith("header.html")
-                    || last.EndsWith("overview.html")
+                    || last.EndsWith("overview.html") || last.EndsWith(outlineFile) // documentoutline.html
                     )
                 {
                     if (last.EndsWith(".png"))

@@ -23,8 +23,8 @@ function redirectLocation(frame, newLocation) {
         return;
     }
 
-	alert(newLocation);
-    // frame.location.replace(newLocation);
+	// alert(newLocation);
+    frame.location.replace(newLocation);
 }
 
 function setHash(newHash) {
@@ -54,8 +54,7 @@ function processHash() {
 
         if (!anchor) {
             if (top.location.pathname != "/") {
-                return;
-                // redirectLocation(top, "/");
+                redirectLocation(top, "/");
             }
             return;
         }

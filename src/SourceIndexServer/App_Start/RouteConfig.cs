@@ -32,8 +32,13 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
 
 namespace Source
 {
-    public static class EngineDebug
+    public class EngineDebug
     {
+        public void Write()
+        {
+            Output(System.Web.HttpContext.Current.Response);
+        }
+
         public static void Output(HttpResponse Response)
         {
             Response.Write("<br/>HostingEnvironment.ApplicationPhysicalPath=" + System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath);

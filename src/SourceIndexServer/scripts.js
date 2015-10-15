@@ -2,6 +2,7 @@
 var currentResult = null;
 var useSolutionExplorer = true;
 var anchorSplitChar = ",";
+var folder = "";
 
 var externalUrlMap = [
     "http://referencesource.microsoft.com/"
@@ -15,7 +16,12 @@ var supportedFileExtensions = [
     "vbproj",
     "targets",
     "props",
-    "xaml"
+    "xaml",
+    "md",
+    "txt",
+    "xml",
+    "sql",
+    "config"
 ];
 
 function redirectLocation(frame, newLocation) {
