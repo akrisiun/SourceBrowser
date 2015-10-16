@@ -126,7 +126,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="HtmlGenerator_1_TemporaryKey.pfx" />
-    <None Include="Microsoft.Language.Xml.nuspec" />
   </ItemGroup>
   <Import Project="$(SrcRoot)\Common.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

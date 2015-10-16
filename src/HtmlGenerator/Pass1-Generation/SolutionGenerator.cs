@@ -413,8 +413,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     this.workspace = workspace;
                 }
                 else if (
-                    solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
-                    solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
+                    solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+                    //||solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
                 {
                     var workspace = CreateWorkspace(properties);
                     workspace.WorkspaceFailed += WorkspaceFailed;

@@ -38,7 +38,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                     sb.AppendLine(Markup.Note("No results found"));
                 }
 
-                if (index != null && index.ProjPath != null)
+                if (index != null)
                 {
                     sb.Append(Markup.P(index.RootPath + (@"\" + index.ProjPath ?? "")));
                 }

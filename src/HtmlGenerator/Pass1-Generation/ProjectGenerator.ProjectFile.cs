@@ -6,11 +6,12 @@ using Microsoft.SourceBrowser.Common;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
-    partial class ProjectGenerator
+    public partial class ProjectGenerator
     {
         private Project msbuildProject;
+        public Project BuildProject { get { return msbuildProject; } }
 
-        private void GenerateProjectFile()
+        public void GenerateProjectFile()
         {
             var projectExtension = Path.GetExtension(ProjectFilePath);
             if (!File.Exists(ProjectFilePath) ||
@@ -43,9 +44,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 var msbuildSupport = new MSBuildSupport(this);
                 msbuildSupport.Generate(ProjectFilePath, destinationFileName, msbuildProject, true);
 
+                GenerateConfig(msbuildProject);
+
                 GenerateXamlFiles(msbuildProject);
 
                 GenerateTypeScriptFiles(msbuildProject);
+
+                GenerateMdFiles(msbuildProject);
+                GenerateXTextFiles(msbuildProject);
+                GenerateSqlFiles(msbuildProject);
 
                 OtherFiles.Add(title);
             }
@@ -98,7 +105,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private void GenerateXamlFile(string xamlFile)
+        public void GenerateXamlFile(string xamlFile)
         {
             var projectSourceFolder = Path.GetDirectoryName(ProjectFilePath);
             if (!Path.IsPathRooted(xamlFile))
@@ -125,5 +132,29 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             OtherFiles.Add(relativePath);
             AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(relativePath), relativePath, 0);
         }
+
+        #region Content files
+
+        public void GenerateConfig(Project msbuildProject)
+        {
+        
+        }
+
+        public void GenerateMdFiles(Project msbuildProject)
+        {
+        
+        }
+        public void GenerateXTextFiles(Project msbuildProject)
+        {
+        
+        }
+
+        public void GenerateSqlFiles(Project msbuildProject)
+        {
+
+        }
+
+        #endregion
+
     }
 }

@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using CS = Microsoft.CodeAnalysis.CSharp;
-using VB = Microsoft.CodeAnalysis.VisualBasic;
+//using VB = Microsoft.CodeAnalysis.VisualBasic;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -64,8 +64,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             if (declaredSymbol != null)
             {
-                if (token.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PartialKeyword) ||
-                    token.IsKind(Microsoft.CodeAnalysis.VisualBasic.SyntaxKind.PartialKeyword))
+                if (token.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PartialKeyword))
+                    //|| token.IsKind(Microsoft.CodeAnalysis.VisualBasic.SyntaxKind.PartialKeyword))
                 {
                     if (declaredSymbol is INamedTypeSymbol)
                     {
@@ -132,10 +132,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     return IsZeroLengthArrayAllocationCSharp(token);
                 }
-                else if (token.Language == LanguageNames.VisualBasic && token.IsKind(VB.SyntaxKind.NewKeyword))
-                {
-                    return IsZeroLengthArrayAllocationVB(token);
-                }
+                //else if (token.Language == LanguageNames.VisualBasic && token.IsKind(VB.SyntaxKind.NewKeyword))
+                //{
+                //    return IsZeroLengthArrayAllocationVB(token);
+                //}
             }
             catch (Exception)
             {
@@ -195,63 +195,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             return (int)value.Value == 0;
-        }
-
-        private bool IsZeroLengthArrayAllocationVB(SyntaxToken token)
-        {
-            var arrayCreationExpression = token.Parent as VB.Syntax.ArrayCreationExpressionSyntax;
-            if (arrayCreationExpression == null)
-            {
-                return false;
-            }
-
-            var arrayType = arrayCreationExpression.Type;
-            if (arrayType == null || arrayType.IsMissing)
-            {
-                return false;
-            }
-
-            var initializer = arrayCreationExpression.Initializer;
-            if (initializer == null || initializer.IsMissing || initializer.Initializers.Count > 0)
-            {
-                return false;
-            }
-
-            var arrayBounds = arrayCreationExpression.ArrayBounds;
-            if (arrayBounds != null && arrayBounds.Arguments.Count == 1)
-            {
-                var argument = arrayBounds.Arguments[0] as VB.Syntax.SimpleArgumentSyntax;
-                if (argument != null && !argument.IsMissing)
-                {
-                    var expression = argument.Expression;
-                    if (expression != null && !expression.IsMissing)
-                    {
-                        var optional = SemanticModel.GetConstantValue(expression);
-                        if (optional.HasValue && optional.Value is int && (int)optional.Value == -1)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            if (arrayCreationExpression.RankSpecifiers.Count != 1)
-            {
-                return false;
-            }
-
-            var specifier = arrayCreationExpression.RankSpecifiers[0] as VB.Syntax.ArrayRankSpecifierSyntax;
-            if (specifier == null)
-            {
-                return false;
-            }
-
-            if (specifier.Rank != 1)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private HtmlElementInfo TryProcessPartialKeyword(INamedTypeSymbol symbol)

@@ -166,11 +166,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
                     "Temp", references: references);
             }
-            else
-            {
-                compilation = Microsoft.CodeAnalysis.VisualBasic.VisualBasicCompilation.Create(
-                    "Temp", references: references);
-            }
+            //else
+            //{
+            //    compilation = Microsoft.CodeAnalysis.VisualBasic.VisualBasicCompilation.Create(
+            //        "Temp", references: references);
+            //}
 
             return compilation;
         }

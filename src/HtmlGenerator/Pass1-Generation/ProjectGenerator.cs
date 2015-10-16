@@ -9,7 +9,7 @@ using Microsoft.SourceBrowser.Common;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
-    public partial class ProjectGenerator
+    partial class ProjectGenerator
     {
         private readonly string assemblyAttributesFileName;
 
@@ -44,6 +44,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             ProjectDestinationFolder = Path.Combine(solutionDestinationFolder, folderName);
             Directory.CreateDirectory(Path.Combine(ProjectDestinationFolder, Constants.ReferencesFileName));
+        }
+
+        public ProjectGenerator SetProjectFilePath(string sln)
+        {
+            ProjectFilePath = sln;
+            return this;
         }
 
         private void AddHtmlFilesToRedirectMap()

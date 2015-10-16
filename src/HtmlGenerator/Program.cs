@@ -124,6 +124,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return filePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) ||
                    filePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+                   filePath.EndsWith(".kproj", StringComparison.OrdinalIgnoreCase) ||
+                   filePath.EndsWith(".proj", StringComparison.OrdinalIgnoreCase) ||
                    filePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase);
         }
 
