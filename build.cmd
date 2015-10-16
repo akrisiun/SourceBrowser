@@ -1,3 +1,3 @@
-call msbuild e:\coreClr\SourceBrowser\SourceBrowser.sln
+call msbuild SourceBrowser.sln
 
 @PAUSE
