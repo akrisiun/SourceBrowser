@@ -26,7 +26,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var lines = File.ReadAllLines(sourceXmlFilePath);
             lineLengths = TextUtilities.GetLineLengths(sourceText);
             var lineCount = lines.Length;
-            var root = Parser.ParseText(sourceText);
+            XmlNodeSyntax root = Parser.ParseText(sourceText);
 
             var sb = new StringBuilder();
 
@@ -48,6 +48,18 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var table = Markup.GetTablePrefix();
             sb.AppendLine(table);
 
+            VisitRanges(root, sb);
+
+            var suffix = Markup.GetDocumentSuffix();
+            sb.AppendLine(suffix);
+
+            var folder = Path.GetDirectoryName(destinationHtmlFilePath);
+            Directory.CreateDirectory(folder);
+            File.WriteAllText(destinationHtmlFilePath, sb.ToString());
+        }
+
+        protected void VisitRanges(XmlNodeSyntax root, StringBuilder sb)
+        {
             var ranges = new List<ClassifiedRange>();
 
             ClassifierVisitor.Visit(
@@ -84,17 +96,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     Length = l,
                     Text = t.Substring(s, l)
                 }).ToList();
+            
             foreach (var range in ranges)
             {
                 GenerateRange(range, sb);
             }
-
-            var suffix = Markup.GetDocumentSuffix();
-            sb.AppendLine(suffix);
-
-            var folder = Path.GetDirectoryName(destinationHtmlFilePath);
-            Directory.CreateDirectory(folder);
-            File.WriteAllText(destinationHtmlFilePath, sb.ToString());
         }
 
         protected abstract string GetDisplayName();

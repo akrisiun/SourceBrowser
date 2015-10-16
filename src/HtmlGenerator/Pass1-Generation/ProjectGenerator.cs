@@ -52,6 +52,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return this;
         }
 
+        public ProjectGenerator SetSolutionGenerator(SolutionGenerator gen)
+        {
+            SolutionGenerator = gen;
+            return this;
+        }
+
         private void AddHtmlFilesToRedirectMap()
         {
             var files = Directory
@@ -139,6 +145,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     GenerateReferencesDataFiles(
                         this.SolutionGenerator.SolutionDestinationFolder,
                         ReferencesByTargetAssemblyAndSymbolId);
+
                     GenerateSymbolIDToListOfDeclarationLocationsMap(
                         ProjectDestinationFolder,
                         SymbolIDToListOfLocationsMap);

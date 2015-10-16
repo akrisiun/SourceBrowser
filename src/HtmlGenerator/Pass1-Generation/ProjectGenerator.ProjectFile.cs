@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.SourceBrowser.Common;
+using Microsoft.SourceBrowser.HtmlGenerator.Extend;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -44,15 +45,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 var msbuildSupport = new MSBuildSupport(this);
                 msbuildSupport.Generate(ProjectFilePath, destinationFileName, msbuildProject, true);
 
-                GenerateConfig(msbuildProject);
+                ExtendGenerator.GenerateConfig(this, msbuildProject); // .config
 
-                GenerateXamlFiles(msbuildProject);
+                GenerateXamlFiles(msbuildProject);  // .xaml
 
-                GenerateTypeScriptFiles(msbuildProject);
-
-                GenerateMdFiles(msbuildProject);
-                GenerateXTextFiles(msbuildProject);
-                GenerateSqlFiles(msbuildProject);
+                GenerateTypeScriptFiles(msbuildProject);   // .ts
+                
+                ExtendGenerator.GenerateContentFiles(this, msbuildProject); // .md, .cshtml, .aspx, .xml, .xslt, .json, .sql
 
                 OtherFiles.Add(title);
             }
@@ -132,29 +131,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             OtherFiles.Add(relativePath);
             AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(relativePath), relativePath, 0);
         }
-
-        #region Content files
-
-        public void GenerateConfig(Project msbuildProject)
-        {
-        
-        }
-
-        public void GenerateMdFiles(Project msbuildProject)
-        {
-        
-        }
-        public void GenerateXTextFiles(Project msbuildProject)
-        {
-        
-        }
-
-        public void GenerateSqlFiles(Project msbuildProject)
-        {
-
-        }
-
-        #endregion
 
     }
 }

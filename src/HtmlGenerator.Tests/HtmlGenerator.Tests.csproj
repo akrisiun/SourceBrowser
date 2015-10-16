@@ -88,9 +88,6 @@
       <HintPath>..\..\packages\Microsoft.CodeAnalysis.Workspaces.Common.1.0.0\lib\net45\Microsoft.CodeAnalysis.Workspaces.Desktop.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Language.Xml">
-      <HintPath>..\..\packages\Microsoft.Language.Xml.1.0.8\lib\net45\Microsoft.Language.Xml.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable">
@@ -140,6 +137,10 @@
     <ProjectReference Include="..\HtmlGenerator\HtmlGenerator.csproj">
       <Project>{3cb763a5-a0c0-46b0-aef5-020e731253c2}</Project>
       <Name>HtmlGenerator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Language.Xml\Microsoft.Language.Xml.csproj">
+      <Project>{2989fbe6-194f-46c9-8ef4-022f62519c9a}</Project>
+      <Name>Microsoft.Language.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\SourceIndexServer\SourceIndexServer.csproj">
       <Project>{1ae38cc6-18c6-4ab7-8fe3-feeb33329952}</Project>

@@ -76,6 +76,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return result;
         }
 
+        #region Process routines
+
         protected override string ProcessRange(ClassifiedRange range, string text)
         {
             if (range.Classification == XmlClassificationTypes.XmlAttributeName)
@@ -671,6 +673,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return text;
         }
+
+        #endregion
 
         private string SolutionDestinationFolder
         {

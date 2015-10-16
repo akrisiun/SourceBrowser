@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html><head><title>TestSolution.csproj</title><link rel="stylesheet" href="../styles.css"><script src="../scripts.js"></script></head>
+<body class="cB" onload="ix(44);"><div class="dH">
+<table style="width: 100%">
+<tr><td>File: <a id="filePath" class="blueLink" href="/#/TestSolution" target="_top">TestSolution</a><br/></td></tr>
+</table>
+</div>
+<div class="cz"><table class="tb" cellpadding="0" cellspacing="0"><tr><td valign="top" align="right"><pre id="ln"></pre></td><td valign="top" align="left"><pre id="code">
+<span class="xd">&lt;?</span><span class="xn">xml </span><span class="xan">version</span><span class="xd">=</span>&quot;<span class="xav">1.0</span>&quot; <span class="xan">encoding</span><span class="xd">=</span>&quot;<span class="xav">utf-8</span>&quot;<span class="xd">?&gt;</span><span class="xd">
+&lt;</span><span class="xn">Project </span><span class="xan">ToolsVersion</span><span class="xd">=</span>&quot;<span class="xav">4.0</span>&quot; <span class="xan">DefaultTargets</span><span class="xd">=</span>&quot;<span class="xav">Build</span>&quot; <span class="xan">xmlns</span><span class="xd">=</span>&quot;<span class="xav">http://schemas.microsoft.com/developer/msbuild/2003</span>&quot;<span class="xd">&gt;</span><span class="xd">
+  &lt;</span><span class="xn">Import </span><span class="xan">Project</span><span class="xd">=</span>&quot;<span class="xav">$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props</span>&quot; <span class="xan">Condition</span><span class="xd">=</span>&quot;<span class="xav">Exists(&#39;$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props&#39;)</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+  &lt;</span><span class="xn">PropertyGroup</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Configuration </span><span class="xan">Condition</span><span class="xd">=</span>&quot;<span class="xav"> &#39;$(Configuration)&#39; == &#39;&#39; </span>&quot;<span class="xd">&gt;</span>Debug<span class="xd">&lt;/</span><span class="xn">Configuration</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Platform </span><span class="xan">Condition</span><span class="xd">=</span>&quot;<span class="xav"> &#39;$(Platform)&#39; == &#39;&#39; </span>&quot;<span class="xd">&gt;</span>AnyCPU<span class="xd">&lt;/</span><span class="xn">Platform</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">ProjectGuid</span><span class="xd">&gt;</span>{0F5BA342-6E00-4772-A967-171772206169}<span class="xd">&lt;/</span><span class="xn">ProjectGuid</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">OutputType</span><span class="xd">&gt;</span>Exe<span class="xd">&lt;/</span><span class="xn">OutputType</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">AssemblyName</span><span class="xd">&gt;</span>TestSolution<span class="xd">&lt;/</span><span class="xn">AssemblyName</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">TargetFrameworkVersion</span><span class="xd">&gt;</span>v4.5<span class="xd">&lt;/</span><span class="xn">TargetFrameworkVersion</span><span class="xd">&gt;</span><span class="xd">
+  &lt;/</span><span class="xn">PropertyGroup</span><span class="xd">&gt;</span><span class="xd">
+  &lt;</span><span class="xn">PropertyGroup </span><span class="xan">Condition</span><span class="xd">=</span>&quot;<span class="xav"> &#39;$(Configuration)|$(Platform)&#39; == &#39;Debug|AnyCPU&#39; </span>&quot;<span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">DebugSymbols</span><span class="xd">&gt;</span>true<span class="xd">&lt;/</span><span class="xn">DebugSymbols</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">DebugType</span><span class="xd">&gt;</span>full<span class="xd">&lt;/</span><span class="xn">DebugType</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Optimize</span><span class="xd">&gt;</span>false<span class="xd">&lt;/</span><span class="xn">Optimize</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">OutputPath</span><span class="xd">&gt;</span>bin\Debug\<span class="xd">&lt;/</span><span class="xn">OutputPath</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">DefineConstants</span><span class="xd">&gt;</span>DEBUG;TRACE<span class="xd">&lt;/</span><span class="xn">DefineConstants</span><span class="xd">&gt;</span><span class="xd">
+  &lt;/</span><span class="xn">PropertyGroup</span><span class="xd">&gt;</span><span class="xd">
+  &lt;</span><span class="xn">PropertyGroup </span><span class="xan">Condition</span><span class="xd">=</span>&quot;<span class="xav"> &#39;$(Configuration)|$(Platform)&#39; == &#39;Release|AnyCPU&#39; </span>&quot;<span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">DebugType</span><span class="xd">&gt;</span>pdbonly<span class="xd">&lt;/</span><span class="xn">DebugType</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Optimize</span><span class="xd">&gt;</span>true<span class="xd">&lt;/</span><span class="xn">Optimize</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">OutputPath</span><span class="xd">&gt;</span>bin\Release\<span class="xd">&lt;/</span><span class="xn">OutputPath</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">DefineConstants</span><span class="xd">&gt;</span>TRACE<span class="xd">&lt;/</span><span class="xn">DefineConstants</span><span class="xd">&gt;</span><span class="xd">
+  &lt;/</span><span class="xn">PropertyGroup</span><span class="xd">&gt;</span><span class="xd">
+  &lt;</span><span class="xn">ItemGroup</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Reference </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">Microsoft.CSharp</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Reference </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">System</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Reference </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">System.ComponentModel.Composition</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Reference </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">System.Core</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Reference </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">System.Xml</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Reference </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">System.Xml.Linq</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+  &lt;/</span><span class="xn">ItemGroup</span><span class="xd">&gt;</span><span class="xd">
+  &lt;</span><span class="xn">ItemGroup</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Compile </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">Folder\Test.cs</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+    &lt;</span><span class="xn">Compile </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">Program.cs</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+  &lt;/</span><span class="xn">ItemGroup</span><span class="xd">&gt;</span><span class="xd">
+  &lt;</span><span class="xn">ItemGroup</span><span class="xd">&gt;</span><span class="xd">
+    &lt;</span><span class="xn">ProjectReference </span><span class="xan">Include</span><span class="xd">=</span>&quot;<span class="xav">..\Project2\Project2.csproj</span>&quot;<span class="xd">&gt;</span><span class="xd">
+      &lt;</span><span class="xn">Project</span><span class="xd">&gt;</span>{c714bcf5-8eea-4ac8-a030-8d7b1f57e122}<span class="xd">&lt;/</span><span class="xn">Project</span><span class="xd">&gt;</span><span class="xd">
+      &lt;</span><span class="xn">Name</span><span class="xd">&gt;</span>Project2<span class="xd">&lt;/</span><span class="xn">Name</span><span class="xd">&gt;</span><span class="xd">
+    &lt;/</span><span class="xn">ProjectReference</span><span class="xd">&gt;</span><span class="xd">
+  &lt;/</span><span class="xn">ItemGroup</span><span class="xd">&gt;</span><span class="xd">
+  &lt;</span><span class="xn">Import </span><span class="xan">Project</span><span class="xd">=</span>&quot;<span class="xav">$(MSBuildToolsPath)\Microsoft.CSharp.targets</span>&quot; <span class="xd">/&gt;</span><span class="xd">
+&lt;/</span><span class="xn">Project</span><span class="xd">&gt;</span></pre></td></tr></table></div></body></html>
