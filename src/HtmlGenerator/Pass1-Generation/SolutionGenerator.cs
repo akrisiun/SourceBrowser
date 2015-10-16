@@ -92,7 +92,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             propertiesOpt = propertiesOpt.Add("CheckForSystemRuntimeDependency", "true");
             propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "14.0");
 
-            return MSBuildWorkspace.Create(properties: propertiesOpt, hostServices: WorkspaceHacks.Pack);
+            try
+            {
+                Microsoft.CodeAnalysis.Host.HostServices hostServices = WorkspaceHacks.Pack;
+                return MSBuildWorkspace.Create(properties: propertiesOpt, hostServices: hostServices);
+            } catch {}
+            
+            return MSBuildWorkspace.Create(properties: propertiesOpt);
         }
 
         private static Solution CreateSolution(
@@ -407,10 +413,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     properties = AddSolutionProperties(properties, solutionFilePath);
                     var workspace = CreateWorkspace(properties);
-                    workspace.SkipUnrecognizedProjects = true;
-                    workspace.WorkspaceFailed += WorkspaceFailed;
-                    solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
-                    this.workspace = workspace;
+                    if (workspace != null)
+                    {
+                        workspace.SkipUnrecognizedProjects = true;
+                        workspace.WorkspaceFailed += WorkspaceFailed;
+                        solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
+                        this.workspace = workspace;
+                    }
                 }
                 else if (
                     solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))

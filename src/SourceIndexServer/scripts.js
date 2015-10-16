@@ -5,7 +5,8 @@ var anchorSplitChar = ",";
 var folder = "";
 
 var externalUrlMap = [
-    "http://referencesource.microsoft.com/"
+    "http://referencesource.microsoft.com/",
+    "http://source.roslyn.io/"
 ];
 
 var supportedFileExtensions = [
@@ -17,6 +18,7 @@ var supportedFileExtensions = [
     "targets",
     "props",
     "xaml",
+    "cshtml",
     "md",
     "txt",
     "xml",
@@ -29,8 +31,8 @@ function redirectLocation(frame, newLocation) {
         return;
     }
 
-	alert(newLocation);
-    // frame.location.replace(newLocation);
+    // alert(newLocation);
+    frame.location.replace(newLocation);
 }
 
 function setHash(newHash) {
@@ -38,7 +40,7 @@ function setHash(newHash) {
         newHash = newHash.slice(1);
     }
 
-    // top.history.replaceState(null, top.document.title, '#' + newHash);
+    top.history.replaceState(null, top.document.title, '#' + newHash);
 }
 
 function onHashChanged(e) {
@@ -209,7 +211,7 @@ function onHeaderLoad() {
         if (this.value != lastSearchString || (event && event.keyCode == 13)) {
             lastSearchString = this.value;
             if (!top.n.document.getElementById("symbols")) {
-                // top.n.location = "results.html";
+                top.n.location = "results.html";
                 setTimeout(onSearchChange, 50);
             }
 

@@ -24,9 +24,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 "Microsoft.CodeAnalysis.CSharp.Features",
                 "Microsoft.CodeAnalysis.VisualBasic.Features"
             };
-            var assemblies = assemblyNames
-                .Select(n => Assembly.Load(n));
-            Pack = MefHostServices.Create(assemblies);
+
+            try
+            {
+                var assemblies = assemblyNames
+                    .Select(n => Assembly.Load(n));
+                Pack = MefHostServices.Create(assemblies);
+            }
+            catch { } // some no .dll found error is not reason to stop.
         }
 
         public static dynamic GetSemanticFactsService(Document document)
