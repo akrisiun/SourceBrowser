@@ -54,9 +54,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
         {
             var projGen = gen.ProjectGenerator;
             var content = new ContentXmlSupport(projGen);
-            content.ParseProject(gen.msbuildProject);
-
-            // void GenerateContentFiles(this ProjectGenerator @this, Project msbuildProject)
+            content.ParseProject(gen.msbuildProject, ".xslt");
         }
 
         [TestMethod]

@@ -198,3 +198,5 @@ app*.config
 web/bin/Microsoft.SourceBrowser.Common.dll
 web/bin/Microsoft.SourceBrowser.SourceIndexServer.dll
 [wW]eb.config
+TestCode/TestSolution/*.html
+TestCode/TestSolution/Views/*.html
