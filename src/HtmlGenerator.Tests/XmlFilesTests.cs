@@ -67,7 +67,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
         // SourceBrowser\TestCode\Project3\Project3.csproj, Solution3.sln
         // string TestSolution { get { return Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\..\TestCode\TestSolution.sln"); } }
         string TestProject3 { get { return "Project3.csproj"; } }
-        string TestFolder3 { get { return Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\..\TestCode\Project3"); } }
+        string TestFolder3 { get { return Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\..\..\TestCode\Project3"); } }
         string OutputFolder { get { return Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\output"); } }
         static ProjectGeneratorWrap gen;
 
@@ -95,6 +95,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
         [TestMethod]
         public void ExtendTest3_ContentFiles()
         {
+            // .csproj
+            var csproj = new MSBuildSupport(gen.ProjectGenerator);
+            string sourceTestProject = TestFolder3 + @"\" + TestProject3;
+            csproj.Generate(sourceTestProject, gen.DestinationFileName, gen.ProjectGenerator.ProjectDestinationFolder);
+
             ExtendGenerator.GenerateConfig(gen.ProjectGenerator, gen.msbuildProject);
             ExtendGenerator.GenerateContentFiles(gen.ProjectGenerator, gen.msbuildProject);
         }

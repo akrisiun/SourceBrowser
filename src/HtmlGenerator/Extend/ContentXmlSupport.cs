@@ -116,7 +116,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
             var relativePath = Paths.MakeRelativeToFolder(filePath, ProjectSourceFolder);
             relativePath = relativePath.Replace("..", "parent");
             var destinationHtmlFile = Path.Combine(DestinationFolder, relativePath) + ".html";
-            base.Generate(filePath, destinationHtmlFile, DestinationFolder);
+            var solutionFolder = generator.SolutionGenerator.SolutionDestinationFolder;
+            base.Generate(filePath, destinationHtmlFile, solutionFolder);
 
             generator.OtherFiles.Add(relativePath);
             ProjectGenerator.AddDeclaredSymbolToRedirectMap(
