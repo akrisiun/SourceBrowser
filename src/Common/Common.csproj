@@ -8,7 +8,7 @@
     <OutputPath>..\..\bin\Microsoft.SourceBrowser.Common\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>HtmlGenerator_1_TemporaryKey.pfx</AssemblyOriginatorKeyFile>

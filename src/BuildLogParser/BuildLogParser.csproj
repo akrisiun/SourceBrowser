@@ -5,7 +5,7 @@
     <AssemblyName>Microsoft.SourceBrowser.BuildLogParser</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>HtmlGenerator_1_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
