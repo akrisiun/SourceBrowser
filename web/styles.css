@@ -321,7 +321,7 @@ a i {
     background-position: 6px 6px;
 }
 
-.cs {
+.cs, .cshtml {
     cursor: pointer;
     white-space: nowrap;
     display: block;
@@ -336,7 +336,7 @@ a i {
     background-origin: border-box;
 }
 
-    .cs:focus {
+    .cs:focus, .cshtml:focus {
         background-color: #3399ff;
         color: white;
     }
@@ -361,7 +361,7 @@ a i {
         color: white;
     }
 
-.csproj {
+.csproj, .kproj, .proj {
     cursor: pointer;
     white-space: nowrap;
     display: block;
@@ -401,7 +401,9 @@ a i {
         color: white;
     }
 
-.xaml {
+.xaml, .xml, .xslt, .config, 
+.md, .css, .js  /* TODO icons */
+{
     cursor: pointer;
     white-space: nowrap;
     display: block;

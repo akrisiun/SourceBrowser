@@ -42,7 +42,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         /// </summary>
         public ProjectGenerator(string folderName, string solutionDestinationFolder) : this()
         {
-            ProjectDestinationFolder = Path.Combine(solutionDestinationFolder, folderName);
+            var justFolderName = Path.GetFileName(folderName);
+            ProjectDestinationFolder = Path.Combine(solutionDestinationFolder, justFolderName);
             Directory.CreateDirectory(Path.Combine(ProjectDestinationFolder, Constants.ReferencesFileName));
         }
 
@@ -55,6 +56,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public ProjectGenerator SetSolutionGenerator(SolutionGenerator gen)
         {
             SolutionGenerator = gen;
+            if (!this.ProjectDestinationFolder.StartsWith(gen.SolutionDestinationFolder))
+                throw new InvalidDataException(String.Format("Solution destination folder mismatch = {0}", gen.SolutionDestinationFolder));
             return this;
         }
 
@@ -108,7 +111,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 ProjectSourcePath = Paths.MakeRelativeToFolder(ProjectFilePath, SolutionGenerator.SolutionSourceFolder);
 
-                if (File.Exists(Path.Combine(ProjectDestinationFolder, Constants.DeclaredSymbolsFileName + ".txt")))
+                if (Configuration.ProcessAll &&
+                    File.Exists(Path.Combine(ProjectDestinationFolder, Constants.DeclaredSymbolsFileName + ".txt")))
                 {
                     // apparently someone already generated a project with this assembly name - their assembly wins
                     Log.Exception(string.Format(
@@ -139,12 +143,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     GenerateProjectFile();
                     GenerateDeclarations();
-                    GenerateBaseMembers();
-                    GenerateImplementedInterfaceMembers();
-                    GenerateProjectInfo();
-                    GenerateReferencesDataFiles(
-                        this.SolutionGenerator.SolutionDestinationFolder,
-                        ReferencesByTargetAssemblyAndSymbolId);
+
+                    if (Configuration.ProcessAll)
+                    {
+                        GenerateBaseMembers();
+                        GenerateImplementedInterfaceMembers();
+                        GenerateProjectInfo();
+                        GenerateReferencesDataFiles(
+                            this.SolutionGenerator.SolutionDestinationFolder,
+                            ReferencesByTargetAssemblyAndSymbolId);
+                    }
 
                     GenerateSymbolIDToListOfDeclarationLocationsMap(
                         ProjectDestinationFolder,

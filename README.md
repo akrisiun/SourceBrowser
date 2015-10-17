@@ -1,9 +1,18 @@
 # SourceBrowser
-https://github.com/KirillOsenkov/SourceBrowser
 
+Clone of https://github.com/KirillOsenkov/SourceBrowser
 Source browser website generator that powers http://referencesource.microsoft.com and http://source.roslyn.io.
+.NET Compiler Platform ("Roslyn") source available: http://source.roslyn.codeplex.com/
+http://source.roslyn.codeplex.com/#Microsoft.Build.Tasks.CodeAnalysis/MSBuildTask.csproj
 
-Create and host your own static HTML website to browse your C#/VB/MSBuild/TypeScript source code.
+## Extend version SourceBrowser
+
+This version includes more .csproj content files:    
+XML: .config, .xml, .xslt     
+Razor Views: .cshtml  
+Html styles, scripts: .css, .js     
+
+### Create and host your own static HTML website to browse your C#/VB/MSBuild/TypeScript source code.
 
 Of course Source Browser allows you to browse its own source code:
 [http://sourcebrowser.azurewebsites.net](http://sourcebrowser.azurewebsites.net)

@@ -22,8 +22,11 @@ var supportedFileExtensions = [
     "md",
     "txt",
     "xml",
+    "xslt",
     "sql",
-    "config"
+    "config",
+    "js",
+    "css"
 ];
 
 function redirectLocation(frame, newLocation) {

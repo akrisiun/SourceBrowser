@@ -25,16 +25,17 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
 
         public static void GenerateContentFiles(this ProjectGenerator @this, Project msbuildProject)
         {
-            var content = new ContentXmlSupport(@this); //  (msbuildProject);
-            content.ParseProject(msbuildProject, ".xslt");
-            content.ParseProject(msbuildProject, ".txt");
-            content.ParseProject(msbuildProject, ".md");
+            var content = new ContentXmlSupport(@this);
 
-            content.ParseProject(msbuildProject, ".cshtml");
-            content.ParseProject(msbuildProject, ".sql");
+            content.ParseRazorSrcFiles(msbuildProject);  // .cshtml
 
+            content.ParseProject(msbuildProject,
+                new string[] {".js", ".css",
+                    ".xslt", ".txt", ".md", ".sql"});
+
+            // TODO:
             // var cshtml = new CSHtmlContentSupport(@this);
-            //var sql = new SqlContentSupport(@this);
+            // var sql = new SqlContentSupport(@this);
         }
     }
 }

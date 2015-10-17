@@ -9,5 +9,7 @@
         public static readonly bool WriteProjectAuxiliaryFilesToDisk = true;
         public static readonly bool CreateFoldersOnDisk = true;
         public static readonly bool FlattenSolutionExplorer = false;
+
+        public static bool ProcessAll = true;
     }
 }

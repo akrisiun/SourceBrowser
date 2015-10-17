@@ -65,6 +65,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     }
                 }
 
+                if (arg.StartsWith("/fast") || arg.StartsWith("/content"))
+                {
+                    // bypass slow .cs files processing
+                    Configuration.ProcessAll = false;
+                    continue;
+                }
+
                 try
                 {
                     AddProject(projects, arg);
@@ -95,7 +102,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             // Warning, this will delete and recreate your destination folder
             Paths.PrepareDestinationFolder();
 
-            using (Disposable.Timing("Generating website"))
+            string message = "Generating website" + (!Configuration.ProcessAll ? " /fast" : String.Empty);
+            using (Disposable.Timing(message))
             {
                 IndexSolutions(projects, properties);
                 FinalizeProjects();
@@ -136,7 +144,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static readonly Folder<Project> mergedSolutionExplorerRoot = new Folder<Project>();
 
-        private static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties)
+        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -173,7 +181,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static void FinalizeProjects()
+        public static void FinalizeProjects()
         {
             GenerateLooseFilesProject(Constants.MSBuildFiles, Paths.SolutionDestinationFolder);
             GenerateLooseFilesProject(Constants.TypeScriptFiles, Paths.SolutionDestinationFolder);

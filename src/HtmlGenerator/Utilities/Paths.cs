@@ -66,35 +66,38 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             if (Directory.Exists(SolutionDestinationFolder))
             {
-                Log.Write(string.Format("Warning, {0} will be deleted! Are you sure? (y/n)", SolutionDestinationFolder), ConsoleColor.Red);
-                if (Console.ReadKey().KeyChar != 'y')
+                if (Configuration.ProcessAll)
                 {
-                    if (!File.Exists(Paths.ProcessedAssemblies))
-                    {
-                        Environment.Exit(0);
-                    }
-
-                    Log.Write("Would you like to continue previously aborted index operation where it left off?", ConsoleColor.Green);
+                    Log.Write(string.Format("Warning, {0} will be deleted! Are you sure? (y/n)", SolutionDestinationFolder), ConsoleColor.Red);
                     if (Console.ReadKey().KeyChar != 'y')
                     {
-                        Environment.Exit(0);
+                        if (!File.Exists(Paths.ProcessedAssemblies))
+                        {
+                            Environment.Exit(0);
+                        }
+
+                        Log.Write("Would you like to continue previously aborted index operation where it left off?", ConsoleColor.Green);
+                        if (Console.ReadKey().KeyChar != 'y')
+                        {
+                            Environment.Exit(0);
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                     else
                     {
-                        return;
+                        Console.WriteLine();
                     }
-                }
-                else
-                {
-                    Console.WriteLine();
-                }
 
-                Log.Write("Deleting " + SolutionDestinationFolder);
-                try
-                {
-                    Directory.Delete(SolutionDestinationFolder, recursive: true);
+                    Log.Write("Deleting " + SolutionDestinationFolder);
+                    try
+                    {
+                        Directory.Delete(SolutionDestinationFolder, recursive: true);
+                    }
+                    catch { }   // not fatal
                 }
-                catch { }   // not fatal
             }
 
             Directory.CreateDirectory(SolutionDestinationFolder);

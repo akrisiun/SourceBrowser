@@ -430,6 +430,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     solution = workspace.OpenProjectAsync(solutionFilePath).GetAwaiter().GetResult().Solution;
                     this.workspace = workspace;
                 }
+                // TODO: CoreClr .proj solution file (like: https://github.com/dotnet/coreclr/blob/master/src/build.proj)
+
                 else if (
                     solutionFilePath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
                     solutionFilePath.EndsWith(".winmd", StringComparison.OrdinalIgnoreCase) ||
