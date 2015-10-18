@@ -228,6 +228,7 @@
     <Compile Include="Extend\ContentXmlSupport.cs" />
     <Compile Include="Extend\CSHtmlContentSupport.cs" />
     <Compile Include="Extend\ExtendGenerator.cs" />
+    <Compile Include="Extend\References.cs" />
     <Compile Include="Extend\SqlContentSupport.cs" />
     <Compile Include="Pass1-Generation\Classifier.cs" />
     <Compile Include="Pass1-Generation\Classifier.Range.cs" />

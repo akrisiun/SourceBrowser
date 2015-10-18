@@ -18,7 +18,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public string ProjectFilePath { get; private set; }
         public string ServerPath { get; set; }
         public string NetworkShare { get; private set; }
-        private Federation Federation { get; set; }
+        public Federation Federation { get; set; }
         private readonly HashSet<string> typeScriptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
@@ -100,6 +100,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             
             return MSBuildWorkspace.Create(properties: propertiesOpt);
         }
+
+        public Workspace Workspace { get { return workspace; } }
 
         private static Solution CreateSolution(
             string commandLineArguments,
@@ -295,25 +297,25 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return currentBatch.Length < projectsToProcess.Length;
         }
 
-        public void GenerateResultsHtml(IEnumerable<string> assemblyList)
-        {
-            var sb = new StringBuilder();
-            var sorter = GetCustomRootSorter();
-            var assemblyNames = assemblyList.ToList();
-            assemblyNames.Sort(sorter);
+        //public void GenerateResultsHtml(IEnumerable<string> assemblyList)
+        //{
+        //    var sb = new StringBuilder();
+        //    var sorter = GetCustomRootSorter();
+        //    var assemblyNames = assemblyList.ToList();
+        //    assemblyNames.Sort(sorter);
 
-            sb.AppendLine(Markup.GetResultsHtmlPrefix());
+        //    sb.AppendLine(Markup.GetResultsHtmlPrefix());
 
-            //foreach (var assemblyName in assemblyNames)
-            //{
-            //    sb.AppendFormat(@"<a href=""/#{0},namespaces"" target=""_top""><div class=""resultItem""><div class=""resultLine"">{0}</div></div></a>", assemblyName);
-            //    sb.AppendLine();
-            //}
+        //    //foreach (var assemblyName in assemblyNames)
+        //    //{
+        //    //    sb.AppendFormat(@"<a href=""/#{0},namespaces"" target=""_top""><div class=""resultItem""><div class=""resultLine"">{0}</div></div></a>", assemblyName);
+        //    //    sb.AppendLine();
+        //    //}
 
-            sb.AppendLine(Markup.GetResultsHtmlSuffix());
+        //    sb.AppendLine(Markup.GetResultsHtmlSuffix());
 
-            File.WriteAllText(Path.Combine(SolutionDestinationFolder, "results.html"), sb.ToString());
-        }
+        //    File.WriteAllText(Path.Combine(SolutionDestinationFolder, "results.html"), sb.ToString());
+        //}
 
         public Comparison<string> GetCustomRootSorter()
         {
@@ -357,6 +359,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             var externalReferences = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+            //Extend.ExtendGenerator.ExternalReferencesPrepare(this, assemblyList);
+
             foreach (var project in solution.Projects)
             {
                 var references = project.MetadataReferences
@@ -366,6 +370,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     .Where(m => !IsPartOfSolution(Path.GetFileNameWithoutExtension(m.FilePath)))
                     .Where(m => GetExternalAssemblyIndex(Path.GetFileNameWithoutExtension(m.FilePath)) == -1)
                     .Select(m => Path.GetFullPath(m.FilePath));
+
                 foreach (var reference in references)
                 {
                     externalReferences[Path.GetFileNameWithoutExtension(reference)] = reference;
@@ -378,7 +383,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 var solutionGenerator = new SolutionGenerator(
                     externalReference.Value,
                     Paths.SolutionDestinationFolder);
+
                 solutionGenerator.Generate(assemblyList);
+
+                Extend.ExtendGenerator.ExternalReferences(solutionGenerator, assemblyList);
             }
         }
 

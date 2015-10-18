@@ -11,6 +11,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private List<HashSet<string>> assemblies = new List<HashSet<string>>();
 
+        public static Federation Instance { get; protected set; }
+        public static List<HashSet<string>> ReferenceSourceAssemblies()
+        {
+            var instance = Instance ?? new Federation(FederatedIndexUrls.First());
+            return instance.assemblies;
+        }
+
         public Federation() : this(FederatedIndexUrls)
         {
         }
@@ -37,6 +44,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 assemblies.Add(assemblyNames);
             }
+
+            Instance = this;
         }
 
         private string GetAssemblyUrl(string server)

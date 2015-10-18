@@ -141,8 +141,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 if (Configuration.WriteProjectAuxiliaryFilesToDisk)
                 {
-                    GenerateProjectFile();
-                    GenerateDeclarations();
+                    if (Configuration.ProcessContent || Configuration.ProcessAll)
+                    {
+                        GenerateProjectFile();
+                        GenerateDeclarations();
+                    }
 
                     if (Configuration.ProcessAll)
                     {

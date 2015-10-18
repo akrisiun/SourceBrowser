@@ -73,23 +73,23 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 folder.Folders.Remove("Properties");
             }
 
+            var assemblyNames = new SortedSet<string>();
             if (Project.ProjectReferences.Any() || Project.MetadataReferences.Any())
-            {
-                WriteReferences(sb);
-            }
+                FillReferencies(assemblyNames);
+
+            string projName = folder.Name;
+            Extend.References.Instance.GetDlls(projName, assemblyNames);
+
+            if (assemblyNames.Any())
+                WriteReferences(sb, assemblyNames);
 
             WriteFolders(folder, sb);
             WriteDocuments(folder, sb);
             sb.AppendLine("</div>");
         }
 
-        private void WriteReferences(StringBuilder sb)
+        private void FillReferencies(SortedSet<string> assemblyNames)
         {
-            sb.Append("<div class=\"folderTitle\">References</div>");
-            sb.AppendLine("<div class=\"folder\">");
-
-            var assemblyNames = new SortedSet<string>();
-
             foreach (var projectReference in Project.ProjectReferences.Select(p => Project.Solution.GetProject(p.ProjectId).AssemblyName))
             {
                 assemblyNames.Add(projectReference);
@@ -99,24 +99,31 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 assemblyNames.Add(metadataReference);
             }
+        }
+
+        private void WriteReferences(StringBuilder sb, SortedSet<string> assemblyNames)
+        {
+            sb.Append("<div class=\"folderTitle\">References</div>");
+            sb.AppendLine("<div class=\"folder\">");
 
             var usedReferences = new HashSet<string>(this.UsedReferences, StringComparer.OrdinalIgnoreCase);
-            foreach (var reference in assemblyNames)
+            foreach (string referenceItem in assemblyNames)
             {
+                string reference = referenceItem;
+                if (reference.Contains(","))
+                    reference = reference.Split(new[] { ',' })[0];
+
                 var externalIndex = this.SolutionGenerator.GetExternalAssemblyIndex(reference);
                 string url = "/#" + reference;
-                if (externalIndex != -1)
+                if (externalIndex != -1)        // Federation assembly
                 {
                     url = "@" + externalIndex.ToString() + "@#" + reference;
                     sb.AppendLine(Markup.GetProjectExplorerReference(url, reference));
                 }
-                else if (SolutionGenerator.IsPartOfSolution(reference) && usedReferences.Contains(reference))
-                {
-                    sb.AppendLine(Markup.GetProjectExplorerReference(url, reference));
-                }
                 else
                 {
-                    sb.AppendLine("<span class=\"referenceDisabled\">" + reference + "</span>");
+                    Extend.ExtendGenerator.WriteReference(sb, reference, referenceItem, 
+                        url, usedReferences, SolutionGenerator);
                 }
             }
 

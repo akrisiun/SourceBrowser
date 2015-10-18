@@ -95,20 +95,64 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
         [TestMethod]
         public void ExtendTest3_ContentFiles()
         {
-            // .csproj
-            var csproj = new MSBuildSupport(gen.ProjectGenerator);
-            string sourceTestProject = TestFolder3 + @"\" + TestProject3;
-            csproj.Generate(sourceTestProject, gen.DestinationFileName, gen.ProjectGenerator.ProjectDestinationFolder);
-
             ExtendGenerator.GenerateConfig(gen.ProjectGenerator, gen.msbuildProject);
             ExtendGenerator.GenerateContentFiles(gen.ProjectGenerator, gen.msbuildProject);
         }
 
         [TestMethod]
-        [Ignore]
+        public void ExtendTest3_RegenerateReferencies()
+        {
+            var csproj = new MSBuildSupport(gen.ProjectGenerator);
+            string sourceTestProject = TestFolder3 + @"\" + TestProject3;
+
+            Configuration.ProcessAll = false;
+            Configuration.ProcessReferencies = true;
+            Configuration.ProcessContent = false;
+            csproj.Generate(sourceTestProject, gen.DestinationFileName, gen.ProjectGenerator.ProjectDestinationFolder);
+
+            //var title = Path.GetFileName(ProjectFilePath);
+            //projectCollection = new ProjectCollection();
+            //GenerateMsBuildProject(projectCollection);
+
+            ExtendGenerator.GenerateConfig(gen.ProjectGenerator, gen.msbuildProject);
+
+            var projects = gen.projects; var properties = gen.properties;
+            Program.IndexSolutions(projects, properties);
+            Program.FinalizeProjects();
+        }
+
+
+
+        // GenerateProjectFile();
+        // 
+
+        //var title = Path.GetFileName(ProjectFilePath);
+        //var destinationFileName = Path.Combine(ProjectDestinationFolder, title) + ".html";
+
+        //        AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(title), title, 0);
+
+        //        // ProjectCollection caches the environment variables it reads at startup
+        //        // and doesn't re-get them later. We need a new project collection to read
+        //        // the latest set of environment variables.
+        //        projectCollection = new ProjectCollection();
+        //        this.msbuildProject = new Project(
+        //            ProjectFilePath,
+        //            null,
+        //            null,
+        //            projectCollection,
+        //            ProjectLoadSettings.IgnoreMissingImports);
+
+        //var msbuildSupport = new MSBuildSupport(this);
+        //msbuildSupport.Generate(ProjectFilePath, destinationFileName, msbuildProject, true);
+
+        [TestMethod]
+        // [Ignore]
         public void ExtendTest3_All()
         {
             Configuration.ProcessAll = true;
+            Configuration.ProcessContent = true;
+            Configuration.ProcessReferencies = true;
+
             var projects = gen.projects;
             var properties = gen.properties;
 
@@ -121,7 +165,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
             }
             Directory.CreateDirectory(SolutionDestinationFolder);
 
-            using (Disposable.Timing("Generating website all"))
+            using (Disposable.Timing("Generating website (all)"))
             {
                 Program.IndexSolutions(projects, properties);
                 Program.FinalizeProjects();
@@ -149,7 +193,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
 
     public class ProjectGeneratorWrap
     {
-        public ProjectGenerator ProjectGenerator { [DebuggerStepThrough] get; set; }
+        public ProjectGenerator ProjectGenerator {[DebuggerStepThrough] get; set; }
+        public SolutionGenerator SolutionGenerator {[DebuggerStepThrough] get { return ProjectGenerator.SolutionGenerator; } }
         public ProjectCollection ProjectCollection { [DebuggerStepThrough] get; set; }
         public Project msbuildProject { [DebuggerStepThrough] get; set; }
         public MSBuildSupport msbuildSupport { [DebuggerStepThrough] get; set; }
@@ -166,6 +211,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
         public ProjectGeneratorWrap Prepare(string testDir1, string TestProject1, string output)
         {
             this.OutputDir = output;
+            Paths.SolutionDestinationFolder = this.OutputDir;
+
             var gen = new ProjectGenerator(testDir1, output);
             ProjectGenerator = gen;
 

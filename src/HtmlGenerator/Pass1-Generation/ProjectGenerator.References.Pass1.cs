@@ -207,6 +207,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 list.Add(Path.GetFileNameWithoutExtension(metadataReference.Display));
             }
 
+            if (!Configuration.ProcessAll || list.Count == 0)
+            {
+                var project = Project;
+                Extend.ExtendGenerator.ProjectReferencesList(project, list);
+            }
+
             File.WriteAllText(index, string.Join(Environment.NewLine, list));
         }
 

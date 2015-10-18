@@ -19,8 +19,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
             DestinationFolder = generator.ProjectDestinationFolder;
         }
 
-        public void ParseProject(Project project)
-        { }
+        public void ParseProject(Project project, string extension) { }
 
         public void Generate(string filePath, string htmlFilePath, Project project)
         {

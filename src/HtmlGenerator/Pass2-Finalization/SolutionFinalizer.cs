@@ -110,7 +110,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private void CreateReferencingProjectLists()
+        public void CreateReferencingProjectLists()
         {
             using (Disposable.Timing("Writing referencing assemblies"))
             {
@@ -251,7 +251,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             Markup.WriteReferencesNotFoundFile(destinationFolder);
 
-            string sourcePath = Assembly.GetEntryAssembly().Location;
+            var entry = Assembly.GetEntryAssembly();
+            if (entry == null)   // if test unit
+                return;
+
+            string sourcePath = entry.Location;
             sourcePath = Path.GetDirectoryName(sourcePath);
             string basePath = sourcePath;
             sourcePath = Path.Combine(sourcePath, @"Web");

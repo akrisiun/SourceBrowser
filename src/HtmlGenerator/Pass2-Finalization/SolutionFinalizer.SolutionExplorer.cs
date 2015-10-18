@@ -8,7 +8,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public partial class SolutionFinalizer
     {
-        private void WriteSolutionExplorer(Folder root = null)
+        public void WriteSolutionExplorer(Folder root = null)
         {
             if (root == null)
             {
@@ -62,6 +62,18 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     WriteProject(project.AssemblyName, writer);
                 }
             }
+
+            if (folder.Folders == null && folder.Items == null)
+            {
+                var projects = this.DiscoverProjects();
+                var withRef = System.Linq.Enumerable.Where(projects, (p) => p.ReferencedAssemblies != null);
+                foreach (var proj in withRef)
+                {
+                    string asmName = proj.ProjectInfoLine;
+                    WriteProject(asmName, writer);
+                }
+            }
+
         }
 
         private void WriteProject(string assemblyName, StreamWriter writer)
@@ -78,7 +90,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var fileName = Path.Combine(SolutionDestinationFolder, assemblyName, Constants.ProjectExplorer + ".html");
             if (!File.Exists(fileName))
             {
-                return null;
+                fileName = Path.Combine(SolutionDestinationFolder, 
+                    Path.GetFileNameWithoutExtension(assemblyName), Constants.ProjectExplorer + ".html");
+                if (!File.Exists(fileName))
+                    return null;
             }
 
             var text = File.ReadAllText(fileName);

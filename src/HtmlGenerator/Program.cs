@@ -172,6 +172,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     {
                         solutionGenerator.GlobalAssemblyList = assemblyNames;
                         solutionGenerator.Generate(solutionExplorerRoot: mergedSolutionExplorerRoot);
+
+                        if (Configuration.ProcessReferencies)
+                            Extend.ExtendGenerator.TopReferencedAssemblies(solutionGenerator, federation, mergedSolutionExplorerRoot);
                     }
                 }
 
@@ -179,6 +182,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
             }
+
         }
 
         public static void FinalizeProjects()
@@ -187,15 +191,20 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             GenerateLooseFilesProject(Constants.TypeScriptFiles, Paths.SolutionDestinationFolder);
             using (Disposable.Timing("Finalizing references"))
             {
+                SolutionFinalizer solutionFinalizer = null;
+                bool error = false;
                 try
                 {
-                    var solutionFinalizer = new SolutionFinalizer(Paths.SolutionDestinationFolder);
+                    solutionFinalizer = new SolutionFinalizer(Paths.SolutionDestinationFolder);
                     solutionFinalizer.FinalizeProjects(mergedSolutionExplorerRoot);
                 }
                 catch (Exception ex)
                 {
+                    error = true;
                     Log.Exception(ex, "Failure while finalizing projects");
                 }
+
+                Extend.ExtendGenerator.Finalize(solutionFinalizer, mergedSolutionExplorerRoot, error);
             }
         }
 
