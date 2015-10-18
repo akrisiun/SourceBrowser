@@ -55,6 +55,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
             ICollection<ProjectItem> items = new Collection<ProjectItem>();
             AddRange<ProjectItem>(items, msbuildProject.GetItems("None"));
             AddRange<ProjectItem>(items, msbuildProject.GetItems("Content"));
+            AddRange<ProjectItem>(items, msbuildProject.GetItems("EmbeddedResource"));
 
             foreach (string file in WhereIncludeEnds(items, extensionList))
             {

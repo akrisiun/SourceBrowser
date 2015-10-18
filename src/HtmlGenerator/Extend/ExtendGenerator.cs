@@ -76,7 +76,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
 
             content.ParseProject(msbuildProject,
                 new string[] {".js", ".css",
-                    ".aspx", ".html", ".xslt", ".txt", ".md", ".sql"});
+                    ".aspx", ".html", ".xslt", ".txt", ".md", ".cmd", ".bat", ".sql"});
 
             //  TODO: var sql = new SqlContentSupport(@this);
         }
