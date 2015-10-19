@@ -30,7 +30,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     break;
                 case SymbolKind.Method:
                     IMethodSymbol ms = symbol as IMethodSymbol;
-                    if (ms?.MethodKind == MethodKind.Constructor)
+                    if (ms != null && ms.MethodKind == MethodKind.Constructor)
                     {
                         result = Constants.ClassificationConstructor;
                     }

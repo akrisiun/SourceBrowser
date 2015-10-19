@@ -69,7 +69,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 var withRef = System.Linq.Enumerable.Where(projects, (p) => p.ReferencedAssemblies != null);
                 foreach (var proj in withRef)
                 {
-                    string asmName = proj.ProjectInfoLine;
+                    string asmName = proj.ProjectInfoLine ?? proj.AssemblyId + ".csproj";
                     WriteProject(asmName, writer);
                 }
             }
@@ -87,7 +87,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private string GetProjectExplorerText(string assemblyName)
         {
-            var fileName = Path.Combine(SolutionDestinationFolder, assemblyName, Constants.ProjectExplorer + ".html");
+            var fileName = Path.Combine(SolutionDestinationFolder, assemblyName ?? "", Constants.ProjectExplorer + ".html");
             if (!File.Exists(fileName))
             {
                 fileName = Path.Combine(SolutionDestinationFolder, 

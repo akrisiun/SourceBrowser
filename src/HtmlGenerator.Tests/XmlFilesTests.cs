@@ -13,10 +13,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
     [TestClass]
     public class XmlFilesTests
     {
-        string TestSolution { get { return Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\..\TestCode\TestSolution.sln"); } }
+        string TestSolution1 { get { return Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\..\TestCode\TestSolution.sln"); } }
+        string TestFolder1 { get { return System.AppDomain.CurrentDomain.BaseDirectory + @"\..\TestCode\TestSolution"; } }
+        string TestSolution2 { get { return Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory 
+                                                + @"\..\..\TestCode\TestSolution.sln"); } }
+        string TestFolder2 { get { return System.AppDomain.CurrentDomain.BaseDirectory 
+                                                + @"\..\..\TestCode\TestSolution"; } }
+
         string TestProject1 { get { return "TestSolution.csproj"; } }
         // SourceBrowser\TestCode\TestSolution
-        string TestFolder1 { get { return System.AppDomain.CurrentDomain.BaseDirectory + @"\..\TestCode\TestSolution"; } }
         string OutputFolder { get { return System.AppDomain.CurrentDomain.BaseDirectory + @"\output"; } }
 
         static ProjectGeneratorWrap gen;
@@ -24,10 +29,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
         [TestInitialize]
         public void Init()
         {
-            var sln = TestSolution;
+            var sln = TestSolution1;    // VS 2015
+            var testDir1 = Path.GetFullPath(TestFolder1);
+            var sln2 = TestSolution2;
+            if (!File.Exists(sln))
+            {
+                sln = sln2;             // VS 2013
+                testDir1 = Path.GetFullPath(TestFolder2);
+            }
             Assert.IsTrue(File.Exists(sln));
 
-            var testDir1 = Path.GetFullPath(TestFolder1);
             var output = Path.GetFullPath(OutputFolder);
             string sourceTestProject1 = testDir1 + @"\" + TestProject1;
             Assert.IsTrue(File.Exists(sourceTestProject1));
@@ -110,10 +121,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
             Configuration.ProcessContent = false;
             csproj.Generate(sourceTestProject, gen.DestinationFileName, gen.ProjectGenerator.ProjectDestinationFolder);
 
-            //var title = Path.GetFileName(ProjectFilePath);
-            //projectCollection = new ProjectCollection();
-            //GenerateMsBuildProject(projectCollection);
-
             ExtendGenerator.GenerateConfig(gen.ProjectGenerator, gen.msbuildProject);
 
             var projects = gen.projects; var properties = gen.properties;
@@ -121,32 +128,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
             Program.FinalizeProjects();
         }
 
-
-
-        // GenerateProjectFile();
-        // 
-
-        //var title = Path.GetFileName(ProjectFilePath);
-        //var destinationFileName = Path.Combine(ProjectDestinationFolder, title) + ".html";
-
-        //        AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(title), title, 0);
-
-        //        // ProjectCollection caches the environment variables it reads at startup
-        //        // and doesn't re-get them later. We need a new project collection to read
-        //        // the latest set of environment variables.
-        //        projectCollection = new ProjectCollection();
-        //        this.msbuildProject = new Project(
-        //            ProjectFilePath,
-        //            null,
-        //            null,
-        //            projectCollection,
-        //            ProjectLoadSettings.IgnoreMissingImports);
-
-        //var msbuildSupport = new MSBuildSupport(this);
-        //msbuildSupport.Generate(ProjectFilePath, destinationFileName, msbuildProject, true);
-
         [TestMethod]
-        // [Ignore]
+        [Ignore]
         public void ExtendTest3_All()
         {
             Configuration.ProcessAll = true;
