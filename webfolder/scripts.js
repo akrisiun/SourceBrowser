@@ -2,11 +2,12 @@
 var currentResult = null;
 var useSolutionExplorer = true;
 var anchorSplitChar = ",";
-var folder = "";
+var folder = "/osx-wiki";
 
 var externalUrlMap = [
     "http://referencesource.microsoft.com/",
-    "http://source.roslyn.io/"
+    "http://source.roslyn.io/",
+    "http://akrisiun.github.io/"
 ];
 
 var supportedFileExtensions = [
@@ -37,7 +38,7 @@ function redirectLocation(frame, newLocation) {
     }
 
 	if (newLocation == folder + "/")
-    frame.location.replace(newLocation);
+	   frame.location.replace(newLocation);
     else 
 	   alert(newLocation);
 }

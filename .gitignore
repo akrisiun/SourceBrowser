@@ -201,3 +201,4 @@ web/bin/Microsoft.SourceBrowser.SourceIndexServer.dll
 TestCode/TestSolution/*.html
 TestCode/TestSolution/Views/*.html
 TestCode/Project3/
+webfolder/content/icons/
