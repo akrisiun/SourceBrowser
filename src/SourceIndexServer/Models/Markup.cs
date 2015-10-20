@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.SourceBrowser.SourceIndexServer.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -13,7 +14,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
 
         public static string A(string url)
         {
-            return "<a href=\"" + url + "\" target=\"_blank\">" + url + "</a>";
+            return "<a href=\"" + SourceConfig.GetUrlPath + url + "\" target=\"_blank\">" + url + "</a>";
         }
 
         public static string A(string url, string displayText, string target = "")
@@ -27,7 +28,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
                 target = "";
             }
 
-            string result = string.Format("<a class=\"blueLink\" href=\"{0}\"{2}>{1}</a>", url, displayText, target);
+            string result = string.Format("<a class=\"blueLink\" href=\"{0}\"{2}>{1}</a>", SourceConfig.GetUrlPath + url, displayText, target);
             return result;
         }
 
@@ -62,7 +63,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
         public static void WriteSymbol(DeclaredSymbolInfo symbol, StringBuilder sb)
         {
             var url = symbol.GetUrl();
-            sb.AppendFormat("<a href=\"{0}\" target=\"s\"><div class=\"resultItem\" onClick=\"resultClick(this);\">", url);
+            sb.AppendFormat("<a href=\"{0}\" target=\"s\"><div class=\"resultItem\" onClick=\"resultClick(this);\">", SourceConfig.GetUrlPath + url);
             sb.Append("<div class=\"resultLine\">");
             sb.AppendFormat("<img src=\"/content/icons/{0}\" height=\"16\" width=\"16\" />", GetGlyph(symbol) + ".png");
             sb.AppendFormat("<div class=\"resultKind\">{0}</div>", symbol.Kind);

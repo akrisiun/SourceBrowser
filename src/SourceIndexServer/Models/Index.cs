@@ -9,9 +9,21 @@ using System.IO;
 using IO = System.IO;
 using System.Net;
 using System.Xml.Linq;
+using System.Configuration;
 
 namespace Microsoft.SourceBrowser.SourceIndexServer.Models
 {
+    public static class SourceConfig
+    {
+        public static string Directory = "src.directory";
+        public static string Folder = "src.folder";
+
+        public static string GetRootPath { get { return NullIfEmpty(ConfigurationManager.AppSettings[Directory]); } }
+        public static string GetUrlPath { get { return ConfigurationManager.AppSettings[Folder]; } }
+
+        public static string NullIfEmpty(string s) { return string.IsNullOrWhiteSpace(s) ? null : s; }
+    }
+
     public class Index : IDisposable
     {
         #region Properties 
@@ -68,8 +80,8 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
 
                             instance = new Index();
                             var rootPath = HostingEnvironment.ApplicationPhysicalPath;
-                            var appPath = System.Configuration.ConfigurationManager.AppSettings["directory"];
-                            if (!string.IsNullOrWhiteSpace(appPath) && System.IO.Directory.Exists(appPath))
+                            var appPath = SourceConfig.GetRootPath;
+                            if (appPath != null && System.IO.Directory.Exists(appPath))
                                 rootPath = System.IO.Path.GetFullPath(appPath);
 
                             var ctx = System.Web.HttpContext.Current;
@@ -262,6 +274,11 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
             var trace = System.Web.HttpContext.Current.Trace;
             trace.Write("index RootPath=" + (RootPath ?? "-"));
             trace.Write("index ProjPath=" + (ProjPath ?? "-"));
+            if (ProjPath == null)
+            {
+                RootPath = SourceConfig.GetRootPath ?? RootPath;
+                ProjPath = "";
+            }
 
             if (!indexFinishedPopulating)
             { 

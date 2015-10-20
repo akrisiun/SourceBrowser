@@ -2,7 +2,9 @@
 var currentResult = null;
 var useSolutionExplorer = true;
 var anchorSplitChar = ",";
-var folder = "/osx-wiki";
+var folder = "folder";
+// http://localhost:?/folder/
+var host = "http://localhost" + folder;
 
 var externalUrlMap = [
     "http://referencesource.microsoft.com/",
@@ -37,10 +39,12 @@ function redirectLocation(frame, newLocation) {
         return;
     }
 
-	if (newLocation == folder + "/")
-	   frame.location.replace(newLocation);
+	if (newLocation == folder + "/" || newLocation.indexOf(host) == 0)
+		frame.location.replace(newLocation);
+	else if (newLocation.indexOf(".html") > 0)
+        frame.location.replace(newLocation);
     else 
-	   alert(newLocation);
+	    alert(newLocation);
 }
 
 function onPageLoaded() {
@@ -59,15 +63,17 @@ function onPageLoaded() {
     }
 
     var pathname = document.location.pathname;
-    if (pathname.toLowerCase().slice(0, 11) == folder + "/index.html") {
+    if (pathname.length > 11 + folder.length && pathname.toLowerCase().slice(folder.length, 11) == "/index.html") {
         redirectLocation(top, folder + "/");
         return;
     }
 
     if (pathname.length > 1) {
         setHash(pathname.slice(1) + location.hash);
-        redirectLocation(top, folder + "/");
-        return;
+
+        // redirectLocation(top, folder + "/");
+        if (location.hash.indexOf("#") < 0)
+           return;
     }
 
     processHash();
@@ -104,11 +110,19 @@ function onResultsLoad() {
 }
 
 function setHash(newHash) {
+
+    if (newHash.length > folder.length)
+    {
+        var slice0 = "/" + newHash.substr(0, folder.length - 1)
+        if (slice0 == folder)
+            newHash = newHash.substr(folder.length);
+    }
+
     if (newHash.charAt(0) == '#') {
         newHash = newHash.slice(1);
     }
 
-    top.history.replaceState(null, top.document.title, '#' + newHash);
+    // top.history.replaceState(null, top.document.title, '#' + newHash);
 }
 
 function onHashChanged(e) {
@@ -384,6 +398,8 @@ function rewriteSolutionExplorerLink(link) {
     var fileName = trimFromEnd(url, ".html");
     var extension = getExtension(fileName);
     var pathname = link.pathname;
+    if (pathname.indexOf(folder) == 0)
+	pathname = pathname.substr(folder.length);
 
     var setClassName = null;
     if (isSupportedExtension(extension) && !link.className) {
@@ -952,9 +968,68 @@ function trackActiveItemInSolutionExplorer() {
     }
 }
 
+function parseTabChannel(div) {
+    var aList = div.getElementsByTagName("a");
+    if (!aList)
+        return;
+    for(var i = 0; i < aList.length; i++)
+    {
+        var a = aList[i];
+        var pos = a.href.indexOf("/#");
+        if (pos >= 0)
+            a.href = folder + a.href.substr(pos);
+    }
+}
+
+function parseProjectImg(div) {
+
+    for (var i = 0; i < div.children.length; i++) {
+        var child = div.children[i];
+        if (child.innerHTML.indexOf("undefined") > 0) {
+            var img1 = child.firstChild;
+            if (img1.tagName == "IMG")
+            {
+                var pos = img1.src.indexOf("undefined");
+                if (pos > 0)
+                    img1.src = folder + img1.src.substr(pos + 9);
+            }
+        }
+
+        if (child.innerHTML.indexOf('href="/#') > 0) {
+            var elem = child.getElementsByTagName("a");
+            if (elem) { // typeof ? !== "undefined") 
+                for (var j = 0; j < elem.length; j++) {
+                    a = elem[j];
+                    if (a.tagName == "A" && a.href.indexOf("#") > 0) {
+                        var href = a.href;
+                        a.href = folder + href.substr(href.indexOf("#") - 1);
+                    }
+                }
+            }
+        }
+
+        if (child.innerHTML.indexOf('href="/') > 0) {
+            var elem = child.getElementsByTagName("a");
+            if (elem) {
+                for (var j = 0; j < elem.length; j++) {
+                    a = elem[j];
+                    if (a.tagName == "A" && a.pathname.indexOf("/") == 0
+                        && !a.pathname.startsWith(folder)
+                        && a.href.indexOf("@#") < 0)
+                    {
+                        var href = a.pathname;
+                        a.href = folder + href + a.hash;
+                    }
+                }
+            }
+        }
+    }
+}
+
 function selectItem(div, parts) {
     var text = parts[0];
     var found = null;
+
     for (var i = 0; i < div.children.length; i++) {
         var child = div.children[i];
         if (getInnerText(child) == text) {
@@ -1097,12 +1172,17 @@ function initializeProjectIndex(url) {
 function initializeProjectExplorer() {
     makeFoldersCollapsible(/* closed folder */"202.png", "201.png", "../content/icons/", initializeSolutionExplorerFolder);
     initializeProjectExplorerRootFolder();
+
     trackActiveItemInSolutionExplorer();
 }
 
 function initializeProjectExplorerRootFolder() {
     var rootFolder = document.getElementById("rootFolder");
     if (rootFolder) {
+        var channelTab = rootFolder.previousElementSibling;
+        if (channelTab)
+            parseTabChannel(channelTab);
+
         rootFolder = rootFolder.nextElementSibling;
         if (rootFolder) {
             initializeSolutionExplorerFolder(rootFolder);
@@ -1114,15 +1194,13 @@ function onSolutionExplorerLoad() {
     loadSolutionExplorer();
 }
 
-function loadSolutionExplorer() {
-    makeFoldersCollapsible(/* closed folder */"202.png", "201.png", 
-		folder + "/content/icons/", initializeSolutionExplorerFolder);
-    document.getElementById("rootFolder").style.display = "block";
-}
-
 function initializeNamespaceExplorer() {
     makeFoldersCollapsible(/* namespace */"90.png", "90.png", 
 		folder + "/content/icons/", /*initializeSolutionExplorerFolder:*/ null);
+
+    var tabChannel = document.getElementsByClassName("tabChannel");
+    if (tabChannel && tabChannel.length > 0)
+        parseTabChannel(tabChannel[0]);
 }
 
 function initializeSolutionExplorerFolder(folder) {
@@ -1132,6 +1210,8 @@ function initializeSolutionExplorerFolder(folder) {
             rewriteSolutionExplorerLink(child);
         }
     }
+
+    parseProjectImg(folder);
 }
 
 function makeFoldersCollapsible(folderIcon, openFolderIcon, pathToIcons, initializeHandler) {
@@ -1139,11 +1219,12 @@ function makeFoldersCollapsible(folderIcon, openFolderIcon, pathToIcons, initial
     pathToIcons = folder + "/content/icons/";
     var elements = document.getElementsByClassName("folder");
     var length = elements.length;
+
     for (var i = 0; i < length; i++) {
-        var folder = elements[i];
-        folder.style.display = 'none';
-        folder.initialize = initializeHandler;
-        var div = folder.previousSibling;
+        var folder1 = elements[i];
+        folder1.style.display = 'none';
+        folder1.initialize = initializeHandler;
+        var div = folder1.previousSibling;
         var firstChild = div.firstChild;
 
         var imagePlusMinus = document.createElement("img");
@@ -1155,7 +1236,7 @@ function makeFoldersCollapsible(folderIcon, openFolderIcon, pathToIcons, initial
         imageFolder.className = "imageFolder";
         setFolderImage(imageFolder, div, firstChild, pathToIcons, folderIcon);
 
-        var handler = expandCollapseFolder(folder, imagePlusMinus, imageFolder, div, firstChild, 
+        var handler = expandCollapseFolder(folder1, imagePlusMinus, imageFolder, div, firstChild,
 			pathToIcons, folderIcon, openFolderIcon);
 
         var skipImage = isLink(firstChild);
@@ -1167,6 +1248,8 @@ function makeFoldersCollapsible(folderIcon, openFolderIcon, pathToIcons, initial
             div.insertBefore(imagePlusMinus, imageFolder);
             div.onclick = handler;
         }
+
+        parseProjectImg(folder1);
     }
 }
 
@@ -1187,8 +1270,10 @@ function expandCollapseFolder(capturedFolder, capturedPlusMinus, capturedFolderI
             if (capturedFolder.initialize) {
                 capturedFolder.initialize(capturedFolder);
                 capturedFolder.initialize = null;
+
             }
 
+            parseProjectImg(capturedFolder);
             capturedFolder.style.display = 'block';
         }
         else {
@@ -1199,19 +1284,21 @@ function expandCollapseFolder(capturedFolder, capturedPlusMinus, capturedFolderI
     }
 }
 
-function setFolderImage(folder, div, firstChild, pathToIcons, folderIcon) {
+function setFolderImage(xfolder, div, firstChild, pathToIcons, folderIcon) {
+
+    pathToIcons = folder + "/content/icons/";
     var text = firstChild.textContent;
     if (text === 'References' || text === "Used By") {
-        folder.src = pathToIcons + "192.png";
+        xfolder.src = pathToIcons + "192.png";
     } else if (text === 'Properties') {
-        folder.src = pathToIcons + "102.png";
+        xfolder.src = pathToIcons + "102.png";
     } else if (div.className == "projectCSInSolution") {
-        folder.src = pathToIcons + "196.png";
+        xfolder.src = pathToIcons + "196.png";
     } else if (div.className == "projectVBInSolution") {
-        folder.src = pathToIcons + "195.png";
+        xfolder.src = pathToIcons + "195.png";
     }
     else {
-        folder.src = pathToIcons + folderIcon;
+        xfolder.src = pathToIcons + folderIcon;
     }
 }
 
@@ -1342,4 +1429,9 @@ function getExtension(filePath) {
 
 function isSupportedExtension(extension) {
     return supportedFileExtensions.indexOf(extension) != -1;
+}
+function loadSolutionExplorer() {
+    makeFoldersCollapsible(/* closed folder */"202.png", "201.png", 
+		folder + "/content/icons/", initializeSolutionExplorerFolder);
+    document.getElementById("rootFolder").style.display = "block";
 }

@@ -96,7 +96,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 var url = text;
                 WriteLine(
                     "<a href=\"{0}/{1}/{2}.html\" target=\"n\"><div class=\"resultItem\"><div class=\"resultLine\">{2}</div>",
-                    Constants.MSBuildPropertiesAssembly,
+                    SourceConfig.GetUrlPath + Constants.MSBuildPropertiesAssembly,
                     Constants.ReferencesFileName,
                     text);
                 WriteLine("</div></a>");
@@ -130,7 +130,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 var url = text;
                 WriteLine(
                     "<a href=\"{0}/{1}/{2}.html\" target=\"n\"><div class=\"resultItem\"><div class=\"resultLine\">{2}</div>",
-                    Constants.MSBuildItemsAssembly,
+                    SourceConfig.GetUrlPath + Constants.MSBuildItemsAssembly,
                     Constants.ReferencesFileName,
                     text);
                 WriteLine("</div></a>");
@@ -164,7 +164,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 var url = text;
                 WriteLine(
                     "<a href=\"{0}/{1}/{2}.html\" target=\"n\"><div class=\"resultItem\"><div class=\"resultLine\">{2}</div>",
-                    Constants.MSBuildTargetsAssembly,
+                    SourceConfig.GetUrlPath + Constants.MSBuildTargetsAssembly,
                     Constants.ReferencesFileName,
                     text);
                 WriteLine("</div></a>");
@@ -198,7 +198,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 var url = text;
                 WriteLine(
                     "<a href=\"{0}/{1}/{2}.html\" target=\"n\"><div class=\"resultItem\"><div class=\"resultLine\">{2}</div>",
-                    Constants.MSBuildTasksAssembly,
+                    SourceConfig.GetUrlPath + Constants.MSBuildTasksAssembly,
                     Constants.ReferencesFileName,
                     text);
                 WriteLine("</div></a>");
@@ -290,7 +290,8 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
             foreach (var assembly in query.ResultAssemblies)
             {
                 var url = assembly;
-                WriteLine("<a href=\"/#{0}\" target=\"_top\"><div class=\"resultItem\"><div class=\"resultLine\">{0}</div>", url.AssemblyName);
+                WriteLine("<a href=\"{1}/#{0}\" target=\"_top\"><div class=\"resultItem\"><div class=\"resultLine\">{0}</div>",
+                        url.AssemblyName, SourceConfig.GetUrlPath);
                 var projectKey = url.ProjectKey;
                 if (projectKey >= 0)
                 {
@@ -331,7 +332,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 var url = project;
                 Write(
                     "<a href=\"{0}/ProjectExplorer.html\" target=\"n\"><div class=\"resultItem\"><div class=\"resultLine\">{1}</div>",
-                    url.AssemblyName,
+                    SourceConfig.GetUrlPath + url.AssemblyName,
                     index.projects[url.ProjectKey]);
                 WriteLine("<div class=\"resultDescription\">{0}</div></div></a>", Markup.HtmlEscape(url.AssemblyName));
             }
@@ -364,7 +365,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 var url = guidText;
                 WriteLine(
                     "<a href=\"{0}/{1}/{2}.html\" target=\"n\"><div class=\"resultItem\"><div class=\"resultLine\">{2}</div>",
-                    Constants.GuidAssembly,
+                    SourceConfig.GetUrlPath + Constants.GuidAssembly,
                     Constants.ReferencesFileName,
                     guidText);
                 WriteLine("</div></a>");
@@ -391,7 +392,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
                 message = "No results found.";
             }
 
-            var url = string.Format("/#q={0}", Markup.UrlEncodeAndHtmlEscape(query.OriginalString));
+            var url = string.Format(SourceConfig.GetUrlPath + "/#q={0}", Markup.UrlEncodeAndHtmlEscape(query.OriginalString));
             message = Markup.A(url, message, "_top");
 
             sb.AppendLine(Markup.Note(message));
