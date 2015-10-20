@@ -11,7 +11,8 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>HtmlGenerator_1_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugWeb|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -82,9 +83,6 @@
     <Compile Include="ProcessLaunchService.cs" />
     <Compile Include="RangeUtilities.cs" />
     <Compile Include="TextUtilities.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="HtmlGenerator_1_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="..\..\Common.targets" />
 </Project>
