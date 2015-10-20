@@ -259,6 +259,10 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
 
         public Query Get(string queryString)
         {
+            var trace = System.Web.HttpContext.Current.Trace;
+            trace.Write("index RootPath=" + (RootPath ?? "-"));
+            trace.Write("index ProjPath=" + (ProjPath ?? "-"));
+
             if (!indexFinishedPopulating)
             { 
                 var rootPath = Path.Combine(RootPath, ProjPath);

@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Microsoft.SourceBrowser.Common;
+using Microsoft.SourceBrowser.SourceIndexServer.Models;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -87,17 +91,95 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Controllers
         // GET: File
         public ActionResult Index()
         {
+            HttpContext.Trace.Write("file=" + HttpContext.Request.Url.PathAndQuery);
+
             return View();
         }
 
 
         protected override void HandleUnknownAction(string actionName)
         {
+            HttpContext.Trace.Write("file.Uknown=" + HttpContext.Request.Url.PathAndQuery);
+
             // base.HandleUnknownAction(actionName);
             var url = Request.Url;
             var path = url.AbsolutePath;
             var index = Microsoft.SourceBrowser.SourceIndexServer.Models.Index.Instance;
-            index.File();
+            //index.File();
+
+            var symbol = Request.Params["symbol"] as string;
+            if (!string.IsNullOrWhiteSpace(symbol))
+            {
+                string api = GetHtml(symbol);
+                var res= new FileContentResult(Encoding.ASCII.GetBytes(api), "text/html");
+                res.ExecuteResult(this.ControllerContext);
+            }
         }
+
+        private const int MaxInputLength = 260;
+        private static readonly Dictionary<string, int> usages = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        private static readonly DateTime serviceStarted = DateTime.UtcNow;
+        private static int requestsServed = 0;
+
+
+        string GetHtml(string symbol)
+        {
+            string result = null;
+            try
+            {
+                result = GetHtmlCore(symbol);
+            }
+            catch (Exception ex)
+            {
+                result = Markup.Note(ex.ToString());
+            }
+            return result;
+        }
+
+        static string GetHtmlCore(string symbol, string usageStats = null)
+        {
+            if (symbol == null || symbol.Length < 3)
+            {
+                return Markup.Note("Enter at least 3 characters.");
+            }
+
+            if (symbol.Length > 260)
+            {
+                return Markup.Note(string.Format(
+                    "Query string is too long (maximum is {0} characters, input is {1} characters)",
+                    MaxInputLength,
+                    symbol.Length));
+            }
+
+            using (Disposable.Timing("Get symbols"))
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+
+                var index = Models.Index.Instance;
+                var query = index.Get(symbol);
+
+                var result = new ResultsHtmlGenerator(query).Generate(sw, index, usageStats);
+                return result;
+            }
+        }
+
+        private string UpdateUsages()
+        {
+            lock (usages)
+            {
+                var userName = this.User.Identity.Name;
+                int requests = 0;
+                usages.TryGetValue(userName, out requests);
+                requests++;
+                requestsServed++;
+                usages[userName] = requests;
+                return string.Format(
+                    "Since {0}:<br>&nbsp;&nbsp;{1} unique users<br>&nbsp;&nbsp;{2} requests served.",
+                    serviceStarted.ToLocalTime().ToString("m"),
+                    usages.Keys.Count,
+                    requestsServed);
+            }
+        }
+
     }
 }
