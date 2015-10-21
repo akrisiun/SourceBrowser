@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.Hosting;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -91,18 +92,41 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Controllers
         // GET: File
         public ActionResult Index()
         {
-            HttpContext.Trace.Write("file=" + HttpContext.Request.Url.PathAndQuery);
+            HttpContext.Trace.Write("file.Index=" + HttpContext.Request.Url.PathAndQuery);
 
-            return View();
+            return IndexFile();
+            
         }
 
+        ActionResult IndexFile()
+        {
+            var path = HostingEnvironment.ApplicationPhysicalPath + "index.html";
+            HttpContext.Trace.Write("file.path=" + path);
+
+            // IIS7 HttpRuntime.FinishRequestNotification handle is invalid
+            //   return new FilePathResult(path, "text/html");
+            if (!System.IO.File.Exists(path))
+                return null;
+
+            var content = System.IO.File.ReadAllBytes(path);
+            var res = new FileContentResult(content, "text/html");
+            return res;
+        }
 
         protected override void HandleUnknownAction(string actionName)
         {
-            HttpContext.Trace.Write("file.Uknown=" + HttpContext.Request.Url.PathAndQuery);
+            var url = Request.Url;
+            HttpContext.Trace.Write("File.Uknown=" + url.PathAndQuery + " localPath=" + (url.LocalPath ?? "-"));
+            if (url.LocalPath == "/" || url.PathAndQuery == "/")
+            {
+                var res = IndexFile();
+                res.ExecuteResult(ControllerContext);
+
+                Response.StatusCode = 200;
+                return;
+            }
 
             // base.HandleUnknownAction(actionName);
-            var url = Request.Url;
             var path = url.AbsolutePath;
             var index = Microsoft.SourceBrowser.SourceIndexServer.Models.Index.Instance;
             //index.File();
@@ -111,7 +135,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Controllers
             if (!string.IsNullOrWhiteSpace(symbol))
             {
                 string api = GetHtml(symbol);
-                var res= new FileContentResult(Encoding.ASCII.GetBytes(api), "text/html");
+                var res = new FileContentResult(Encoding.ASCII.GetBytes(api), "text/html");
                 res.ExecuteResult(this.ControllerContext);
             }
         }

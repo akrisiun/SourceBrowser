@@ -44,7 +44,7 @@ function redirectLocation(frame, newLocation) {
 	else if (newLocation.indexOf(".html") > 0)
         frame.location.replace(newLocation);
     else 
-	    alert(newLocation);
+	   alert(newLocation);
 }
 
 function onPageLoaded() {
@@ -111,7 +111,7 @@ function onResultsLoad() {
 
 function setHash(newHash) {
 
-    if (newHash.length > folder.length)
+    if (folder.length > 1 && newHash.length > folder.length)
     {
         var slice0 = "/" + newHash.substr(0, folder.length - 1)
         if (slice0 == folder)

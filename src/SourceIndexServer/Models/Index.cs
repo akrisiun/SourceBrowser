@@ -114,19 +114,6 @@ namespace Microsoft.SourceBrowser.SourceIndexServer.Models
         public const string indexFile = "SolutionExplorer.html";
         public const string outlineFile = "documentoutline.html";
 
-        // TODO
-            //var urlPath = ctx.Request.Url.AbsolutePath;
-            //ctx.Trace.Write("urlPath=" + urlPath);
-            //var dir = ctx.Request.Params["dir"];
-            //if (!string.IsNullOrWhiteSpace(dir))
-            //{
-            //    if (dir.Contains("%"))
-            //        dir = WebUtility.HtmlDecode(dir);
-            //    dir = Path.Combine(rootPath, dir);
-            //    if (Directory.Exists(dir))
-            //        instance.ProjPath = dir;
-            //}
-
         public void File(string file = "index.html")
         {
             var ctx = System.Web.HttpContext.Current;
