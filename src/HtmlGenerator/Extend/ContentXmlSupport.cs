@@ -12,7 +12,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
     // app.config, web.config generate
     public class ContentXmlSupport : XmlSupport, IExtend
     {
-        public static string[] Extensions = new[] { ".config", ".xslt", ".xml" };
+        public static string[] Extensions = new[] { ".config", ".xslt", ".xml", ".xsl", ".resx" };
         public ushort Glyph { get { return 227; } } // for DeclaredSymbolInfo like xaml file
 
         public string FilePath { get; protected set; }

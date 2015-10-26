@@ -76,15 +76,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
 
             content.ParseProject(msbuildProject,
                 new string[] {".js", ".css",
-                    ".aspx", ".html", ".xslt", ".txt", ".md", ".cmd", ".bat", ".sql"});
+                    ".aspx", ".html", ".xslt", ".xsl", ".resx", ".ashx", ".ascx",
+                    ".txt", ".md", ".cmd", ".bat", ".sql"});
 
             //  TODO: var sql = new SqlContentSupport(@this);
         }
-
-        //public static void ExternalReferencesPrepare(SolutionGenerator solutionGenerator, HashSet<string> assemblyList)
-        //{
-        //    References.Instance.ExternalReferencesPrepare(solutionGenerator, assemblyList);
-        //}
 
         public static void ExternalReferences(SolutionGenerator solutionGenerator, HashSet<string> assemblyList)
         {
@@ -142,7 +138,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
             if (afterError || !Configuration.ProcessAll)
             {
                 var solutionExplorerRoot = mergedSolutionExplorerRoot;
-                // var output = Path.Combine(solutionFinalizer.SolutionDestinationFolder, Constants.SolutionExplorer + ".html");
                 solutionFinalizer.WriteSolutionExplorer(solutionExplorerRoot);
 
                 try

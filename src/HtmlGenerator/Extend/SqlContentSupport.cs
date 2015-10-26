@@ -25,7 +25,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
         {
         } 
 
-        public static string[] Extensions = new[] { ".sql", ".dd" };
+        public static string[] Extensions = new[] { ".sql", ".ddl" };
 
     }
 }
