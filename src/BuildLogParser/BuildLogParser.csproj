@@ -3,6 +3,8 @@
   <PropertyGroup>
     <ProjectGuid>{57002F26-8D15-4CF7-A53D-61AE8CC5E836}</ProjectGuid>
     <AssemblyName>Microsoft.SourceBrowser.BuildLogParser</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
@@ -57,7 +59,7 @@
   </PropertyGroup>
   <Import Project="..\..\Common.props" />
   <ItemGroup>
-    <Reference Include="Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />

@@ -6,6 +6,8 @@
     <AssemblyName>HtmlGenerator</AssemblyName>
     <StartArguments>..\..\..\TestCode\TestSolution.sln</StartArguments>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
     <PublishUrl>d:\Publish\SourceBrowser\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>

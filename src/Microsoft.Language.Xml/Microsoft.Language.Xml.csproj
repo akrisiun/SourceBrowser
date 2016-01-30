@@ -4,6 +4,8 @@
     <SrcRoot>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Common.props))</SrcRoot>
     <ProjectGuid>{2989FBE6-194F-46C9-8EF4-022F62519C9A}</ProjectGuid>
     <AssemblyName>Microsoft.Language.Xml</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

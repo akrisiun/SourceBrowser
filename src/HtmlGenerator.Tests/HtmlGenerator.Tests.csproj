@@ -3,6 +3,8 @@
   <PropertyGroup>
     <ProjectGuid>{609FD601-68F1-44DD-A5A9-0F57099C2677}</ProjectGuid>
     <AssemblyName>Microsoft.SourceBrowser.HtmlGenerator.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>Microsoft.SourceBrowser.HtmlGenerator.Tests</RootNamespace>
@@ -133,10 +135,6 @@
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{f13cd277-e86b-4bc6-9e93-39ed055a46db}</Project>
       <Name>Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HtmlGenerator\HtmlGenerator.csproj">
-      <Project>{3cb763a5-a0c0-46b0-aef5-020e731253c2}</Project>
-      <Name>HtmlGenerator</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Language.Xml\Microsoft.Language.Xml.csproj">
       <Project>{2989fbe6-194f-46c9-8ef4-022f62519c9a}</Project>
