@@ -2,7 +2,7 @@
 // Type: Microsoft.CodeAnalysis.MSBuild.ProjectBlock
 // Assembly: Microsoft.CodeAnalysis.Workspaces.Desktop, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
 // MVID: D215115A-535F-4F97-A96F-CBBE58E1FDB0
-// Assembly location: D:\Sanitex\webstack\SourceBrowser\bin\Microsoft.CodeAnalysis.Workspaces.Desktop.dll
+// Assembly location: SourceBrowser\bin\Microsoft.CodeAnalysis.Workspaces.Desktop.dll
 
 using Microsoft.CodeAnalysis;
 using System;
