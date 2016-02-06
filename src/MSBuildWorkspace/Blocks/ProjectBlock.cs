@@ -13,7 +13,8 @@ using System.Text;
 
 namespace Microsoft.CodeAnalysis.MSBuild
 {
-    internal sealed class ProjectBlock
+    // internal 
+    public sealed class ProjectBlock
     {
         private Guid _projectTypeGuid;
         private readonly string _projectName;

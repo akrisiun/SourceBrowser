@@ -21,6 +21,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Construction;
 
 namespace Microsoft.CodeAnalysis.MSBuild
 {
@@ -167,7 +168,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
         /// <exception cref="InvalidOperationException">The lock is not currently held by the calling thread.</exception>
         public void AssertHasLock()
         {
-            
+
             //Contract.ThrowIfFalse(LockHeldByMe());
         }
 
@@ -314,8 +315,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
 
         public static MSBuildWorkspace Create(IDictionary<string, string> properties)
         {
-            throw new NotImplementedException();
-            //return MSBuildWorkspace.Create(properties, (HostServices)DesktopMefHostServices.DefaultServices);
+            return MSBuildWorkspace.Create(properties, (HostServices)DesktopMefHostServices.DefaultServices);
         }
 
         public static MSBuildWorkspace Create(IDictionary<string, string> properties, HostServices hostServices)
@@ -325,7 +325,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
             if (hostServices == null)
                 throw new ArgumentNullException("hostServices");
             else
-                return new MSBuildWorkspace(hostServices, ImmutableDictionary.ToImmutableDictionary<string, string>((IEnumerable<KeyValuePair<string, string>>)properties));
+                return new MSBuildWorkspace(hostServices, 
+                    ImmutableDictionary.ToImmutableDictionary<string, string>((IEnumerable<KeyValuePair<string, string>>)properties));
         }
 
         public void AssociateFileExtensionWithLanguage(string projectFileExtension, string language)
@@ -494,7 +495,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
                 FileUtilities.ResolveRelativePath(path, baseDirectoryPath) ?? path);
         }
 
-        public async Task<Solution> OpenSolutionAsync(string solutionFilePath, CancellationToken? cancellationToken = null)
+        public async Task<Solution> OpenSolutionAsync(string solutionFilePath, CancellationToken cancellationToken)
         {
             // ISSUE: explicit reference operation
             // ISSUE: reference to a compiler-generated field
@@ -505,6 +506,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
             string absoluteSolutionPath;
             VersionStamp version;
             IEnumerator<ProjectInSolution> enumerator;
+
             if (num != 0)
             {
                 if (solutionFilePath == null)
@@ -513,69 +515,81 @@ namespace Microsoft.CodeAnalysis.MSBuild
                 absoluteSolutionPath = this.GetAbsoluteSolutionPath(solutionFilePath, System.IO.Directory.GetCurrentDirectory());
 
                 throw new NotImplementedException();
-                //NonReentrantLock.SemaphoreDisposer semaphoreDisposer1 = this._dataGuard.DisposableWait(cancellationToken);
-                //try
-                //{
-                //    this.SetSolutionProperties(absoluteSolutionPath);
-                //}
-                //finally
-                //{
-                //    if (num < 0)
-                //        semaphoreDisposer1.Dispose();
-                //}
+                NonReentrantLock.SemaphoreDisposer semaphoreDisposer1 = this._dataGuard.DisposableWait(cancellationToken);
+                try
+                {
+                    this.SetSolutionProperties(absoluteSolutionPath);
+                }
+                finally
+                {
+                    if (num < 0)
+                        semaphoreDisposer1.Dispose();
+                }
                 version = new VersionStamp();
 
-                throw new NotImplementedException();
-                
-                //SolutionFile solutionFile = SolutionFile.Parse(absoluteSolutionPath);
+                // throw new NotImplementedException();
+                // var reader = System.IO.File.OpenText(absoluteSolutionPath);
 
-                //reportMode = this.SkipUnrecognizedProjects ? MSBuildWorkspace.ReportMode.Log : MSBuildWorkspace.ReportMode.Throw;
-                //invalidProjects = new List<ProjectInSolution>();
-                //NonReentrantLock.SemaphoreDisposer semaphoreDisposer2 = this._dataGuard.DisposableWait(cancellationToken);
-                //try
-                //{
-                //    IEnumerator<ProjectInSolution> enumerator1 = solutionFile.ProjectsInOrder().GetEnumerator();
-                //    try
-                //    {
-                //        while (enumerator1.MoveNext())
-                //        {
-                //            ProjectInSolution current = enumerator1.Current;
-                //            if (current.ProjectType != SolutionProjectType.SolutionFolder)
-                //            {
-                //                string absolutePath = this.TryGetAbsolutePath(current.AbsolutePath, reportMode);
-                //                if (absolutePath != null)
-                //                {
-                //                    string extension = System.IO.Path.GetExtension(absolutePath);
-                //                    if (extension.Length > 0 && (int)extension[0] == 46)
-                //                        extension = extension.Substring(1);
-                //                    IProjectFileLoader projectFileExtension = ProjectFileLoader.GetLoaderForProjectFileExtension((Workspace)this, extension);
-                //                    if (projectFileExtension != null)
-                //                        this._projectPathToLoaderMap[absolutePath] = projectFileExtension;
-                //                }
-                //                else
-                //                    invalidProjects.Add(current);
-                //            }
-                //        }
-                //    }
-                //    finally
-                //    {
-                //        if (num < 0 && enumerator1 != null)
-                //            enumerator1.Dispose();
-                //    }
-                //}
-                //finally
-                //{
-                //    if (num < 0)
-                //        semaphoreDisposer2.Dispose();
-                //}
-                //loadedProjects = new Dictionary<ProjectId, ProjectInfo>();
-                //enumerator = solutionFile.ProjectsInOrder().GetEnumerator();
+                // SolutionFile solutionFile = SolutionFile.Parse(reader);
+                Microsoft.Build.Construction.SolutionFile solutionFile = SolutionFile.Parse(absoluteSolutionPath);
+
+                reportMode = this.SkipUnrecognizedProjects ? MSBuildWorkspace.ReportMode.Log : MSBuildWorkspace.ReportMode.Throw;
+                invalidProjects = new List<ProjectInSolution>();
+                NonReentrantLock.SemaphoreDisposer semaphoreDisposer2 = this._dataGuard.DisposableWait(cancellationToken);
+                try
+                {
+                    // MsBuildWorkspace SolutionFile ProjectsInOrder
+                    IEnumerator<ProjectInSolution> enumerator1 = solutionFile.ProjectsInOrder.GetEnumerator();
+
+                    // IEnumerator<ProjectBlock> enumeratorBlock =  // .ProjectsInOrder().GetEnumerator();
+
+                    try
+                    {
+                        while (enumerator1.MoveNext())
+                        {
+                            var block = enumerator1.Current;
+
+                            ProjectInSolution current = new ProjectInSolution(solutionFile);
+
+                            if (current.ProjectType != SolutionProjectType.SolutionFolder)
+                            {
+                                string absolutePath = this.TryGetAbsolutePath(current.AbsolutePath, reportMode);
+                                if (absolutePath != null)
+                                {
+                                    string extension = System.IO.Path.GetExtension(absolutePath);
+                                    if (extension.Length > 0 && (int)extension[0] == 46)
+                                        extension = extension.Substring(1);
+                                    
+                                    IProjectFileLoader projectFileExtension = 
+                                        ProjectFileLoader.GetLoaderForProjectFileExtension((Workspace)this, extension);
+                                    if (projectFileExtension != null)
+                                        this._projectPathToLoaderMap[absolutePath] = projectFileExtension;
+                                }
+                                else
+                                    invalidProjects.Add(current);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        if (num < 0 && enumerator1 != null)
+                            enumerator1.Dispose();
+                    }
+                }
+                finally
+                {
+                    if (num < 0)
+                        semaphoreDisposer2.Dispose();
+                }
+                loadedProjects = new Dictionary<ProjectId, ProjectInfo>();
+                enumerator = solutionFile.ProjectsInOrder.GetEnumerator();
             }
             try
             {
                 if (num == 0)
                 {
-                    ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter configuredTaskAwaiter = new ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter();
+                    //ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter
+                    //    configuredTaskAwaiter = new ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter();
                     // ISSUE: explicit reference operation
                     // ISSUE: reference to a compiler-generated field
                     _state = num = -1;
@@ -584,34 +598,39 @@ namespace Microsoft.CodeAnalysis.MSBuild
                     goto label_32;
             label_31:
 
-                //string absolutePath;
-                //IProjectFileLoader loader;
+                string absolutePath;
+                IProjectFileLoader loader;
 
                 throw new NotImplementedException();
-                //ProjectId projectId = await this.GetOrLoadProjectAsync(absolutePath, loader, false, 
+                
+                //absolutePath = solutionFilePath;
+                //loader = null;
+                //loadedProjects = null;
+                //ProjectId projectId = await this.GetOrLoadProjectAsync(absolutePath, loader, false,
                 //    loadedProjects, cancellationToken).ConfigureAwait(false);
+
             label_32:
 
-            throw new NotImplementedException();
-                //while (enumerator.MoveNext())
-                //{
-                //    ProjectInSolution current = enumerator.Current;
+                throw new NotImplementedException();
+                while (enumerator.MoveNext())
+                {
+                    ProjectInSolution current = enumerator.Current;
 
-                //    throw new NotImplementedException();
-                    //cancellationToken.ThrowIfCancellationRequested();
-                    //if (current.ProjectType != SolutionProjectType.SolutionFolder && !invalidProjects.Contains(current))
-                    //{
-                    //    absolutePath = this.TryGetAbsolutePath(current.AbsolutePath, reportMode);
-                    //    if (absolutePath != null && this.TryGetLoaderFromProjectPath(absolutePath, reportMode, out loader))
-                    //        goto label_31;
-                    //}
-                //}
+                    throw new NotImplementedException();
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (current.ProjectType != SolutionProjectType.SolutionFolder && !invalidProjects.Contains(current))
+                    {
+                        absolutePath = this.TryGetAbsolutePath(current.AbsolutePath, reportMode);
+                        if (absolutePath != null && this.TryGetLoaderFromProjectPath(absolutePath, reportMode, out loader))
+                            goto label_31;
+                    }
+                }
             }
             finally
             {
                 throw new NotImplementedException();
-                //if (num < 0 && enumerator != null)
-                //    enumerator.Dispose();
+                if (num < 0 && enumerator != null)
+                    enumerator.Dispose();
             }
             enumerator = (IEnumerator<ProjectInSolution>)null;
 
@@ -624,23 +643,24 @@ namespace Microsoft.CodeAnalysis.MSBuild
             return this.CurrentSolution;
         }
 
-        public async Task<Project> OpenProjectAsync(string projectFilePath, CancellationToken? xcancellationToken = null)
+        public async Task<Project> OpenProjectAsync(string projectFilePath, CancellationToken cancellationToken)
         {
-
-            CancellationToken cancellationToken = xcancellationToken ?? CancellationToken.None;
-
             // ISSUE: explicit reference operation
             // ISSUE: reference to a compiler-generated field
+
             int num = _state;
             Dictionary<ProjectId, ProjectInfo> loadedProjects;
             string absolutePath;
             IProjectFileLoader loader;
             Project project;
+
             if (num != 0)
             {
                 if (projectFilePath == null)
                     throw new ArgumentNullException("projectFilePath");
-                if (this.TryGetAbsoluteProjectPath(projectFilePath, System.IO.Directory.GetCurrentDirectory(), MSBuildWorkspace.ReportMode.Throw, out absolutePath) && this.TryGetLoaderFromProjectPath(projectFilePath, MSBuildWorkspace.ReportMode.Throw, out loader))
+                if (this.TryGetAbsoluteProjectPath(projectFilePath, System.IO.Directory.GetCurrentDirectory(),
+                    MSBuildWorkspace.ReportMode.Throw, out absolutePath) && this.TryGetLoaderFromProjectPath(projectFilePath,
+                    MSBuildWorkspace.ReportMode.Throw, out loader))
                 {
                     loadedProjects = new Dictionary<ProjectId, ProjectInfo>();
                 }
@@ -652,28 +672,34 @@ namespace Microsoft.CodeAnalysis.MSBuild
             }
             else
             {
-                //ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter configuredTaskAwaiter = new ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter();
+                //ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter configuredTaskAwaiter
+                //    = new ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter();
                 // ISSUE: explicit reference operation
                 // ISSUE: reference to a compiler-generated field
+
+                absolutePath = null;
+                loader = null;
                 _state = num = -1;
+                throw new NotImplementedException();
             }
 
-            throw new NotImplementedException();
-            //ProjectId projectId = await this.GetOrLoadProjectAsync(absolutePath, loader, this.LoadMetadataForReferencedProjects, loadedProjects, cancellationToken).ConfigureAwait(false);
-            //Dictionary<ProjectId, ProjectInfo>.ValueCollection.Enumerator enumerator = loadedProjects.Values.GetEnumerator();
-            //try
-            //{
-            //    while (enumerator.MoveNext())
-            //        this.OnProjectAdded(enumerator.Current);
-            //}
-            //finally
-            //{
-            //    if (num < 0)
-            //        enumerator.Dispose();
-            //}
+            ProjectId projectId = await this.GetOrLoadProjectAsync(
+                absolutePath, loader, this.LoadMetadataForReferencedProjects, loadedProjects, cancellationToken).ConfigureAwait(false);
 
-            //this.UpdateReferencesAfterAdd();
-            //project = this.CurrentSolution.GetProject(projectId);
+            Dictionary<ProjectId, ProjectInfo>.ValueCollection.Enumerator enumerator = loadedProjects.Values.GetEnumerator();
+            try
+            {
+                while (enumerator.MoveNext())
+                    this.OnProjectAdded(enumerator.Current);
+            }
+            finally
+            {
+                if (num < 0)
+                    enumerator.Dispose();
+            }
+
+            this.UpdateReferencesAfterAdd();
+            project = this.CurrentSolution.GetProject(projectId);
 
         label_15:
             return project;
@@ -711,7 +737,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
                 if (solution == currentSolution)
                     return;
                 Solution newSolution = this.SetCurrentSolution(solution);
-                this.RaiseWorkspaceChangedEventAsync(WorkspaceChangeKind.SolutionChanged, currentSolution, newSolution, (ProjectId)null, (DocumentId)null);
+                this.RaiseWorkspaceChangedEventAsync(WorkspaceChangeKind.SolutionChanged, currentSolution,
+                    newSolution, (ProjectId)null, (DocumentId)null);
             }
         }
 
@@ -731,7 +758,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
                     MetadataReference meta = metadataReference;
                     PortableExecutableReference executableReference = meta as PortableExecutableReference;
                     ProjectId projectId2;
-                    if (executableReference != null && (!string.IsNullOrEmpty(executableReference.Display) 
+                    if (executableReference != null && (!string.IsNullOrEmpty(executableReference.Display)
                         && dictionary.TryGetValue(executableReference.Display, out projectId2)
                         || !string.IsNullOrEmpty(executableReference.FilePath)
                         && dictionary.TryGetValue(executableReference.FilePath, out projectId2)))
@@ -753,7 +780,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
             return solution;
         }
 
-        private async Task<ProjectId> GetOrLoadProjectAsync(string projectFilePath, IProjectFileLoader loader, bool preferMetadata, Dictionary<ProjectId, ProjectInfo> loadedProjects, CancellationToken cancellationToken)
+        private async Task<ProjectId> GetOrLoadProjectAsync(string projectFilePath, IProjectFileLoader loader,
+            bool preferMetadata, Dictionary<ProjectId, ProjectInfo> loadedProjects, CancellationToken cancellationToken)
         {
             ProjectId projectId;
             // ISSUE: explicit reference operation
@@ -766,13 +794,16 @@ namespace Microsoft.CodeAnalysis.MSBuild
             }
             else
             {
-                ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter configuredTaskAwaiter = new ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter();
-                int num;
+                //ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter 
+                //    configuredTaskAwaiter = new ConfiguredTaskAwaitable<ProjectId>.ConfiguredTaskAwaiter();
+                int num = 0;
                 // ISSUE: explicit reference operation
                 // ISSUE: reference to a compiler-generated field
                 _state = num = -1;
             }
-            projectId = await this.LoadProjectAsync(projectFilePath, loader, preferMetadata, loadedProjects, cancellationToken).ConfigureAwait(false);
+
+            projectId = await this.LoadProjectAsync(projectFilePath, loader, preferMetadata,
+                loadedProjects, cancellationToken).ConfigureAwait(false);
         label_4:
             return projectId;
         }
@@ -818,37 +849,37 @@ namespace Microsoft.CodeAnalysis.MSBuild
         label_5:
 
             throw new NotImplementedException();
-            //ProjectFileInfo projectFileInfo = await projectFile.GetProjectFileInfoAsync(cancellationToken).ConfigureAwait(false);
-            //VersionStamp version = string.IsNullOrEmpty(projectFilePath) || !System.IO.File.Exists(projectFilePath) ? VersionStamp.Create() : VersionStamp.Create(System.IO.File.GetLastWriteTimeUtc(projectFilePath));
-            //ImmutableArray<DocumentFileInfo> immutableArray = Roslyn.Utilities.ImmutableArrayExtensions.ToImmutableArrayOrEmpty<DocumentFileInfo>((IEnumerable<DocumentFileInfo>)projectFileInfo.Documents);
-            //this.CheckDocuments((IEnumerable<DocumentFileInfo>)immutableArray, projectFilePath, projectId);
-            //System.Text.Encoding defaultEncoding = MSBuildWorkspace.GetDefaultEncoding(projectFileInfo.CodePage);
-            //List<DocumentInfo> docs = new List<DocumentInfo>();
-            //foreach (DocumentFileInfo documentFileInfo in immutableArray)
-            //{
-            //    string name;
-            //    ImmutableArray<string> folders;
-            //    MSBuildWorkspace.GetDocumentNameAndFolders(documentFileInfo.LogicalPath, out name, out folders);
-            //    docs.Add(DocumentInfo.Create(DocumentId.CreateNewId(projectId, documentFileInfo.FilePath), name, (IEnumerable<string>)folders, projectFile.GetSourceCodeKind(documentFileInfo.FilePath), (TextLoader)new FileTextLoader(documentFileInfo.FilePath, defaultEncoding), documentFileInfo.FilePath, documentFileInfo.IsGenerated));
-            //}
-            //List<DocumentInfo> additonalDocs = new List<DocumentInfo>();
-            //IEnumerator<DocumentFileInfo> enumerator = projectFileInfo.AdditionalDocuments.GetEnumerator();
-            //try
-            //{
-            //    while (enumerator.MoveNext())
-            //    {
-            //        DocumentFileInfo current = enumerator.Current;
-            //        string name;
-            //        ImmutableArray<string> folders;
-            //        MSBuildWorkspace.GetDocumentNameAndFolders(current.LogicalPath, out name, out folders);
-            //        additonalDocs.Add(DocumentInfo.Create(DocumentId.CreateNewId(projectId, current.FilePath), name, (IEnumerable<string>)folders, SourceCodeKind.Regular, (TextLoader)new FileTextLoader(current.FilePath, defaultEncoding), current.FilePath, current.IsGenerated));
-            //    }
-            //}
-            //finally
-            //{
-            //    if (num1 < 0 && enumerator != null)
-            //        enumerator.Dispose();
-            //}
+        //ProjectFileInfo projectFileInfo = await projectFile.GetProjectFileInfoAsync(cancellationToken).ConfigureAwait(false);
+        //VersionStamp version = string.IsNullOrEmpty(projectFilePath) || !System.IO.File.Exists(projectFilePath) ? VersionStamp.Create() : VersionStamp.Create(System.IO.File.GetLastWriteTimeUtc(projectFilePath));
+        //ImmutableArray<DocumentFileInfo> immutableArray = Roslyn.Utilities.ImmutableArrayExtensions.ToImmutableArrayOrEmpty<DocumentFileInfo>((IEnumerable<DocumentFileInfo>)projectFileInfo.Documents);
+        //this.CheckDocuments((IEnumerable<DocumentFileInfo>)immutableArray, projectFilePath, projectId);
+        //System.Text.Encoding defaultEncoding = MSBuildWorkspace.GetDefaultEncoding(projectFileInfo.CodePage);
+        //List<DocumentInfo> docs = new List<DocumentInfo>();
+        //foreach (DocumentFileInfo documentFileInfo in immutableArray)
+        //{
+        //    string name;
+        //    ImmutableArray<string> folders;
+        //    MSBuildWorkspace.GetDocumentNameAndFolders(documentFileInfo.LogicalPath, out name, out folders);
+        //    docs.Add(DocumentInfo.Create(DocumentId.CreateNewId(projectId, documentFileInfo.FilePath), name, (IEnumerable<string>)folders, projectFile.GetSourceCodeKind(documentFileInfo.FilePath), (TextLoader)new FileTextLoader(documentFileInfo.FilePath, defaultEncoding), documentFileInfo.FilePath, documentFileInfo.IsGenerated));
+        //}
+        //List<DocumentInfo> additonalDocs = new List<DocumentInfo>();
+        //IEnumerator<DocumentFileInfo> enumerator = projectFileInfo.AdditionalDocuments.GetEnumerator();
+        //try
+        //{
+        //    while (enumerator.MoveNext())
+        //    {
+        //        DocumentFileInfo current = enumerator.Current;
+        //        string name;
+        //        ImmutableArray<string> folders;
+        //        MSBuildWorkspace.GetDocumentNameAndFolders(current.LogicalPath, out name, out folders);
+        //        additonalDocs.Add(DocumentInfo.Create(DocumentId.CreateNewId(projectId, current.FilePath), name, (IEnumerable<string>)folders, SourceCodeKind.Regular, (TextLoader)new FileTextLoader(current.FilePath, defaultEncoding), current.FilePath, current.IsGenerated));
+        //    }
+        //}
+        //finally
+        //{
+        //    if (num1 < 0 && enumerator != null)
+        //        enumerator.Dispose();
+        //}
 
         label_16:
             throw new NotImplementedException();
@@ -866,7 +897,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
             //}
 
             //loadedProjects.Add(projectId, ProjectInfo.Create(projectId, version, projectName, assemblyName, loader.Language, projectFilePath, outputFilePath, projectFileInfo.CompilationOptions,
-                        //projectFileInfo.ParseOptions, (IEnumerable<DocumentInfo>)docs, (IEnumerable<ProjectReference>)resolvedReferences.ProjectReferences, metadataReferences, (IEnumerable<AnalyzerReference>)
+            //projectFileInfo.ParseOptions, (IEnumerable<DocumentInfo>)docs, (IEnumerable<ProjectReference>)resolvedReferences.ProjectReferences, metadataReferences, (IEnumerable<AnalyzerReference>)
             //    projectFileInfo.AnalyzerReferences, (IEnumerable<DocumentInfo>)additonalDocs, false, (Type)null));
             return projectId;
         }
@@ -886,31 +917,31 @@ namespace Microsoft.CodeAnalysis.MSBuild
         }
 
         private static void GetDocumentNameAndFolders(string logicalPath, out string name, out ImmutableArray<string> folders)
-    {
-      string[] strArray1 = logicalPath.Split(MSBuildWorkspace.s_directorySplitChars, StringSplitOptions.RemoveEmptyEntries);
-      if (strArray1.Length != 0)
-      {
-        folders = strArray1.Length <= 1 ? ImmutableArray.Create<string>() :
-                ImmutableArray.ToImmutableArray<string>(Enumerable.Take<string>((IEnumerable<string>) strArray1, strArray1.Length - 1));
-        
-          // ISSUE: explicit reference operation
-        // ISSUE: variable of a reference type
+        {
+            string[] strArray1 = logicalPath.Split(MSBuildWorkspace.s_directorySplitChars, StringSplitOptions.RemoveEmptyEntries);
+            if (strArray1.Length != 0)
+            {
+                folders = strArray1.Length <= 1 ? ImmutableArray.Create<string>() :
+                        ImmutableArray.ToImmutableArray<string>(Enumerable.Take<string>((IEnumerable<string>)strArray1, strArray1.Length - 1));
 
-        throw new NotImplementedException();
-        //string& local = @name;
-        //string[] strArray2 = strArray1;
-        //int index = strArray2.Length - 1;
-        //string str = strArray2[index];
-        //// ISSUE: explicit reference operation
-        //// ^local = str;
-        //name = str;
-      }
-      else
-      {
-        name = logicalPath;
-        folders = ImmutableArray.Create<string>();
-      }
-    }
+                // ISSUE: explicit reference operation
+                // ISSUE: variable of a reference type
+
+                throw new NotImplementedException();
+                //string& local = @name;
+                //string[] strArray2 = strArray1;
+                //int index = strArray2.Length - 1;
+                //string str = strArray2[index];
+                //// ISSUE: explicit reference operation
+                //// ^local = str;
+                //name = str;
+            }
+            else
+            {
+                name = logicalPath;
+                folders = ImmutableArray.Create<string>();
+            }
+        }
 
         private void CheckDocuments(IEnumerable<DocumentFileInfo> docs, string projectFilePath, ProjectId projectId)
         {
@@ -967,7 +998,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
                                 _state = num = -1;
                                 goto label_17;
                             default:
-                                
+
                                 throw new NotImplementedException();
                                 //while (enumerator.MoveNext())
                                 //{
@@ -1011,28 +1042,28 @@ namespace Microsoft.CodeAnalysis.MSBuild
                     //        goto label_21;
                     label_14:
 
-                    throw new NotImplementedException();
-                        //ProjectId projectId = await this.GetOrLoadProjectAsync(fullPath, loader, preferMetadata, loadedProjects, cancellationToken).ConfigureAwait(false);
-                        //if (this.ProjectAlreadyReferencesProject(loadedProjects, projectId, thisProjectId))
-                        //{
-                        //    configuredTaskAwaitable = this.GetProjectMetadata(fullPath, projectFileReference.Aliases, (IDictionary<string, string>)this._properties, cancellationToken).ConfigureAwait(false);
-                        //}
-                        //else
-                        //{
-                        //    resolvedReferences.ProjectReferences.Add(new ProjectReference(projectId, projectFileReference.Aliases, false));
-                        //    goto default;
-                        //}
+                        throw new NotImplementedException();
+                    //ProjectId projectId = await this.GetOrLoadProjectAsync(fullPath, loader, preferMetadata, loadedProjects, cancellationToken).ConfigureAwait(false);
+                    //if (this.ProjectAlreadyReferencesProject(loadedProjects, projectId, thisProjectId))
+                    //{
+                    //    configuredTaskAwaitable = this.GetProjectMetadata(fullPath, projectFileReference.Aliases, (IDictionary<string, string>)this._properties, cancellationToken).ConfigureAwait(false);
+                    //}
+                    //else
+                    //{
+                    //    resolvedReferences.ProjectReferences.Add(new ProjectReference(projectId, projectFileReference.Aliases, false));
+                    //    goto default;
+                    //}
                     label_17:
 
-                    throw new NotImplementedException();
-                        //MetadataReference metadataReference2 = await configuredTaskAwaitable;
-                        //if (metadataReference2 != null)
-                        //{
-                        //    resolvedReferences.MetadataReferences.Add(metadataReference2);
-                        //    goto default;
-                        //}
-                        //else
-                        //    goto default;
+                        throw new NotImplementedException();
+                    //MetadataReference metadataReference2 = await configuredTaskAwaitable;
+                    //if (metadataReference2 != null)
+                    //{
+                    //    resolvedReferences.MetadataReferences.Add(metadataReference2);
+                    //    goto default;
+                    //}
+                    //else
+                    //    goto default;
                     label_21:
                         resolvedReferences.ProjectReferences.Add(new ProjectReference(this.GetOrCreateProjectId(fullPath), projectFileReference.Aliases, false));
                         fullPath = (string)null;

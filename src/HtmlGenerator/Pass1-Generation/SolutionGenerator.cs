@@ -6,8 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
-// using Microsoft.CodeAnalysis.MSBuild;
+using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.SourceBrowser.Common;
+using System.Threading;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -83,10 +84,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static 
-            ImmutableDictionary<string, string>
-            // global::Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace 
-            CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
+        private static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
         {
             propertiesOpt = propertiesOpt ?? ImmutableDictionary<string, string>.Empty;
 
@@ -95,17 +93,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             propertiesOpt = propertiesOpt.Add("CheckForSystemRuntimeDependency", "true");
             propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "14.0");
 
-            return propertiesOpt;
-
-            //    properties = CreateWorkspace(properties);
-            //    object workspace = null;
-            //    try
-            //    {
-            //        Microsoft.CodeAnalysis.Host.HostServices hostServices = WorkspaceHacks.Pack;
-            //        workspace = MSBuildWorkspace.Create(properties: properties, hostServices: hostServices);
-            //    }
-            //    catch { workspace = MSBuildWorkspace.Create(properties: properties); }
-            //   return workspace;
+            var properties = propertiesOpt;
+            object workspace = null;
+            try
+            {
+                Microsoft.CodeAnalysis.Host.HostServices hostServices = WorkspaceHacks.Pack;
+                workspace = MSBuildWorkspace.Create(properties: properties, hostServices: hostServices);
+            }
+            catch { workspace = MSBuildWorkspace.Create(properties: properties); }
+            return workspace as MSBuildWorkspace;
         }
 
         public Workspace Workspace { get { return workspace; } }
@@ -118,7 +114,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             string outputAssemblyPath)
         {
             //var workspace = CreateWorkspace();
-            
+
             //var projectInfo = CommandLineProject.CreateProjectInfo(
             //    projectName,
             //    language,
@@ -425,54 +421,55 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             try
             {
                 Solution solution = null;
-                //if (solutionFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
-                //{
-                //    properties = AddSolutionProperties(properties, solutionFilePath);
-                //    properties = CreateWorkspace(properties);
-                //    object workspace = null;
-                //    try
-                //    {
-                //        Microsoft.CodeAnalysis.Host.HostServices hostServices = WorkspaceHacks.Pack;
-                //        workspace = MSBuildWorkspace.Create(properties: properties, hostServices: hostServices);
-                //    }
-                //    catch { 
-                //    workspace = MSBuildWorkspace.Create(properties: properties);
-                //}
 
-                //    
-
-                //    if (workspace != null)
-                //    {
-                //        workspace.SkipUnrecognizedProjects = true;
-                //        workspace.WorkspaceFailed += WorkspaceFailed;
-                //        solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
-                //        this.workspace = workspace;
-                //    }
-                //}
-                //else 
-                if (
-                    solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
-                    //||solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
+                if (solutionFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
                 {
-                    //var workspace = CreateWorkspace(properties);
-                    //workspace.WorkspaceFailed += WorkspaceFailed;
-                    //solution = workspace.OpenProjectAsync(solutionFilePath).GetAwaiter().GetResult().Solution;
-                    //this.workspace = workspace;
-                }
-                // TODO: CoreClr .proj solution file (like: https://github.com/dotnet/coreclr/blob/master/src/build.proj)
-
-                else if (
-                    solutionFilePath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
-                    solutionFilePath.EndsWith(".winmd", StringComparison.OrdinalIgnoreCase) ||
-                    solutionFilePath.EndsWith(".netmodule", StringComparison.OrdinalIgnoreCase))
-                {
-                    solution = MetadataAsSource.LoadMetadataAsSourceSolution(solutionFilePath);
-                    if (solution != null)
+                    properties = AddSolutionProperties(properties, solutionFilePath);
+                    MSBuildWorkspace workspace = null;
+                    try
                     {
-                        solution.Workspace.WorkspaceFailed += WorkspaceFailed;
-                        workspace = solution.Workspace;
+                        workspace = CreateWorkspace(properties);
+                    }
+                    catch
+                    {
+                        workspace = MSBuildWorkspace.Create(properties: properties);
+                    }
+
+                    if (workspace != null)
+                    {
+                        workspace.SkipUnrecognizedProjects = true;
+                        workspace.WorkspaceFailed += WorkspaceFailed;
+                        solution = workspace.OpenSolutionAsync(solutionFilePath, CancellationToken.None).GetAwaiter().GetResult();
+                        this.workspace = workspace;
                     }
                 }
+                else
+                    if (
+                        solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+                    //||solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var workspace = CreateWorkspace(properties);
+
+                        // workspace.WorkspaceFailed += WorkspaceFailed;
+                        solution = workspace.OpenProjectAsync(solutionFilePath, CancellationToken.None)
+                            .GetAwaiter().GetResult().Solution;
+
+                        this.workspace = workspace;
+                    }
+                    // TODO: CoreClr .proj solution file (like: https://github.com/dotnet/coreclr/blob/master/src/build.proj)
+
+                    else if (
+                        solutionFilePath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
+                        solutionFilePath.EndsWith(".winmd", StringComparison.OrdinalIgnoreCase) ||
+                        solutionFilePath.EndsWith(".netmodule", StringComparison.OrdinalIgnoreCase))
+                    {
+                        solution = MetadataAsSource.LoadMetadataAsSourceSolution(solutionFilePath);
+                        if (solution != null)
+                        {
+                            solution.Workspace.WorkspaceFailed += WorkspaceFailed;
+                            workspace = solution.Workspace;
+                        }
+                    }
 
                 if (solution == null)
                 {

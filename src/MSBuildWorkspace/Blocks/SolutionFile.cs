@@ -13,7 +13,8 @@ using System.Text;
 
 namespace Microsoft.CodeAnalysis.MSBuild
 {
-    internal sealed class SolutionFile
+    // internal
+    sealed class _SolutionFile
     {
         private readonly IEnumerable<string> _headerLines;
         private readonly string _visualStudioVersionLineOpt;
@@ -45,6 +46,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
             }
         }
 
+        public IEnumerable<ProjectBlock> ProjectsInOrder() { return ProjectBlocks; }
+
         public IEnumerable<ProjectBlock> ProjectBlocks
         {
             get
@@ -61,7 +64,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
             }
         }
 
-        public SolutionFile(IEnumerable<string> headerLines, string visualStudioVersionLineOpt, string minimumVisualStudioVersionLineOpt, IEnumerable<ProjectBlock> projectBlocks, IEnumerable<SectionBlock> globalSectionBlocks)
+        public _SolutionFile(IEnumerable<string> headerLines, string visualStudioVersionLineOpt, 
+            string minimumVisualStudioVersionLineOpt, IEnumerable<ProjectBlock> projectBlocks, IEnumerable<SectionBlock> globalSectionBlocks)
         {
             if (headerLines == null)
                 throw new ArgumentNullException("headerLines");
@@ -91,26 +95,27 @@ namespace Microsoft.CodeAnalysis.MSBuild
             return ((object)stringBuilder).ToString();
         }
 
-        public static SolutionFile Parse(TextReader reader)
+        public static _SolutionFile Parse(TextReader reader)
         {
             List<string> list1 = new List<string>();
-            string nextNonEmptyLine = SolutionFile.GetNextNonEmptyLine(reader);
+            string nextNonEmptyLine = _SolutionFile.GetNextNonEmptyLine(reader);
             if (nextNonEmptyLine == null || !nextNonEmptyLine.StartsWith("Microsoft Visual Studio Solution File", StringComparison.Ordinal))
                 throw new Exception(string.Format("MissingHeaderInSolutionFile", (object)"Microsoft Visual Studio Solution File"));
             list1.Add(nextNonEmptyLine);
             while (reader.Peek() != -1 && Enumerable.Contains<char>((IEnumerable<char>)"#\r\n", (char)reader.Peek()))
                 list1.Add(reader.ReadLine());
+
             string visualStudioVersionLineOpt = (string)null;
             if (reader.Peek() == 86)
             {
-                visualStudioVersionLineOpt = SolutionFile.GetNextNonEmptyLine(reader);
+                visualStudioVersionLineOpt = _SolutionFile.GetNextNonEmptyLine(reader);
                 if (!visualStudioVersionLineOpt.StartsWith("VisualStudioVersion", StringComparison.Ordinal))
                     throw new Exception(string.Format("MissingHeaderInSolutionFile", (object)"VisualStudioVersion"));
             }
             string minimumVisualStudioVersionLineOpt = (string)null;
             if (reader.Peek() == 77)
             {
-                minimumVisualStudioVersionLineOpt = SolutionFile.GetNextNonEmptyLine(reader);
+                minimumVisualStudioVersionLineOpt = _SolutionFile.GetNextNonEmptyLine(reader);
                 if (!minimumVisualStudioVersionLineOpt.StartsWith("MinimumVisualStudioVersion", StringComparison.Ordinal))
                     throw new Exception(string.Format("MissingHeaderInSolutionFile", (object)"MinimumVisualStudioVersion"));
             }
@@ -127,23 +132,24 @@ namespace Microsoft.CodeAnalysis.MSBuild
                         goto label_15;
                 }
             }
-            IEnumerable<SectionBlock> globalSectionBlocks = SolutionFile.ParseGlobal(reader);
+        IEnumerable<SectionBlock> globalSectionBlocks = _SolutionFile.ParseGlobal(reader);
             if (reader.Peek() != -1)
                 throw new Exception("MissingEndOfFileInSolutionFile");
             else
-                return new SolutionFile((IEnumerable<string>)list1, visualStudioVersionLineOpt, minimumVisualStudioVersionLineOpt, (IEnumerable<ProjectBlock>)list2, globalSectionBlocks);
+                return new _SolutionFile((IEnumerable<string>)list1, 
+                    visualStudioVersionLineOpt, minimumVisualStudioVersionLineOpt, (IEnumerable<ProjectBlock>)list2, globalSectionBlocks);
         }
 
         private static IEnumerable<SectionBlock> ParseGlobal(TextReader reader)
         {
             if (reader.Peek() == -1)
                 return Enumerable.Empty<SectionBlock>();
-            if (SolutionFile.GetNextNonEmptyLine(reader) != "Global")
+            if (_SolutionFile.GetNextNonEmptyLine(reader) != "Global")
                 throw new Exception(string.Format("MissingLineInSolutionFile", (object)"Global"));
             List<SectionBlock> list = new List<SectionBlock>();
             while (reader.Peek() != -1 && char.IsWhiteSpace((char)reader.Peek()))
                 list.Add(SectionBlock.Parse(reader));
-            if (SolutionFile.GetNextNonEmptyLine(reader) != "EndGlobal")
+            if (_SolutionFile.GetNextNonEmptyLine(reader) != "EndGlobal")
                 throw new Exception(string.Format("MissingLineInSolutionFile", (object)"EndGlobal"));
             while (reader.Peek() != -1 && Enumerable.Contains<char>((IEnumerable<char>)"\r\n", (char)reader.Peek()))
                 reader.ReadLine();

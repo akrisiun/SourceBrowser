@@ -204,3 +204,4 @@ TestCode/Project3/
 *.zip
 dnx/
 webfolder/content/
+bin/Microsoft.Build.dll

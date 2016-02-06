@@ -37,7 +37,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return result;
         }
 
-        public static readonly SymbolDisplayFormat CSharpFormat =
+        public static readonly SymbolDisplayFormat CSharpFormat;
+        public static readonly SymbolDisplayFormat VisualBasicFormat;
+        public static readonly SymbolDisplayFormat ShortNameFormat;
+
+        static SymbolIdService()
+        {
+            CSharpFormat =
             new SymbolDisplayFormat(
                 globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -57,7 +63,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     SymbolDisplayMiscellaneousOptions.UseAsterisksInMultiDimensionalArrays |
                     SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName);
 
-        public static readonly SymbolDisplayFormat VisualBasicFormat =
+            VisualBasicFormat =
             new SymbolDisplayFormat(
                 globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -80,7 +86,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     SymbolDisplayMiscellaneousOptions.UseAsterisksInMultiDimensionalArrays |
                     SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName);
 
-        public static readonly SymbolDisplayFormat ShortNameFormat =
+            ShortNameFormat =
             new SymbolDisplayFormat(
                 globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
@@ -89,6 +95,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 memberOptions: SymbolDisplayMemberOptions.None,
                 parameterOptions: SymbolDisplayParameterOptions.None,
                 miscellaneousOptions: SymbolDisplayMiscellaneousOptions.None);
+
+            try
+            {
+                getGlyph =
+                    Assembly.Load("Microsoft.CodeAnalysis.Features")
+                        .GetType("Microsoft.CodeAnalysis.Shared.Extensions.ISymbolExtensions2")
+                        .GetMethod("GetGlyph");
+            } catch {}
+        }
+
 
         public static string GetDisplayString(ISymbol symbol)
         {
@@ -129,10 +145,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return symbol.ToDisplayString(ShortNameFormat);
         }
 
-        private static readonly MethodInfo getGlyph =
-            Assembly.Load("Microsoft.CodeAnalysis.Features")
-                .GetType("Microsoft.CodeAnalysis.Shared.Extensions.ISymbolExtensions2")
-                .GetMethod("GetGlyph");
+        private static readonly MethodInfo getGlyph;
 
         // "../../0000000000"
         public static readonly byte[] ZeroId = new byte[] { 46, 46, 47, 46, 46, 47, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48 };
@@ -154,8 +167,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         public static ushort GetGlyphNumber(ISymbol declaredSymbol)
         {
-            var glyph = (Glyph)getGlyph.Invoke(null, new object[] { declaredSymbol });
-            ushort result = (ushort)((ushort)GetStandardGlyphGroup(glyph) + (ushort)GetStandardGlyphItem(glyph));
+            ushort result = 0;
+            if (getGlyph != null)
+            {
+                var glyph = (Glyph)getGlyph.Invoke(null, new object[] { declaredSymbol });
+                result = (ushort)((ushort)GetStandardGlyphGroup(glyph) + (ushort)GetStandardGlyphItem(glyph));
+            }
             return result;
         }
 
