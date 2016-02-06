@@ -50,13 +50,20 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\System.Collections.Immutable.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Reflection" />
+    <Reference Include="System.Runtime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Blocks\Mef.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Blocks\SectionBlock.cs" />
     <Compile Include="Blocks\ProjectBlock.cs" />
     <Compile Include="Blocks\ProjectFile.cs" />

@@ -45,8 +45,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 this.Text = await Document.GetTextAsync();
                 this.Root = await Document.GetSyntaxRootAsync();
                 this.SemanticModel = await Document.GetSemanticModelAsync();
-                this.SemanticFactsService = WorkspaceHacks.GetSemanticFactsService(this.Document);
-                this.SyntaxFactsService = WorkspaceHacks.GetSyntaxFactsService(this.Document);
+                //this.SemanticFactsService = WorkspaceHacks.GetSemanticFactsService(this.Document);
+                //this.SyntaxFactsService = WorkspaceHacks.GetSyntaxFactsService(this.Document);
 
                 var semanticFactsServiceType = SemanticFactsService.GetType();
                 var isWrittenTo = semanticFactsServiceType.GetMethod("IsWrittenTo");

@@ -323,10 +323,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 // and they just take the index from this.projects (see below)
                 //.Where(p => p.ProjectInfoLine != null) 
                 .ToArray();
-            Serialization.WriteProjectMap(
-                outputPath ?? SolutionDestinationFolder,
-                projects.Select(p => Tuple.Create(p.AssemblyId, p.ProjectInfoLine)),
-                projects.ToDictionary(p => p.AssemblyId, p => p.ReferencingAssemblies.Count));
+
+            //Serialization.WriteProjectMap(
+            //    outputPath ?? SolutionDestinationFolder,
+            //    projects.Select(p => Tuple.Create(p.AssemblyId, p.ProjectInfoLine)),
+            //    projects.ToDictionary(p => p.AssemblyId, p => p.ReferencingAssemblies.Count));
         }
 
         public void CreateMasterDeclarationsIndex(string outputPath = null)

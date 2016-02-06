@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ProjectGuid>{57002F26-8D15-4CF7-A53D-61AE8CC5E836}</ProjectGuid>
     <AssemblyName>Microsoft.SourceBrowser.BuildLogParser</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>

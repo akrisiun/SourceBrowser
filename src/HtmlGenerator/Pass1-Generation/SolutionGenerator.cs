@@ -97,7 +97,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             object workspace = null;
             try
             {
-                Microsoft.CodeAnalysis.Host.HostServices hostServices = WorkspaceHacks.Pack;
+                Microsoft.CodeAnalysis.Host.HostServices hostServices = null; // WorkspaceHacks.Pack;
                 workspace = MSBuildWorkspace.Create(properties: properties, hostServices: hostServices);
             }
             catch { workspace = MSBuildWorkspace.Create(properties: properties); }
@@ -331,25 +331,27 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return (l, r) => StringComparer.OrdinalIgnoreCase.Compare(l, r);
             }
 
-            var lines = File
-                .ReadAllLines(file)
-                .Select((assemblyName, index) => new KeyValuePair<string, int>(assemblyName, index + 1))
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            throw new NotImplementedException();
 
-            return (l, r) =>
-            {
-                int index1, index2;
-                lines.TryGetValue(l, out index1);
-                lines.TryGetValue(r, out index2);
-                if (index1 == 0 || index2 == 0)
-                {
-                    return l.CompareTo(r);
-                }
-                else
-                {
-                    return index1 - index2;
-                }
-            };
+            //var lines = File
+            //    .ReadAllLines(file)
+            //    .Select((assemblyName, index) => new KeyValuePair<string, int>(assemblyName, index + 1))
+            //    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            //return (l, r) =>
+            //{
+            //    int index1, index2;
+            //    lines.TryGetValue(l, out index1);
+            //    lines.TryGetValue(r, out index2);
+            //    if (index1 == 0 || index2 == 0)
+            //    {
+            //        return l.CompareTo(r);
+            //    }
+            //    else
+            //    {
+            //        return index1 - index2;
+            //    }
+            //};
         }
 
         private void SetFieldValue(object instance, string fieldName, object value)

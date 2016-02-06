@@ -21,12 +21,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             var symbolIDToListOfLocationsMap = ReadSymbolIDToListOfLocationsMap(declarationMapFile);
 
-            ProjectGenerator.GenerateRedirectFile(
-                this.SolutionFinalizer.SolutionDestinationFolder,
-                this.ProjectDestinationFolder,
-                symbolIDToListOfLocationsMap.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value.Select(t => t.Item1.Replace('\\', '/'))));
+            //ProjectGenerator.GenerateRedirectFile(
+            //    this.SolutionFinalizer.SolutionDestinationFolder,
+            //    this.ProjectDestinationFolder,
+            //    symbolIDToListOfLocationsMap.ToDictionary(
+            //        kvp => kvp.Key,
+            //        kvp => kvp.Value.Select(t => t.Item1.Replace('\\', '/'))));
 
             var locationsToPatch = new Dictionary<string, List<long>>();
             GetLocationsToPatch(referencesFolder, locationsToPatch, symbolIDToListOfLocationsMap);

@@ -37,10 +37,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
                 }
             }
 
-            Microsoft.SourceBrowser.HtmlGenerator.ProjectGenerator.GenerateRedirectFile(
-                @"E:\Solution",
-                @"E:\Solution\Project",
-                list.ToDictionary(kvp => kvp.Key, kvp => (IEnumerable<string>)new List<string> { kvp.Value }));
+            //Microsoft.SourceBrowser.HtmlGenerator.ProjectGenerator.GenerateRedirectFile(
+            //    @"E:\Solution",
+            //    @"E:\Solution\Project",
+            //    list.ToDictionary(kvp => kvp.Key, kvp => (IEnumerable<string>)new List<string> { kvp.Value }));
         }
     }
 }

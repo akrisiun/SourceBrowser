@@ -30,7 +30,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 assemblyFilePath,
                 Path.GetFileNameWithoutExtension(assemblyFilePath));
 
-            return MetadataReference.CreateFromFile(assemblyFilePath, documentation: documentationProvider);
+            return MetadataReference.CreateFromFile(assemblyFilePath, documentation: null); // documentationProvider);
         }
 
         public static Solution LoadMetadataAsSourceSolution(string assemblyFilePath)
@@ -41,7 +41,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     var assemblyName = Path.GetFileNameWithoutExtension(assemblyFilePath);
 
-                    var solution = new AdhocWorkspace(WorkspaceHacks.Pack).CurrentSolution;
+                    var solution = new AdhocWorkspace(null) // WorkspaceHacks.Pack)
+                        .CurrentSolution;
                     var workspace = solution.Workspace;
                     var project = solution.AddProject(assemblyName, assemblyName, LanguageNames.CSharp);
                     var metadataReference = CreateReferenceFromFilePath(assemblyFilePath);
@@ -82,67 +83,68 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         .OfType<INamedTypeSymbol>()
                         .Where(t => t.CanBeReferencedByName);
 
-                    var tempDocument = projectWithReference.AddDocument("temp", SourceText.From(""), null);
-                    var metadataAsSourceService = WorkspaceHacks.GetMetadataAsSourceService(tempDocument);
-                    if (addSourceToAsync == null)
-                    {
-                        addSourceToAsync = ReflectAddSourceToAsync(metadataAsSourceService);
-                    }
+                    throw new NotImplementedException();
+                    //var tempDocument = projectWithReference.AddDocument("temp", SourceText.From(""), null);
+                    //var metadataAsSourceService = WorkspaceHacks.GetMetadataAsSourceService(tempDocument);
+                    //if (addSourceToAsync == null)
+                    //{
+                    //    addSourceToAsync = ReflectAddSourceToAsync(metadataAsSourceService);
+                    //}
 
-                    var texts = new Dictionary<INamedTypeSymbol, string>();
+                    //var texts = new Dictionary<INamedTypeSymbol, string>();
 
-                    Parallel.ForEach(
-                        types,
-                        new ParallelOptions
-                        {
-                            MaxDegreeOfParallelism = Environment.ProcessorCount
-                        },
-                        type =>
-                        {
-                            try
-                            {
-                                string text = "";
+                    //Parallel.ForEach(
+                    //    types,
+                    //    new ParallelOptions
+                    //    {
+                    //        MaxDegreeOfParallelism = Environment.ProcessorCount
+                    //    },
+                    //    type =>
+                    //    {
+                    //        try
+                    //        {
+                    //            string text = "";
 
-                                if (Configuration.GenerateMetadataAsSourceBodies)
-                                {
-                                    var document = addSourceToAsync(
-                                                            tempDocument,
-                                                            type,
-                                                            CancellationToken.None).Result;
-                                    text = document.GetTextAsync().Result.ToString();
-                                }
+                    //            if (Configuration.GenerateMetadataAsSourceBodies)
+                    //            {
+                    //                var document = addSourceToAsync(
+                    //                                        tempDocument,
+                    //                                        type,
+                    //                                        CancellationToken.None).Result;
+                    //                text = document.GetTextAsync().Result.ToString();
+                    //            }
 
-                                lock (texts)
-                                {
-                                    texts.Add(type, text);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Exception(ex, "Error when adding a MAS document to texts: " + assemblyFilePath);
-                            }
-                        });
+                    //            lock (texts)
+                    //            {
+                    //                texts.Add(type, text);
+                    //            }
+                    //        }
+                    //        catch (Exception ex)
+                    //        {
+                    //            Log.Exception(ex, "Error when adding a MAS document to texts: " + assemblyFilePath);
+                    //        }
+                    //    });
 
-                    HashSet<string> existingFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    //HashSet<string> existingFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var kvp in texts)
-                    {
-                        var tempProject = AddDocument(project, kvp, existingFileNames);
+                    //foreach (var kvp in texts)
+                    //{
+                    //    var tempProject = AddDocument(project, kvp, existingFileNames);
 
-                        // tempProject can be null if the document was in an unutterable namespace
-                        // we want to skip such documents
-                        if (tempProject != null)
-                        {
-                            project = tempProject;
-                        }
-                    }
+                    //    // tempProject can be null if the document was in an unutterable namespace
+                    //    // we want to skip such documents
+                    //    if (tempProject != null)
+                    //    {
+                    //        project = tempProject;
+                    //    }
+                    //}
 
-                    project = project.AddDocument(
-                        "AssemblyAttributes.cs",
-                        assemblyAttributesFileText).Project;
+                    //project = project.AddDocument(
+                    //    "AssemblyAttributes.cs",
+                    //    assemblyAttributesFileText).Project;
 
-                    solution = project.Solution;
-                    return solution;
+                    //solution = project.Solution;
+                    //return solution;
                 }
             }
             catch (Exception ex)

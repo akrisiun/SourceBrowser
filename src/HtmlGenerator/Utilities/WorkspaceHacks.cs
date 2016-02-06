@@ -5,6 +5,8 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Host.Mef;
+using System.Composition.Hosting;
+using System.Collections.Generic;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -17,21 +19,35 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var assemblyNames = new[]
             {
                 "Microsoft.CodeAnalysis.Workspaces",
-                "Microsoft.CodeAnalysis.Workspaces.Desktop",
+                "MSBuildWorkspace", // Microsoft.CodeAnalysis.Workspaces.Desktop",
                 "Microsoft.CodeAnalysis.CSharp.Workspaces",
-                "Microsoft.CodeAnalysis.VisualBasic.Workspaces",
+                //"Microsoft.CodeAnalysis.VisualBasic.Workspaces",
                 "Microsoft.CodeAnalysis.Features",
                 "Microsoft.CodeAnalysis.CSharp.Features",
-                "Microsoft.CodeAnalysis.VisualBasic.Features"
+                //"Microsoft.CodeAnalysis.VisualBasic.Features"
             };
 
             try
             {
                 var assemblies = assemblyNames
                     .Select(n => Assembly.Load(n));
-                Pack = MefHostServices.Create(assemblies);
+                
+                // Pack = MefHostServices.Create(assemblies);
+                Pack = Create(assemblies);
             }
             catch { } // some no .dll found error is not reason to stop.
+        }
+
+        static MefHostServices Create(IEnumerable<Assembly> assemblies)
+        {
+            if (assemblies == null)
+            {
+                throw new ArgumentNullException("assemblies");
+            }
+
+            var compositionConfiguration = new ContainerConfiguration().WithAssemblies(assemblies);
+            var container = compositionConfiguration.CreateContainer();
+            return new MefHostServices(container);
         }
 
         public static dynamic GetSemanticFactsService(Document document)

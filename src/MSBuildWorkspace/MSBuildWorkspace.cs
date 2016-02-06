@@ -1220,8 +1220,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
 
         private static System.Text.Encoding DetermineEncoding(SourceText text, Document document)
         {
-            if (text.Encoding != null)
-                return text.Encoding;
+            //if (text.Encoding != null)
+            //    return (System.Text.Encoding) (object)text.Encoding;
 
             throw new NotImplementedException();
             //try
@@ -1238,6 +1238,7 @@ namespace Microsoft.CodeAnalysis.MSBuild
             //catch (InvalidDataException ex)
             //{
             //}
+
             return (System.Text.Encoding)null;
         }
 
