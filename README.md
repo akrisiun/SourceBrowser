@@ -5,6 +5,10 @@ Source browser website generator that powers http://referencesource.microsoft.co
 .NET Compiler Platform ("Roslyn") source available: http://source.roslyn.codeplex.com/
 http://source.roslyn.codeplex.com/#Microsoft.Build.Tasks.CodeAnalysis/MSBuildTask.csproj
 
+```
+.nuget\nuget.exe install System.Reflection.Metadata
+ 1.1.0
+
 ## Extend version SourceBrowser
 
 This version includes more .csproj content files:    
