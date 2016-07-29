@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+//using Microsoft.Build.Evaluation;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -64,33 +65,53 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return;
             }
 
-            if (Directory.Exists(SolutionDestinationFolder))
+            bool outputConfirm = Directory.Exists(SolutionDestinationFolder);
+            if (outputConfirm)
             {
-                Log.Write(string.Format("Warning, {0} will be deleted! Are you sure? (y/n)", SolutionDestinationFolder), ConsoleColor.Red);
-                if (Console.ReadKey().KeyChar != 'y')
-                {
-                    if (!File.Exists(Paths.ProcessedAssemblies))
-                    {
-                        Environment.Exit(0);
-                    }
+                var anyFile = Directory.EnumerateFiles(SolutionDestinationFolder, "*.*");
+                var numerator = anyFile.GetEnumerator();
+                outputConfirm = numerator.MoveNext();
+            }
+            if (outputConfirm)
+            {
+                var args = Environment.GetCommandLineArgs();
+                bool ask = !args.Contains<string>("-y");
 
-                    Log.Write("Would you like to continue previously aborted index operation where it left off?", ConsoleColor.Green);
-                    if (Console.ReadKey().KeyChar != 'y')
+                if (Configuration.ProcessAll)
+                {
+                    if (ask)
+                        Log.Write(string.Format("Warning, {0} will be deleted! Are you sure? (y/n)", SolutionDestinationFolder), ConsoleColor.Red);
+
+                    if (ask && Console.ReadKey().KeyChar != 'y')
                     {
-                        Environment.Exit(0);
+                        if (!File.Exists(Paths.ProcessedAssemblies))
+                        {
+                            Environment.Exit(0);
+                        }
+
+                        if (ask)
+                            Log.Write("Would you like to continue previously aborted index operation where it left off?", ConsoleColor.Green);
+                        if (ask && Console.ReadKey().KeyChar != 'y')
+                        {
+                            Environment.Exit(0);
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                     else
                     {
-                        return;
+                        Console.WriteLine();
                     }
-                }
-                else
-                {
-                    Console.WriteLine();
-                }
 
-                Log.Write("Deleting " + SolutionDestinationFolder);
-                Directory.Delete(SolutionDestinationFolder, recursive: true);
+                    Log.Write("Deleting " + SolutionDestinationFolder);
+                    try
+                    {
+                        Directory.Delete(SolutionDestinationFolder, recursive: true);
+                    }
+                    catch { }   // not fatal
+                }
             }
 
             Directory.CreateDirectory(SolutionDestinationFolder);

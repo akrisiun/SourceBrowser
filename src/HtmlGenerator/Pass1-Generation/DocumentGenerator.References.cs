@@ -30,7 +30,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     break;
                 case SymbolKind.Method:
                     IMethodSymbol ms = symbol as IMethodSymbol;
-                    if (ms?.MethodKind == MethodKind.Constructor)
+                    if (ms != null && ms.MethodKind == MethodKind.Constructor)
                     {
                         result = Constants.ClassificationConstructor;
                     }
@@ -133,12 +133,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var kind = ReferenceKind.Reference;
             var node = GetBindableParent(token);
 
-            if (token.RawKind == (int)Microsoft.CodeAnalysis.VisualBasic.SyntaxKind.NewKeyword &&
-                node is Microsoft.CodeAnalysis.VisualBasic.Syntax.ObjectCreationExpressionSyntax)
-            {
-                // don't count New in New Foo() as a reference to the constructor
-                return null;
-            }
+            //if (token.RawKind == (int)Microsoft.CodeAnalysis.VisualBasic.SyntaxKind.NewKeyword &&
+            //    node is Microsoft.CodeAnalysis.VisualBasic.Syntax.ObjectCreationExpressionSyntax)
+            //{
+            //    // don't count New in New Foo() as a reference to the constructor
+            //    return null;
+            //}
 
             if (token.ToString() == "[" &&
                 token.Parent is Microsoft.CodeAnalysis.CSharp.Syntax.BracketedArgumentListSyntax &&
@@ -245,9 +245,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var kind = ReferenceKind.Reference;
 
             var baseList =
-                (SyntaxNode)node.FirstAncestorOrSelf<Microsoft.CodeAnalysis.CSharp.Syntax.BaseListSyntax>() ??
-                (SyntaxNode)node.FirstAncestorOrSelf<Microsoft.CodeAnalysis.VisualBasic.Syntax.InheritsStatementSyntax>() ??
-                node.FirstAncestorOrSelf<Microsoft.CodeAnalysis.VisualBasic.Syntax.ImplementsStatementSyntax>();
+                (SyntaxNode)node.FirstAncestorOrSelf<Microsoft.CodeAnalysis.CSharp.Syntax.BaseListSyntax>();
+                //(SyntaxNode)node.FirstAncestorOrSelf<Microsoft.CodeAnalysis.VisualBasic.Syntax.InheritsStatementSyntax>() ??
+                //node.FirstAncestorOrSelf<Microsoft.CodeAnalysis.VisualBasic.Syntax.ImplementsStatementSyntax>();
             if (baseList != null)
             {
                 var typeDeclaration = baseList.Parent;

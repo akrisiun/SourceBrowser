@@ -38,9 +38,8 @@ namespace Microsoft.SourceBrowser.Common
         {
             if (!Path.IsPathRooted(path))
             {
-                throw new ArgumentException($"Path '{path}' is not absolute.", nameof(path));
+                throw new ArgumentException(String.Format("Path '{%0}' is not absolute.", path)); // nameof(path));
             }
-
             return path;
         }
     }

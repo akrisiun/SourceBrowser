@@ -89,6 +89,21 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     return;
                 }
 
+                if (ex.Message.Contains("from assembly 'Microsoft.DotNet.Tasks, Version="))
+                {
+                    // System.TypeLoadException: Method 'get_BuildEngine' in type 'Microsoft.DotNet.Tasks.KProcess'
+                    // TODO:  DotNet.Tasks dll load (net46)
+                    return;
+                }
+
+                if (ex.Message.Contains("proj' is not associated with a language."))
+                {
+                    // .xproj' because the file extension '.xproj' is not associated with a language.
+                    // TODO 
+                    // .xproj -> .csproj
+                    Hacks.HtmlGenerator.Utilities.WorkSpaceXProj.ParseXProj(null);
+                 }
+
                 if (knownMessages.Contains(ex.Message))
                 {
                     return;

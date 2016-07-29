@@ -5,9 +5,17 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>HtmlGenerator</AssemblyName>
     <StartArguments>..\..\..\TestCode\TestSolution.sln</StartArguments>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>Microsoft.SourceBrowser.HtmlGenerator</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <IntermediateOutputPath>C:\Temp\vs45BE.tmp\Debug\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <IntermediateOutputPath>C:\Temp\vs45BE.tmp\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <Import Project="..\..\Common.props" />
   <ItemGroup>
@@ -56,6 +64,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.DotNet.Files">
+      <HintPath>..\..\packages\Microsoft.DotNet.Files.1.0.0-preview2-003121\lib\net451\Microsoft.DotNet.Files.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.DotNet.InternalAbstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.DotNet.InternalAbstractions.1.0.0\lib\net451\Microsoft.DotNet.InternalAbstractions.dll</HintPath>
       <Private>True</Private>
@@ -248,6 +259,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration.cs" />
+    <Compile Include="Extend\ContentXmlSupport.cs" />
+    <Compile Include="Extend\CSHtmlContentSupport.cs" />
+    <Compile Include="Extend\ExtendGenerator.cs" />
+    <Compile Include="Extend\References.cs" />
+    <Compile Include="Extend\SqlContentSupport.cs" />
     <Compile Include="Pass1-Generation\Classifier.cs" />
     <Compile Include="Pass1-Generation\Classifier.Range.cs" />
     <Compile Include="Pass1-Generation\DocumentGenerator.cs" />
@@ -283,6 +299,7 @@
     <Compile Include="Pass2-Finalization\SolutionFinalizer.cs" />
     <Compile Include="Pass2-Finalization\SolutionFinalizer.SolutionExplorer.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolutionInfo.cs" />
     <Compile Include="Utilities\Constants.cs" />
     <Compile Include="Utilities\DeclaredSymbolInfo.cs" />
@@ -300,6 +317,8 @@
     <Compile Include="Utilities\SymbolKindText.cs" />
     <Compile Include="Utilities\SymbolSorter.cs" />
     <Compile Include="Utilities\WorkspaceHacks.cs" />
+    <Compile Include="Utilities\WorkspaceProjectJson.cs" />
+    <Compile Include="Utilities\WorkSpaceXProj.cs" />
     <Compile Include="Utilities\XmlDocumentationProvider.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -1358,6 +1377,7 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Referencies.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TypeScriptSupport\analyzer.js">

@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.SourceBrowser.Common;
+using Hacks.HtmlGenerator.Utilities;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -18,7 +19,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public string ProjectFilePath { get; private set; }
         public string ServerPath { get; set; }
         public string NetworkShare { get; private set; }
-        private Federation Federation { get; set; }
+        public Federation Federation { get; set; }
         private readonly HashSet<string> typeScriptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
@@ -28,6 +29,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private Solution solution;
         private Workspace workspace;
+
+        public HashSet<string> AdditionProjectFiles { get; protected set; }
+        private ImmutableDictionary<string, string> _properties;
 
         public SolutionGenerator(
             string solutionFilePath,
@@ -40,8 +44,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             this.SolutionDestinationFolder = solutionDestinationFolder;
             this.ProjectFilePath = solutionFilePath;
             this.ServerPath = serverPath;
-            this.solution = CreateSolution(solutionFilePath, properties);
+            _properties = properties;
+
+            AdditionProjectFiles = new HashSet<string>();
             this.Federation = federation ?? new Federation();
+        }
+
+        public SolutionGenerator Create()
+        {
+            this.solution = CreateSolution(this, ProjectFilePath, _properties);
+            Generator = null;
+            if (AdditionProjectFiles.Count > 0)
+            {
+
+            }
+
+            return this;
         }
 
         public SolutionGenerator(
@@ -71,17 +89,69 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 outputAssemblyPath);
         }
 
-        private static MSBuildWorkspace CreateMsBuildWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
+        public IEnumerable<string> GetAssemblyNames()
+        {
+            if (solution != null)
+            {
+                return solution.Projects.Select(p => p.AssemblyName);
+            }
+            else
+            {
+                return Enumerable.Empty<string>();
+            }
+        }
+
+        private static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
         {
             propertiesOpt = propertiesOpt ?? ImmutableDictionary<string, string>.Empty;
 
             // Explicitly add "CheckForSystemRuntimeDependency = true" property to correctly resolve facade references.
             // See https://github.com/dotnet/roslyn/issues/560
             propertiesOpt = propertiesOpt.Add("CheckForSystemRuntimeDependency", "true");
-            propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "14.0");
 
-            return MSBuildWorkspace.Create(properties: propertiesOpt, hostServices: WorkspaceHacks.Pack);
+            if (Environment.GetCommandLineArgs().Contains("-v15.0"))
+                propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "15.0");   // VS 15"
+            else
+                propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "14.0");
+
+            // bool isProjectJson = false;
+            //bool isXProj = false;
+            Exception ex = null;
+            MSBuildWorkspace space = WorkspaceTryGet(out ex, propertiesOpt);
+
+            try
+            {
+                if (space == null)
+                    space = MSBuildWorkspace.Create(properties: propertiesOpt);
+            }
+            catch (Exception ex2) { ex = ex2; }
+
+            //isXProj = ex != null && ex.Message.Contains(".xproj");
+            //if (isXProj)
+            //{
+
+            //}
+
+            return space;
         }
+
+        public static MSBuildWorkspace WorkspaceTryGet(out Exception e, ImmutableDictionary<string, string> propertiesOpt = null)
+        {
+            MSBuildWorkspace space = null;
+            e = null;
+            try
+            {
+                Microsoft.CodeAnalysis.Host.HostServices hostServices = WorkspaceHacks.Pack;
+                space = MSBuildWorkspace.Create(properties: propertiesOpt, hostServices: hostServices);
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+            }
+            return space;
+        }
+
+        public Workspace Workspace { get { return workspace; } }
 
         private static Solution CreateSolution(
             string commandLineArguments,
@@ -90,7 +160,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             string projectSourceFolder,
             string outputAssemblyPath)
         {
-            var workspace = CreateMsBuildWorkspace();
+            var workspace = CreateWorkspace();
             var projectInfo = CommandLineProject.CreateProjectInfo(
                 projectName,
                 language,
@@ -213,8 +283,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     var document = project.AddDocument(
                         newAssemblyAttributesDocumentName,
-                        assemblyAttributesFileText,
-                        filePath: newAssemblyAttributesDocumentName);
+                        assemblyAttributesFileText);
                     solution = document.Project.Solution;
                 }
             }
@@ -243,8 +312,45 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var projectsToProcess = allProjects
                 .Where(p => processedAssemblyList == null || !processedAssemblyList.Contains(p.AssemblyName))
                 .ToArray();
-            var currentBatch = projectsToProcess
+            Project[] currentBatch = projectsToProcess
                 .ToArray();
+
+            GenerateBatch(currentBatch, processedAssemblyList);
+
+            if (Generator != null && Generator.AdditionProjectFiles.Count > 0)
+            {
+                var projectOne = solution.Projects.First();
+
+                HashSet<Project> list = new HashSet<Project>();
+                foreach (string referencePath in Generator.AdditionProjectFiles)
+                {
+                    var meta = MetadataReference.CreateFromFile(referencePath);
+                    Project p = projectOne.AddMetadataReference(meta);
+                    list.Add(p);
+                }
+
+                if (list.Count > 0)
+                {
+                    var secondBatch = list.ToArray();
+                    GenerateBatch(secondBatch, processedAssemblyList);
+                }
+                Generator = null;
+            }
+
+            new TypeScriptSupport().Generate(typeScriptFiles, SolutionDestinationFolder);
+
+            if (currentBatch.Length > 1)
+            {
+                AddProjectsToSolutionExplorer(
+                    solutionExplorerRoot,
+                    currentBatch);
+            }
+
+            return currentBatch.Length < projectsToProcess.Length;
+        }
+
+        void GenerateBatch(Project[] currentBatch, HashSet<string> processedAssemblyList)
+        {
             foreach (var project in currentBatch)
             {
                 try
@@ -265,17 +371,58 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     CurrentAssemblyName = null;
                 }
             }
+        }
 
-            new TypeScriptSupport().Generate(typeScriptFiles, SolutionDestinationFolder);
 
-            if (currentBatch.Length > 1)
+        //public void GenerateResultsHtml(IEnumerable<string> assemblyList)
+        //{
+        //    var sb = new StringBuilder();
+        //    var sorter = GetCustomRootSorter();
+        //    var assemblyNames = assemblyList.ToList();
+        //    assemblyNames.Sort(sorter);
+
+        //    sb.AppendLine(Markup.GetResultsHtmlPrefix());
+
+        //    //foreach (var assemblyName in assemblyNames)
+        //    //{
+        //    //    sb.AppendFormat(@"<a href=""/#{0},namespaces"" target=""_top""><div class=""resultItem""><div class=""resultLine"">{0}</div></div></a>", assemblyName);
+        //    //    sb.AppendLine();
+        //    //}
+
+        //    sb.AppendLine(Markup.GetResultsHtmlSuffix());
+
+        //    File.WriteAllText(Path.Combine(SolutionDestinationFolder, "results.html"), sb.ToString());
+        //}
+
+        public Comparison<string> GetCustomRootSorter()
+        {
+            var file = Path.Combine(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                "AssemblySortOrder.txt");
+            if (!File.Exists(file))
             {
-                AddProjectsToSolutionExplorer(
-                    solutionExplorerRoot,
-                    currentBatch);
+                return (l, r) => StringComparer.OrdinalIgnoreCase.Compare(l, r);
             }
 
-            return currentBatch.Length < projectsToProcess.Length;
+            var lines = File
+                .ReadAllLines(file)
+                .Select((assemblyName, index) => new KeyValuePair<string, int>(assemblyName, index + 1))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            return (l, r) =>
+            {
+                int index1, index2;
+                lines.TryGetValue(l, out index1);
+                lines.TryGetValue(r, out index2);
+                if (index1 == 0 || index2 == 0)
+                {
+                    return l.CompareTo(r);
+                }
+                else
+                {
+                    return index1 - index2;
+                }
+            };
         }
 
         private void SetFieldValue(object instance, string fieldName, object value)
@@ -289,6 +436,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             var externalReferences = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+            //Extend.ExtendGenerator.ExternalReferencesPrepare(this, assemblyList);
+
             foreach (var project in solution.Projects)
             {
                 var references = project.MetadataReferences
@@ -298,6 +447,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     .Where(m => !IsPartOfSolution(Path.GetFileNameWithoutExtension(m.FilePath)))
                     .Where(m => GetExternalAssemblyIndex(Path.GetFileNameWithoutExtension(m.FilePath)) == -1)
                     .Select(m => Path.GetFullPath(m.FilePath));
+
                 foreach (var reference in references)
                 {
                     externalReferences[Path.GetFileNameWithoutExtension(reference)] = reference;
@@ -309,8 +459,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 Log.Write(externalReference.Key, ConsoleColor.Magenta);
                 var solutionGenerator = new SolutionGenerator(
                     externalReference.Value,
-                    Paths.SolutionDestinationFolder);
+                    Paths.SolutionDestinationFolder)
+                    .Create();
+
                 solutionGenerator.Generate(assemblyList);
+
+                Extend.ExtendGenerator.ExternalReferences(solutionGenerator, assemblyList);
             }
         }
 
@@ -336,40 +490,47 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return Federation.GetExternalAssemblyIndex(assemblyName);
         }
 
-        private Solution CreateSolution(string solutionFilePath, ImmutableDictionary<string, string> properties = null)
+        internal static SolutionGenerator Generator { get; set; }
+
+        private static Solution CreateSolution(SolutionGenerator generator, string solutionFilePath, ImmutableDictionary<string, string> properties = null)
         {
+            Generator = generator;
+
             try
             {
                 Solution solution = null;
                 if (solutionFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
                 {
-                    properties = AddSolutionProperties(properties, solutionFilePath);
-                    var workspace = CreateMsBuildWorkspace(properties);
-                    workspace.SkipUnrecognizedProjects = true;
-                    workspace.WorkspaceFailed += WorkspaceFailed;
-                    solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
-                    this.workspace = workspace;
+                    properties = generator.AddSolutionProperties(properties, solutionFilePath);
+                    var workspace = CreateWorkspace(properties);
+                    if (workspace != null)
+                    {
+                        workspace.SkipUnrecognizedProjects = true;
+                        workspace.WorkspaceFailed += WorkspaceFailed;
+                        solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
+                        generator.workspace = workspace;
+                    }
                 }
                 else if (
-                    solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
-                    solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
+                    solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+                //||solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
                 {
-                    var workspace = CreateMsBuildWorkspace(properties);
+                    var workspace = CreateWorkspace(properties);
                     workspace.WorkspaceFailed += WorkspaceFailed;
                     solution = workspace.OpenProjectAsync(solutionFilePath).GetAwaiter().GetResult().Solution;
-                    this.workspace = workspace;
+                    generator.workspace = workspace;
                 }
-                else if (solutionFilePath.EndsWith("global.json"))
+                else if (
+                    solutionFilePath.EndsWith(".xproj", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.workspace = ProjectJsonUtilities.CreateWorkspaceFromGlobal(solutionFilePath);
-                    workspace.WorkspaceFailed += WorkspaceFailed;
-                    solution = workspace.CurrentSolution;
+                    var solutionFilePathCsProj = Path.ChangeExtension(solutionFilePath, "csproj");
+                    if (File.Exists(solutionFilePathCsProj))
+                        solutionFilePath = solutionFilePathCsProj;
                 }
-                else if (solutionFilePath.EndsWith("project.json", StringComparison.OrdinalIgnoreCase))
+                else if (
+                    solutionFilePath.EndsWith("project.json", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.workspace = ProjectJsonUtilities.CreateWorkspace(solutionFilePath);
-                    workspace.WorkspaceFailed += WorkspaceFailed;
-                    solution = workspace.CurrentSolution;
+                    // TODO: CoreClr .proj solution file (like: https://github.com/dotnet/coreclr/blob/master/src/build.proj)
                 }
                 else if (
                     solutionFilePath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
@@ -380,8 +541,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     if (solution != null)
                     {
                         solution.Workspace.WorkspaceFailed += WorkspaceFailed;
-                        workspace = solution.Workspace;
+                        generator.workspace = solution.Workspace;
                     }
+                }
+
+                if (solution == null)
+                {
+                    return null;
                 }
 
                 return solution;
@@ -428,6 +594,17 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 message = message + " Project: " + project.Name;
             }
+
+            if (message.Contains("because the file extension '.xproj' is not associated with a language."))
+            {
+                var csProj = WorkSpaceXProj.ParseXProj(message);
+
+                if (csProj != null && SolutionGenerator.Generator != null)
+                    SolutionGenerator.Generator.AdditionProjectFiles.Add(csProj);
+
+                return;
+            }
+
 
             Log.Exception("Workspace failed: " + message);
             Log.Write(message, ConsoleColor.Red);

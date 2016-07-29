@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+//using Microsoft.Build.Evaluation;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -112,8 +113,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
             else
             {
-                Markup.GenerateResultsHtml(SolutionDestinationFolder);
-            }
+            Markup.GenerateResultsHtml(SolutionDestinationFolder);
+        }
         }
 
         private Comparison<string> GetCustomRootSorter()
@@ -157,7 +158,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private void CreateReferencingProjectLists()
+        public void CreateReferencingProjectLists()
         {
             using (Disposable.Timing("Writing referencing assemblies"))
             {
@@ -298,8 +299,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             Markup.WriteReferencesNotFoundFile(destinationFolder);
 
-            string sourcePath = Assembly.GetEntryAssembly().Location;
-            sourcePath = Path.GetDirectoryName(sourcePath);
+            var entry = Assembly.GetEntryAssembly();
+            if (entry == null)   // if test unit
+                return;
+
+            var sourcePath = Path.GetDirectoryName(entry.Location);
             string basePath = sourcePath;
             sourcePath = Path.Combine(sourcePath, @"Web");
             if (!Directory.Exists(sourcePath))

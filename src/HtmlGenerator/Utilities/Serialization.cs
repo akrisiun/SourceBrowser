@@ -24,6 +24,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 case ".cs":
                     return "196";
+                case ".cshtml":
+                    return "196";
                 case ".vb":
                     return "195";
                 case ".ts":

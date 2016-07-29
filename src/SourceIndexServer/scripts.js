@@ -5,6 +5,7 @@ var anchorSplitChar = ",";
 
 var externalUrlMap = [
     "http://referencesource.microsoft.com/",
+    "aspnetsource.azurewebsites.net",
     "http://source.roslyn.io/"
 ];
 
@@ -16,7 +17,19 @@ var supportedFileExtensions = [
     "vbproj",
     "targets",
     "props",
-    "xaml"
+    "xaml",
+    "cshtml",
+    "aspx",
+    "md",
+    "txt",
+    "xml",
+    "html",
+    "xslt",
+    "sql",
+    "config",
+    "json",
+    "js",
+    "css"
 ];
 
 function redirectLocation(frame, newLocation) {
@@ -24,6 +37,7 @@ function redirectLocation(frame, newLocation) {
         return;
     }
 
+    // alert(newLocation);
     frame.location.replace(newLocation);
 }
 
@@ -55,7 +69,6 @@ function processHash() {
             if (top.location.pathname != "/") {
                 redirectLocation(top, "/");
             }
-
             return;
         }
 
@@ -82,6 +95,12 @@ function processHash() {
         if (startsWithIgnoreCase(anchor, "EmptyArrayAllocation")) {
             redirectLocation(n, "/mscorlib/R/EmptyArrayAllocation.html");
             return;
+        }
+
+        dir = "";
+        if (startsWith(anchor, "dir=")) {
+            dir = anchor.slice(2);
+            anchoranchor.slice(3);
         }
 
         if (startsWith(anchor, "q=")) {

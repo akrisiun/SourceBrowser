@@ -68,7 +68,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     Log.Write(invocation.OutputAssemblyPath, ConsoleColor.Magenta);
                     var solutionGenerator = new SolutionGenerator(
                         invocation.OutputAssemblyPath,
-                        Paths.SolutionDestinationFolder);
+                        Paths.SolutionDestinationFolder)
+                        .Create();
                     solutionGenerator.Generate();
                 }
             }

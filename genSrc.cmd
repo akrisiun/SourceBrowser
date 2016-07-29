@@ -1,0 +1,1 @@
+bin\HtmlGenerator\HtmlGenerator.exe SrcSourceBrowser.sln /out:srcBrowser -debug

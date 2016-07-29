@@ -30,6 +30,10 @@ namespace Microsoft.SourceBrowser.Common
         {
             Write(message, ConsoleColor.Blue);
             WriteToFile(message, MessageLogFilePath);
+
+            if (message.Contains(".xproj"))
+            {
+            }
         }
 
         private static void WriteToFile(string message, string filePath)
@@ -42,7 +46,10 @@ namespace Microsoft.SourceBrowser.Common
                 }
                 catch (Exception ex)
                 {
-                    Write($"Failed to write to ${filePath}: ${ex}.", ConsoleColor.Red);
+                    Console.Write("Failed to write to ", ConsoleColor.Red);
+                    Console.Write(filePath, ConsoleColor.Red);
+                    Console.Write(" ", ConsoleColor.Red);
+                    Console.Write(ex.ToString(), ConsoleColor.Red);
                 }
             }
         }

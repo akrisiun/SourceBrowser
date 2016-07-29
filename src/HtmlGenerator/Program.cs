@@ -2,34 +2,58 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+using Hacks.HtmlGenerator.Utilities;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class Program
     {
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            var projects = new List<string>();
+            var properties = new Dictionary<string, string>();
+            Paths.SolutionDestinationFolder = Path.GetFullPath(@"srcweb"); // default
+
+            #region Parse args
+
             if (args.Length == 0)
             {
                 PrintUsage();
                 return;
             }
 
-            var projects = new List<string>();
-            var properties = new Dictionary<string, string>();
-            var emitAssemblyList = false;
-
-            foreach (var arg in args)
+            for (int idx = 0; idx < args.Length; idx++)
             {
+                string arg = args[idx];
+
+                if (arg.StartsWith("-debug"))
+                {
+                    Console.ReadLine();
+                    if (Debugger.IsAttached)
+                    {
+                        Debugger.Break();
+                    }
+                    continue;
+                }
+
                 if (arg.StartsWith("/out:"))
                 {
                     Paths.SolutionDestinationFolder = Path.GetFullPath(arg.Substring("/out:".Length).StripQuotes());
                     continue;
                 }
+                if (arg.StartsWith("/outdir"))
+                {
+                    idx++;
+                    Paths.SolutionDestinationFolder = Path.GetFullPath(args[idx].StripQuotes());
+                    continue;
+                }
+
+                if (arg.StartsWith("-y", StringComparison.InvariantCulture))
+                    continue;
 
                 if (arg.StartsWith("/in:"))
                 {
@@ -67,27 +91,35 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     }
                 }
 
-                if (arg == "/assemblylist")
+                if (arg.StartsWith("/fast") || arg.StartsWith("/content"))
                 {
-                    emitAssemblyList = true;
+                    // bypass slow .cs files processing
+                    Configuration.ProcessAll = false;
                     continue;
                 }
 
-                try
-                {
-                    AddProject(projects, arg);
-                }
-                catch (Exception ex)
-                {
-                    Log.Write("Exception: " + ex.ToString(), ConsoleColor.Red);
-                }
+                AddProjectSafe(projects, arg);
             }
 
             if (projects.Count == 0)
             {
-                PrintUsage();
-                return;
+                ImmutableList<string> solutions = null;
+                try
+                {
+                    solutions =
+                        Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.sln", SearchOption.TopDirectoryOnly)
+                        .ToImmutableList();
+                }
+                catch { }
+                if (solutions == null || solutions.Count != 1)
+                {
+                    PrintUsage();
+                    return;
+                }
+
+                AddProjectSafe(projects, solutions[0]);
             }
+            #endregion
 
             AssertTraceListener.Register();
             AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
@@ -103,10 +135,23 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             // Warning, this will delete and recreate your destination folder
             Paths.PrepareDestinationFolder();
 
-            using (Disposable.Timing("Generating website"))
+            string message = "Generating website" + (!Configuration.ProcessAll ? " /fast" : String.Empty);
+            using (Disposable.Timing(message))
             {
                 IndexSolutions(projects, properties);
-                FinalizeProjects(emitAssemblyList);
+                FinalizeProjects(emitAssemblyList: true);
+            }
+        }
+
+        public static void AddProjectSafe(List<string> projects, string arg)
+        {
+            try
+            {
+                AddProject(projects, arg);
+            }
+            catch (Exception ex)
+            {
+                Log.Write("Exception: " + ex.ToString(), ConsoleColor.Red);
             }
         }
 
@@ -130,8 +175,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return false;
             }
 
+            if (filePath.EndsWith(".xproj", StringComparison.OrdinalIgnoreCase))
+            {
+                WorkSpaceXProj.ParseXProj(filePath);
+                return File.Exists(Path.ChangeExtension(filePath, "csproj"));
+            }
+
+            if (filePath.EndsWith(".project.json", StringComparison.OrdinalIgnoreCase))
+            {
+                WorkspaceProjectJson.ParseJson(filePath);
+                return File.Exists(Path.ChangeExtension(filePath, "csproj"));
+            }
+
             return filePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) ||
                    filePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+                   filePath.EndsWith(".kproj", StringComparison.OrdinalIgnoreCase) ||
+                   filePath.EndsWith(".proj", StringComparison.OrdinalIgnoreCase) ||
                    filePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase) ||
                    filePath.EndsWith("project.json", StringComparison.OrdinalIgnoreCase) ||
                    filePath.EndsWith("global.json");
@@ -148,7 +207,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static readonly Folder<Project> mergedSolutionExplorerRoot = new Folder<Project>();
 
-        private static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties)
+        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -172,10 +231,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         path,
                         Paths.SolutionDestinationFolder,
                         properties: properties.ToImmutableDictionary(),
-                        federation: federation))
+                        federation: federation)
+                        .Create())
                     {
                         solutionGenerator.GlobalAssemblyList = assemblyNames;
                         solutionGenerator.Generate(solutionExplorerRoot: mergedSolutionExplorerRoot);
+
+                        if (Configuration.ProcessReferencies)
+                            Extend.ExtendGenerator.TopReferencedAssemblies(solutionGenerator, federation, mergedSolutionExplorerRoot);
                     }
                 }
 
@@ -183,23 +246,29 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
             }
+
         }
 
-        private static void FinalizeProjects(bool emitAssemblyList)
+        public static void FinalizeProjects(bool emitAssemblyList = true)
         {
             GenerateLooseFilesProject(Constants.MSBuildFiles, Paths.SolutionDestinationFolder);
             GenerateLooseFilesProject(Constants.TypeScriptFiles, Paths.SolutionDestinationFolder);
             using (Disposable.Timing("Finalizing references"))
             {
+                SolutionFinalizer solutionFinalizer = null;
+                bool error = false;
                 try
                 {
-                    var solutionFinalizer = new SolutionFinalizer(Paths.SolutionDestinationFolder);
+                    solutionFinalizer = new SolutionFinalizer(Paths.SolutionDestinationFolder);
                     solutionFinalizer.FinalizeProjects(emitAssemblyList, mergedSolutionExplorerRoot);
                 }
                 catch (Exception ex)
                 {
+                    error = true;
                     Log.Exception(ex, "Failure while finalizing projects");
                 }
+
+                Extend.ExtendGenerator.Finalize(solutionFinalizer, mergedSolutionExplorerRoot, error);
             }
         }
 

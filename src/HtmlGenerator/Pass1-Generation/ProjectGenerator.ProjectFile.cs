@@ -3,14 +3,16 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.SourceBrowser.Common;
+using Microsoft.SourceBrowser.HtmlGenerator.Extend;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
-    partial class ProjectGenerator
+    public partial class ProjectGenerator
     {
         private Project msbuildProject;
+        public Project BuildProject { get { return msbuildProject; } }
 
-        private void GenerateProjectFile()
+        public void GenerateProjectFile()
         {
             var projectExtension = Path.GetExtension(ProjectFilePath);
             if (!File.Exists(ProjectFilePath) ||
@@ -25,33 +27,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             try
             {
                 var title = Path.GetFileName(ProjectFilePath);
-                var destinationFileName = Path.Combine(ProjectDestinationFolder, title) + ".html";
+                projectCollection = new ProjectCollection();
 
-                AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(title), title, 0);
-                if (!ProjectFilePath.EndsWith("project.json"))
+                GenerateMsBuildProject(projectCollection);
+                ExtendGenerator.GenerateConfig(this, msbuildProject); // .config
+
+                if (Configuration.ProcessContent)
                 {
-                    // ProjectCollection caches the environment variables it reads at startup
-                    // and doesn't re-get them later. We need a new project collection to read
-                    // the latest set of environment variables.
-                    projectCollection = new ProjectCollection();
-                    this.msbuildProject = new Project(
-                        ProjectFilePath,
-                        null,
-                        null,
-                        projectCollection,
-                        ProjectLoadSettings.IgnoreMissingImports);
+                    // process content files
+                    GenerateXamlFiles(msbuildProject);  // .xaml
 
-                    var msbuildSupport = new MSBuildSupport(this);
-                    msbuildSupport.Generate(ProjectFilePath, destinationFileName, msbuildProject, true);
+                    GenerateTypeScriptFiles(msbuildProject);   // .ts
 
-                    GenerateXamlFiles(msbuildProject);
-
-                    GenerateTypeScriptFiles(msbuildProject);
-                }
-                else
-                {
-                    var projectJsonSupport = new JsonSupport(this);
-                    projectJsonSupport.Generate(ProjectFilePath, destinationFileName);
+                    ExtendGenerator.GenerateContentFiles(this, msbuildProject); // .md, .cshtml, .aspx, .xml, .xslt, .json, .sql
                 }
 
                 OtherFiles.Add(title);
@@ -68,6 +56,27 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     projectCollection.Dispose();
                 }
             }
+        }
+
+        public void GenerateMsBuildProject(ProjectCollection projectCollection)
+        {
+            var title = Path.GetFileName(ProjectFilePath);
+            var destinationFileName = Path.Combine(ProjectDestinationFolder, title) + ".html";
+
+            AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(title), title, 0);
+
+            // ProjectCollection caches the environment variables it reads at startup
+            // and doesn't re-get them later. We need a new project collection to read
+            // the latest set of environment variables.
+            this.msbuildProject = new Project(
+                ProjectFilePath,
+                null,
+                null,
+                projectCollection,
+                ProjectLoadSettings.IgnoreMissingImports);
+
+            var msbuildSupport = new MSBuildSupport(this);
+            msbuildSupport.Generate(ProjectFilePath, destinationFileName, msbuildProject, true);
         }
 
         private void GenerateTypeScriptFiles(Project msbuildProject)
@@ -105,7 +114,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private void GenerateXamlFile(string xamlFile)
+        public void GenerateXamlFile(string xamlFile)
         {
             var projectSourceFolder = Path.GetDirectoryName(ProjectFilePath);
             if (!Path.IsPathRooted(xamlFile))
@@ -132,5 +141,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             OtherFiles.Add(relativePath);
             AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(relativePath), relativePath, 0);
         }
+
     }
 }
