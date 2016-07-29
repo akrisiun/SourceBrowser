@@ -1344,10 +1344,6 @@
       <Link>Web\favicon.ico</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\SourceIndexServer\Global.asax">
-      <Link>Web\Global.asax</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="..\SourceIndexServer\header.html">
       <Link>Web\header.html</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
