@@ -92,6 +92,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
         private static void Match(DeclaredSymbolInfo declaredSymbolInfo, string queryString, bool expected)
         {
             var query = new Query(queryString);
+#if !COREFX
             bool actual =
                 query.Filter(declaredSymbolInfo) &&
                 query.Interpretations.Any(i =>
@@ -99,7 +100,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
                         i.CoreSearchTerm,
                         StringComparison.OrdinalIgnoreCase) &&
                     i.Filter(declaredSymbolInfo));
+
             Assert.AreEqual(expected, actual, queryString);
+#endif
         }
 
         [TestMethod]

@@ -1,1 +1,4 @@
-bin\HtmlGenerator\HtmlGenerator.exe SrcSourceBrowser.sln /out:srcBrowser -debug
+
+bin\HtmlGenerator\HtmlGenerator.exe SourceBrowser.sln /out:srcBrowser -debug -y
+
+@PAUSE

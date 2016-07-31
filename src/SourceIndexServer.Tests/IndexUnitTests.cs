@@ -210,10 +210,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
                 var huffman = Huffman.Create(testData.Select(i => i.Description));
                 index.indexFinishedPopulating = true;
                 index.huffman = huffman;
+#if !COREFX
                 index.symbols = testData.Select(dsi => new IndexEntry(dsi)).ToList();
                 var query = index.Get(queryString);
                 var actualHtml = new ResultsHtmlGenerator(query).Generate(index: index);
                 Assert.AreEqual(expectedHtml, actualHtml);
+#endif
             }
         }
 

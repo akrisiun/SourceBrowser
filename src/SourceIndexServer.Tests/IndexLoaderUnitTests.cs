@@ -95,8 +95,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
                 Name = "SourceNamedTypeSymbol",
                 ProjectFilePath = "Source\\Compilers\\CSharp\\Source\\CSharpCodeAnalysis.csproj"
             };
+#if !COREFX
             Verify(matches, expected);
-
+#endif
             var query = new Query("System.Core");
             index.FindAssemblies(query);
             Assert.AreEqual("System.Core", query.ResultAssemblies.First().AssemblyName);

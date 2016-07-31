@@ -6,15 +6,15 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>67dc0159-7524-4d6d-bf0c-b01db1e527fb</ProjectGuid>
+    <ProjectGuid>f13cd277-e86b-4bc6-9e93-39ed055a46db</ProjectGuid>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\bin\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <OutputPath>..\..\bin\</OutputPath>
+    <AssemblyName>Microsoft.SourceBrowser.Common</AssemblyName>
+    <OutputPath>..\..\bin\Microsoft.SourceBrowser.Common\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>HtmlGenerator</AssemblyName>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>

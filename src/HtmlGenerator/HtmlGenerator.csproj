@@ -19,6 +19,9 @@
   </PropertyGroup>
   <Import Project="..\..\Common.props" />
   <ItemGroup>
+    <Reference Include="Common">
+      <HintPath>..\Common\bin\Debug\net46\Common.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.Build.Tasks.Core, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -64,9 +67,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.DotNet.Files">
-      <HintPath>..\..\packages\Microsoft.DotNet.Files.1.0.0-preview2-003121\lib\net451\Microsoft.DotNet.Files.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.DotNet.InternalAbstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.DotNet.InternalAbstractions.1.0.0\lib\net451\Microsoft.DotNet.InternalAbstractions.dll</HintPath>
       <Private>True</Private>
@@ -322,14 +322,6 @@
     <Compile Include="Utilities\XmlDocumentationProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BuildLogParser\BuildLogParser.csproj">
-      <Project>{57002f26-8d15-4cf7-a53d-61ae8cc5e836}</Project>
-      <Name>BuildLogParser</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{f13cd277-e86b-4bc6-9e93-39ed055a46db}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SourceIndexServer\SourceIndexServer.csproj">
       <Project>{1ae38cc6-18c6-4ab7-8fe3-feeb33329952}</Project>
       <Name>SourceIndexServer</Name>

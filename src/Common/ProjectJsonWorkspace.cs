@@ -16,10 +16,12 @@ using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Files;
 using NuGet.Frameworks;
+using Microsoft.DotNet.ProjectModel.Workspaces;
 
 using RoslynWorkspace = Microsoft.CodeAnalysis.Workspace;
+using Microsoft.DotNet.ProjectModel;
 
-namespace Microsoft.DotNet.ProjectModel.Workspaces
+namespace DotNet.ProjectModel.Workspaces
 {
     public class ProjectJsonWorkspace : RoslynWorkspace
     {
@@ -252,7 +254,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             {
                 keyFile = Path.GetFullPath(Path.Combine(projectDirectory, compilerOptions.KeyFile));
 
-                if (RuntimeEnvironment.OperatingSystemPlatform != InternalAbstractions.Platform.Windows || useOssSigning)
+                if (RuntimeEnvironment.OperatingSystemPlatform != Microsoft.DotNet.InternalAbstractions.Platform.Windows || useOssSigning)
                 {
                     return options.WithCryptoPublicKey(
                         SnkUtils.ExtractPublicKey(File.ReadAllBytes(keyFile)));

@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Content Include="project.json" />
+    <Content Include="TypeScriptSupport\analyzer.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeScriptSupport\lib.d.ts">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
+  <!--<Import Project="..\..\Common.props" />-->
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>303b7c76-5af3-4393-99cc-d83e4da2c4b0</ProjectGuid>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\bin\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <OutputPath>..\..\bin\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>HtmlGenerator</AssemblyName>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <NuGetInput Include="$(MSBuildThisFile)" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Extend\ContentXmlSupport.cs" />
+    <Compile Include="Extend\CSHtmlContentSupport.cs" />
+    <Compile Include="Extend\ExtendGenerator.cs" />
+    <Compile Include="Extend\References.cs" />
+    <Compile Include="Extend\SqlContentSupport.cs" />
+    <Compile Include="Pass1-Generation\Classifier.cs" />
+    <Compile Include="Pass1-Generation\Classifier.Range.cs" />
+    <Compile Include="Pass1-Generation\DocumentGenerator.cs" />
+    <Compile Include="Pass1-Generation\DocumentGenerator.Declarations.cs" />
+    <Compile Include="Pass1-Generation\DocumentGenerator.HighlightReferences.cs" />
+    <Compile Include="Pass1-Generation\DocumentGenerator.Links.cs" />
+    <Compile Include="Pass1-Generation\DocumentGenerator.References.cs" />
+    <Compile Include="Pass1-Generation\Federation.cs" />
+    <Compile Include="Pass1-Generation\GenerateFromBuildLog.cs" />
+    <Compile Include="Pass1-Generation\JsonSupport.cs" />
+    <Compile Include="Pass1-Generation\MetadataAsSource.cs" />
+    <Compile Include="Pass1-Generation\MSBuildSupport.cs" />
+    <Compile Include="Pass1-Generation\ProjectGenerator.cs" />
+    <Compile Include="Pass1-Generation\ProjectGenerator.Declarations.cs" />
+    <Compile Include="Pass1-Generation\ProjectGenerator.MetadataToSourceRedirect.cs" />
+    <Compile Include="Pass1-Generation\ProjectGenerator.ProjectExplorer.cs" />
+    <Compile Include="Pass1-Generation\ProjectGenerator.ProjectFile.cs" />
+    <Compile Include="Pass1-Generation\ProjectGenerator.ProjectInfo.cs" />
+    <Compile Include="Pass1-Generation\ProjectGenerator.References.Pass1.cs" />
+    <Compile Include="Pass1-Generation\SolutionGenerator.cs" />
+    <Compile Include="Pass1-Generation\SolutionGenerator.SolutionExplorer.cs" />
+    <Compile Include="Pass1-Generation\TypeScriptSupport.AnalysisError.cs" />
+    <Compile Include="Pass1-Generation\TypeScriptSupport.AnalyzedFile.cs" />
+    <Compile Include="Pass1-Generation\TypeScriptSupport.ClassifiedRange.cs" />
+    <Compile Include="Pass1-Generation\TypeScriptSupport.cs" />
+    <Compile Include="Pass1-Generation\TypeScriptSupport.Hyperlink.cs" />
+    <Compile Include="Pass1-Generation\XamlSupport.cs" />
+    <Compile Include="Pass1-Generation\XmlSupport.cs" />
+    <Compile Include="Pass2-Finalization\NamespaceExplorer.cs" />
+    <Compile Include="Pass2-Finalization\ProjectFinalizer.cs" />
+    <Compile Include="Pass2-Finalization\ProjectFinalizer.Declarations.cs" />
+    <Compile Include="Pass2-Finalization\ProjectFinalizer.References.cs" />
+    <Compile Include="Pass2-Finalization\SolutionFinalizer.cs" />
+    <Compile Include="Pass2-Finalization\SolutionFinalizer.SolutionExplorer.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="SolutionInfo.cs" />
+    <Compile Include="Utilities\Constants.cs" />
+    <Compile Include="Utilities\DeclaredSymbolInfo.cs" />
+    <Compile Include="Utilities\FirstChanceExceptionHandler.cs" />
+    <Compile Include="Utilities\Folder`1.cs" />
+    <Compile Include="Utilities\Glyph.cs" />
+    <Compile Include="Utilities\HtmlElementInfo.cs" />
+    <Compile Include="Utilities\Markup.cs" />
+    <Compile Include="Utilities\MetadataReading.cs" />
+    <Compile Include="Utilities\MSBuildExpressionParser.cs" />
+    <Compile Include="Utilities\Paths.cs" />
+    <Compile Include="Utilities\Reference.cs" />
+    <Compile Include="Utilities\Serialization.cs" />
+    <Compile Include="Utilities\SymbolIdService.cs" />
+    <Compile Include="Utilities\SymbolKindText.cs" />
+    <Compile Include="Utilities\SymbolSorter.cs" />
+    <Compile Include="Utilities\WorkspaceHacks.cs" />
+    <Compile Include="Utilities\WorkspaceProjectJson.cs" />
+    <Compile Include="Utilities\WorkSpaceXProj.cs" />
+    <Compile Include="Utilities\XmlDocumentationProvider.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Web\content\icons\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildLogParser\BuildLogParser.xproj" />
+    <ProjectReference Include="..\Common\Common.xproj" />
+  </ItemGroup>
+  <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" 
+	      DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(OutDir)\Microsoft.SourceBrowser.$(NuGetVersion).nupkg">
+    <Exec Command="&quot;$(SolutionDir)\.nuget\NuGet.exe&quot; Pack Microsoft.SourceBrowser.nuspec -NoPackageAnalysis -BasePath &quot;$(OutDir.TrimEnd('\'))&quot; -OutputDirectory &quot;$(OutDir.TrimEnd('\'))&quot; -prop currentVersion=$(NuGetVersion)" />
+  </Target>
+  <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.targets" Condition="'$(VSToolsPath)' != ''" />
+</Project>

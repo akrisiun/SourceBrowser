@@ -1,3 +1,7 @@
 {
-  "projects": [ "./src/common"]
+  "projects": [ 
+  "./src/common", 
+  "./src/BuildLogParser", 
+  "./src/HtmlGenerator", 
+  "src/Microsoft.Language.Xml/src" ]
 }

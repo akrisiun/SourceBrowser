@@ -212,6 +212,5 @@ bin/HtmlGenerator/Microsoft.Build.Engine.dll
 project.lock.json
 *.project.lock.json
 bin/HtmlGenerator/Microsoft.Build.Engine.dll
-src/Microsoft.DotNet.Build.Tasks/
-src/Microsoft.DotNet.VersionTools/
-src/BuildTools.sln
+Vendor/
+*.txt

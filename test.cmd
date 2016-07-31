@@ -11,5 +11,6 @@
 @if not exist "%TestWindow%" set TestWindow=C:\Program Files\Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow
 
 "%TestWindow%\vstest.console.exe"  bin\Microsoft.SourceBrowser.HtmlGenerator.Tests\Microsoft.SourceBrowser.HtmlGenerator.Tests.dll
+"%TestWindow%\vstest.console.exe"  bin\Microsoft.SourceBrowser.SourceIndexServer.Tests\Microsoft.SourceBrowser.SourceIndexServer.Tests.dll
 
 @PAUSE

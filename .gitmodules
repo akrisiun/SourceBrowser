@@ -1,9 +1,3 @@
 [submodule "src/Microsoft.Language.Xml"]
 	path = src/Microsoft.Language.Xml
 	url = https://github.com/akrisiun/Microsoft.Language.Xml.git
-[submodule "src/csLibCheck"]
-	path = src/csLibCheck
-	url = https://github.com/akrisiun/csLibCheck.git
-[submodule "src/MSBuildStructuredLog"]
-	path = src/MSBuildStructuredLog
-	url = https://github.com/KirillOsenkov/MSBuildStructuredLog.git

@@ -12,20 +12,24 @@ namespace Microsoft.SourceBrowser.Common
                 throw new ArgumentException("Source directory doesn't exist:" + sourceDirectory);
             }
 
-            sourceDirectory = sourceDirectory.TrimSlash();
+            var sourceDirectoryTrim = sourceDirectory; // .TrimSlash();
+            if (sourceDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                sourceDirectoryTrim = sourceDirectory.Substring(sourceDirectory.Length - 1);
 
             if (string.IsNullOrEmpty(destinationDirectory))
             {
                 throw new ArgumentNullException("destinationDirectory");
             }
 
-            destinationDirectory = destinationDirectory.TrimSlash();
+            var destinationDirectoryTrim = destinationDirectory; //.TrimSlash();
+            if (destinationDirectory.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                destinationDirectory = destinationDirectory.Substring(destinationDirectory.Length - 1);
 
-            var files = Directory.GetFiles(sourceDirectory, "*.*", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(sourceDirectoryTrim, "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
-                var relative = file.Substring(sourceDirectory.Length + 1);
-                var destination = Path.Combine(destinationDirectory, relative);
+                var relative = file.Substring(sourceDirectoryTrim.Length + 1);
+                var destination = Path.Combine(destinationDirectoryTrim, relative);
                 CopyFile(file, destination);
             }
         }

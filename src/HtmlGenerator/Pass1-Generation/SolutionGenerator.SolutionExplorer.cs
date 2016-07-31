@@ -17,10 +17,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             Dictionary<string, IEnumerable<string>> projectToSolutionFolderMap = null;
+
+#if !COREFX
             if (!Configuration.FlattenSolutionExplorer)
             {
                 projectToSolutionFolderMap = GetProjectToSolutionFolderMap(ProjectFilePath);
             }
+#endif
 
             var processedAssemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -68,6 +71,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
+#if !COREFX
         private static Dictionary<string, IEnumerable<string>> GetProjectToSolutionFolderMap(string solutionFilePath)
         {
             var solutionFile = SolutionFile.Parse(solutionFilePath);
@@ -116,5 +120,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             parentFolderChain.Reverse();
             return parentFolderChain;
         }
+#endif
     }
 }

@@ -30,7 +30,8 @@ namespace Microsoft.SourceBrowser.Common
 
         public static RoslynWorkspace CreateWorkspace(string projectFile)
         {
-            return new ProjectJsonWorkspace(GetCompatibleProjectContext(projectFile));
+            //RoslynWorkspace.TryGetWorkspace()
+            return null; // new ProjectJsonWorkspace(GetCompatibleProjectContext(projectFile));
         }
 
         public static IEnumerable<string> GetProjects(string globalJsonPath)
@@ -52,7 +53,8 @@ namespace Microsoft.SourceBrowser.Common
                 var found = new List<string>();
                 foreach (var searchPath in global.ProjectSearchPaths)
                 {
-                    found.AddRange(matcher.GetResultsInFullPath(searchPath));
+                    var path = searchPath.StartsWith("./") ? searchPath.Substring(2) : searchPath;
+                    found.AddRange(matcher.GetResultsInFullPath(path));
                 }
                 return found;
             }
@@ -60,7 +62,7 @@ namespace Microsoft.SourceBrowser.Common
 
         public static RoslynWorkspace CreateWorkspaceFromGlobal(string globalJsonPath)
         {
-            return new ProjectJsonWorkspace(GetProjects(globalJsonPath));
+            return new DotNet.ProjectModel.Workspaces.ProjectJsonWorkspace(GetProjects(globalJsonPath));
         }
     }
 }

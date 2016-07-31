@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>67dc0159-7524-4d6d-bf0c-b01db1e527fb</ProjectGuid>
+    <ProjectGuid>303b7c76-5af3-4393-99cc-d83e4da2c4b0</ProjectGuid>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">..\..\bin\</OutputPath>
   </PropertyGroup>
@@ -14,7 +14,7 @@
     <OutputPath>..\..\bin\</OutputPath>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>HtmlGenerator</AssemblyName>
+    <AssemblyName>BuildLogParser</AssemblyName>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>

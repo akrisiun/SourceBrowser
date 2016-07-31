@@ -15,14 +15,14 @@ namespace Microsoft.SourceBrowser.Common
 
         public static IDisposable Timing(string actionName)
         {
-            Log.Write(actionName, ConsoleColor.DarkGray);
+            //Log.Write(actionName, ConsoleColor.DarkGray);
             return new Disposable(actionName);
         }
 
         public void Dispose()
         {
             var message = actionName + " complete. Took: " + stopwatch.Elapsed;
-            Log.Write(message, ConsoleColor.Green);
+            //Log.Write(message, ConsoleColor.Green);
         }
     }
 }
