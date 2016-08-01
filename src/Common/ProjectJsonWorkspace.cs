@@ -16,12 +16,10 @@ using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.DotNet.ProjectModel.Files;
 using NuGet.Frameworks;
-using Microsoft.DotNet.ProjectModel.Workspaces;
 
 using RoslynWorkspace = Microsoft.CodeAnalysis.Workspace;
-using Microsoft.DotNet.ProjectModel;
 
-namespace DotNet.ProjectModel.Workspaces
+namespace Microsoft.DotNet.ProjectModel.Workspaces
 {
     public class ProjectJsonWorkspace : RoslynWorkspace
     {
@@ -165,8 +163,8 @@ namespace DotNet.ProjectModel.Workspaces
                 folders = Path.GetDirectoryName(file).Replace(solutionDir, "")
                     .Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
             }
-
-            OnDocumentAdded(DocumentInfo.Create(id, file, folders, filePath: file, loader: loader));
+            var title = string.Join("/", folders.Concat(new [] { Path.GetFileName(file) }));
+            OnDocumentAdded(DocumentInfo.Create(id, title, folders, filePath: file, loader: loader));
         }
 
         private MetadataReference GetMetadataReference(string path)
@@ -254,7 +252,7 @@ namespace DotNet.ProjectModel.Workspaces
             {
                 keyFile = Path.GetFullPath(Path.Combine(projectDirectory, compilerOptions.KeyFile));
 
-                if (RuntimeEnvironment.OperatingSystemPlatform != Microsoft.DotNet.InternalAbstractions.Platform.Windows || useOssSigning)
+                if (RuntimeEnvironment.OperatingSystemPlatform != InternalAbstractions.Platform.Windows || useOssSigning)
                 {
                     return options.WithCryptoPublicKey(
                         SnkUtils.ExtractPublicKey(File.ReadAllBytes(keyFile)));

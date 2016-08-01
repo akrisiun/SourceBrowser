@@ -5,23 +5,12 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>HtmlGenerator</AssemblyName>
     <StartArguments>..\..\..\TestCode\TestSolution.sln</StartArguments>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>Microsoft.SourceBrowser.HtmlGenerator</RootNamespace>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <IntermediateOutputPath>C:\Temp\vs45BE.tmp\Debug\</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <IntermediateOutputPath>C:\Temp\vs45BE.tmp\Release\</IntermediateOutputPath>
-  </PropertyGroup>
   <Import Project="..\..\Common.props" />
   <ItemGroup>
-    <Reference Include="Common">
-      <HintPath>..\Common\bin\Debug\net46\Common.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.Build.Tasks.Core, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -299,7 +288,6 @@
     <Compile Include="Pass2-Finalization\SolutionFinalizer.cs" />
     <Compile Include="Pass2-Finalization\SolutionFinalizer.SolutionExplorer.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolutionInfo.cs" />
     <Compile Include="Utilities\Constants.cs" />
     <Compile Include="Utilities\DeclaredSymbolInfo.cs" />
@@ -322,6 +310,14 @@
     <Compile Include="Utilities\XmlDocumentationProvider.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BuildLogParser\BuildLogParser.csproj">
+      <Project>{57002f26-8d15-4cf7-a53d-61ae8cc5e836}</Project>
+      <Name>BuildLogParser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{f13cd277-e86b-4bc6-9e93-39ed055a46db}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SourceIndexServer\SourceIndexServer.csproj">
       <Project>{1ae38cc6-18c6-4ab7-8fe3-feeb33329952}</Project>
       <Name>SourceIndexServer</Name>

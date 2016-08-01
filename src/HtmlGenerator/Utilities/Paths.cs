@@ -141,12 +141,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             if (string.IsNullOrEmpty(filePath))
             {
-                throw new ArgumentNullException(nameof(filePath));
+                throw new ArgumentNullException("filePath");
             }
 
             if (string.IsNullOrEmpty(relativeToPath))
             {
-                throw new ArgumentNullException(nameof(relativeToPath));
+                throw new ArgumentNullException("relativeToPath");
             }
 
             // the file is on a different drive
