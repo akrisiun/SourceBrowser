@@ -30,11 +30,11 @@ namespace Microsoft.SourceBrowser.Common
                 return GetAssemblyNamesFromSolution(projectOrSolutionFilePath);
             }
             else
-            if (projectOrSolutionFilePath.EndsWith("project.json"))
+            if (projectOrSolutionFilePath.EndsWith(ProjectJsonUtilities.projectJson)) // "project.json"))
             {
                 return new[] { GetAssemblyNameFromProjectJson(projectOrSolutionFilePath) };
             }
-            else if (projectOrSolutionFilePath.EndsWith("global.json"))
+            else if (projectOrSolutionFilePath.EndsWith(ProjectJsonUtilities.globalJson)) // "global.json"))
             {
                 return ProjectJsonUtilities.GetProjects(projectOrSolutionFilePath)
                     .Select(GetAssemblyNameFromProjectJson);

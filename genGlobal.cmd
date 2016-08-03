@@ -1,4 +1,4 @@
 
-bin\HtmlGenerator\HtmlGenerator.exe global.json /out:srcBrowser -debug -y
+bin\Debug\HtmlGenerator\HtmlGenerator.exe global.json /outdir srcBrowser -debug
 
 @PAUSE

@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
 using Hacks.HtmlGenerator.Utilities;
+using System.Reflection;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -160,6 +161,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var project = Path.GetFullPath(path);
             if (IsSupportedProject(project))
             {
+                if (project.EndsWith(ProjectJsonUtilities.globalJson))
+                {
+                    // var json = System.IO.File.ReadAllText(project);
+                    var list = ProjectJsonUtilities.GetProjects(project);
+                    foreach (string projectJson in list)
+                        projects.Add(projectJson);
+
+                    return;
+                }
+
                 projects.Add(project);
             }
             else
@@ -181,10 +192,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return File.Exists(Path.ChangeExtension(filePath, "csproj"));
             }
 
-            if (filePath.EndsWith(".project.json", StringComparison.OrdinalIgnoreCase))
+            if (filePath.EndsWith(ProjectJsonUtilities.projectJson // "project.json"))
+                        , StringComparison.OrdinalIgnoreCase))
             {
                 WorkspaceProjectJson.ParseJson(filePath);
                 return File.Exists(Path.ChangeExtension(filePath, "csproj"));
+            }
+            if (filePath.EndsWith(ProjectJsonUtilities.globalJson // "global.json"))
+                        , StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
             }
 
             return filePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) ||
@@ -221,6 +238,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     }
                 }
             }
+
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            Assembly.LoadFile(baseDir + "System.Reflection.Metadata.dll");
+            Assembly.LoadFile(baseDir + "Microsoft.CodeAnalysis.dll");        // , Version=1.3.0.0
+            Assembly.LoadFile(baseDir + "Microsoft.CodeAnalysis.CSharp.dll"); // , Version=1.3.0.0
 
             var federation = new Federation();
             foreach (var path in solutionFilePaths)

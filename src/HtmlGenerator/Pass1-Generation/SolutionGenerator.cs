@@ -14,6 +14,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public partial class SolutionGenerator : IDisposable
     {
+        #region Properties
+
         public string SolutionSourceFolder { get; private set; }
         public string SolutionDestinationFolder { get; private set; }
         public string ProjectFilePath { get; private set; }
@@ -100,6 +102,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return Enumerable.Empty<string>();
             }
         }
+
+        #endregion
+
+        #region Create Solution
 
         private static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
         {
@@ -432,6 +438,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             fieldInfo.SetValue(instance, null);
         }
 
+        #endregion
+
         public void GenerateExternalReferences(HashSet<string> assemblyList)
         {
             var externalReferences = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -468,6 +476,108 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
+#if OLDCODE
+
+        private Solution CreateSolution0(string solutionFilePath, ImmutableDictionary<string, string> properties = null)
+        {
+            try
+            {
+                Solution solution = null;
+                if (solutionFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
+                {
+                    properties = AddSolutionProperties(properties, solutionFilePath);
+                    ////var workspace = CreateMsBuildWorkspace(properties);
+                    //workspace.SkipUnrecognizedProjects = true;
+                    //workspace.WorkspaceFailed += WorkspaceFailed;
+                    //solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
+                    //this.workspace = workspace;
+                }
+                else if (
+                    solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
+                    solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
+                {
+                    //var workspace = CreateMsBuildWorkspace(properties);
+                    //workspace.WorkspaceFailed += WorkspaceFailed;
+                    //solution = workspace.OpenProjectAsync(solutionFilePath).GetAwaiter().GetResult().Solution;
+                    //this.workspace = workspace;
+                }
+                else if (solutionFilePath.EndsWith("global.json")) 
+                {
+                    this.workspace = ProjectJsonUtilities.CreateWorkspaceFromGlobal(solutionFilePath);
+                    workspace.WorkspaceFailed += WorkspaceFailed;
+                    solution = workspace.CurrentSolution;
+                }
+                else if (solutionFilePath.EndsWith("project.json", StringComparison.OrdinalIgnoreCase))
+                {
+                    this.workspace = ProjectJsonUtilities.CreateWorkspace(solutionFilePath);
+                    workspace.WorkspaceFailed += WorkspaceFailed;
+                    solution = workspace.CurrentSolution;
+                }
+                else if (
+                    solutionFilePath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
+                    solutionFilePath.EndsWith(".winmd", StringComparison.OrdinalIgnoreCase) ||
+                    solutionFilePath.EndsWith(".netmodule", StringComparison.OrdinalIgnoreCase))
+                {
+                    solution = MetadataAsSource.LoadMetadataAsSourceSolution(solutionFilePath);
+                    if (solution != null)
+                    {
+                        solution.Workspace.WorkspaceFailed += WorkspaceFailed;
+                        workspace = solution.Workspace;
+                    }
+                }
+
+                return solution;
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex, "Failed to open solution: " + solutionFilePath);
+                return null; 
+            }
+        }
+
+        private ImmutableDictionary<string, string> AddSolutionProperties0(ImmutableDictionary<string, string> properties, string solutionFilePath)
+        {
+            // http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.CurrentVersion.targets,296
+            properties = properties ?? ImmutableDictionary<string, string>.Empty;
+            properties = properties.Add("SolutionName", Path.GetFileNameWithoutExtension(solutionFilePath));
+            properties = properties.Add("SolutionFileName", Path.GetFileName(solutionFilePath));
+            properties = properties.Add("SolutionPath", solutionFilePath);
+            properties = properties.Add("SolutionDir", Path.GetDirectoryName(solutionFilePath));
+            properties = properties.Add("SolutionExt", Path.GetExtension(solutionFilePath));
+            return properties;
+        }
+
+        private static void WorkspaceFailed0(object sender, WorkspaceDiagnosticEventArgs e)
+        {
+            var message = e.Diagnostic.Message;
+            if (message.StartsWith("Could not find file") || message.StartsWith("Could not find a part of the path"))
+            {
+                return;
+            }
+
+            if (message.StartsWith("The imported project "))
+            {
+                return;
+            }
+
+            if (message.Contains("because the file extension '.shproj'"))
+            {
+                return;
+            }
+
+            var project = ((Workspace)sender).CurrentSolution.Projects.FirstOrDefault();
+            if (project != null)
+            {
+                message = message + " Project: " + project.Name;
+
+            }
+
+            Log.Exception("Workspace failed: " + message);
+            Log.Write(message, ConsoleColor.Red);
+        }
+
+#endif
+
         public bool IsPartOfSolution(string assemblyName)
         {
             if (GlobalAssemblyList == null)
@@ -492,7 +602,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         internal static SolutionGenerator Generator { get; set; }
 
-        private static Solution CreateSolution(SolutionGenerator generator, string solutionFilePath, ImmutableDictionary<string, string> properties = null)
+        private static Solution CreateSolution(SolutionGenerator generator,
+                      string solutionFilePath, ImmutableDictionary<string, string> properties = null)
         {
             Generator = generator;
 
@@ -528,9 +639,21 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         solutionFilePath = solutionFilePathCsProj;
                 }
                 else if (
-                    solutionFilePath.EndsWith("project.json", StringComparison.OrdinalIgnoreCase))
+                    solutionFilePath.EndsWith(ProjectJsonUtilities.projectJson // "project.json"))
+                        , StringComparison.OrdinalIgnoreCase))
                 {
-                    // TODO: CoreClr .proj solution file (like: https://github.com/dotnet/coreclr/blob/master/src/build.proj)
+                    var workspace = ProjectJsonUtilities.CreateWorkspace(solutionFilePath);
+                    workspace.WorkspaceFailed += WorkspaceFailed;
+                    solution = workspace.CurrentSolution;
+
+                }
+                else if (
+                    solutionFilePath.EndsWith(ProjectJsonUtilities.globalJson // "global.json"))
+                    , StringComparison.OrdinalIgnoreCase))
+                {
+                    var workspace = ProjectJsonUtilities.CreateWorkspaceFromGlobal(solutionFilePath);
+                    workspace.WorkspaceFailed += WorkspaceFailed;
+                    solution = workspace.CurrentSolution;
                 }
                 else if (
                     solutionFilePath.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
@@ -604,7 +727,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 return;
             }
-
 
             Log.Exception("Workspace failed: " + message);
             Log.Write(message, ConsoleColor.Red);

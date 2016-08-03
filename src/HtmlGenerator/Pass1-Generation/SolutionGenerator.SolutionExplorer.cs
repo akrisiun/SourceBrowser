@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.CodeAnalysis;
 using Folder = Microsoft.SourceBrowser.HtmlGenerator.Folder<Microsoft.CodeAnalysis.Project>;
+using Microsoft.SourceBrowser.Common;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -11,7 +12,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
     {
         public void AddProjectsToSolutionExplorer(Folder root, IEnumerable<Project> projects)
         {
-            if (!ProjectFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) && !ProjectFilePath.EndsWith("global.json"))
+            if (!ProjectFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)
+                && !ProjectFilePath.EndsWith(ProjectJsonUtilities.globalJson)) // "global.json"))
             {
                 return;
             }
