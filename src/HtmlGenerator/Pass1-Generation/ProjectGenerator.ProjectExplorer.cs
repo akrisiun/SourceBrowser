@@ -95,8 +95,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 assemblyNames.Add(projectReference);
             }
 
-            foreach (var metadataReference in Project.MetadataReferences.Select(m => Path.GetFileNameWithoutExtension(m.Display)))
+            foreach (var metadata in Project.MetadataReferences)
             {
+                if (metadata.Display.StartsWith("<"))
+                    continue;   // <in memory
+
+                var metadataReference = Path.GetFileNameWithoutExtension(metadata.Display);
                 assemblyNames.Add(metadataReference);
             }
         }

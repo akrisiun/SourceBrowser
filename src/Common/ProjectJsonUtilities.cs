@@ -31,13 +31,18 @@ namespace Microsoft.SourceBrowser.Common
             }
 
             ProjectContext project = null;
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string baseDir = AssemblyNameExtractor.BaseDir ?? AppDomain.CurrentDomain.BaseDirectory;
+
             HashSet<Assembly> asmList = new HashSet<Assembly>();
-            asmList.Add(Assembly.Load(baseDir + "Microsoft.Extensions.DependencyModel.dll"));       // -> 1.0.0.0
-            // Microsoft.DotNet.InternalAbstractions, Version = 1.0.1.0,  -> 1.0.0.0
-            asmList.Add(Assembly.Load(baseDir + "Microsoft.DotNet.InternalAbstractions.dll"));
-            // System.IO.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-            asmList.Add(Assembly.Load(baseDir + "System.IO.FileSystem.dll"));
+            try
+            {
+                asmList.Add(Assembly.Load(baseDir + "Microsoft.Extensions.DependencyModel.dll"));       // -> 1.0.0.0
+                                                                                                        // Microsoft.DotNet.InternalAbstractions, Version = 1.0.1.0,  -> 1.0.0.0
+                asmList.Add(Assembly.Load(baseDir + "Microsoft.DotNet.InternalAbstractions.dll"));
+                // System.IO.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+                asmList.Add(Assembly.Load(baseDir + "System.IO.FileSystem.dll"));
+            }
+            catch {; }
 
             try
             {

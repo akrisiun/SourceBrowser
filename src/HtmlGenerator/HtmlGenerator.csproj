@@ -5,6 +5,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>HtmlGenerator</AssemblyName>
     <StartArguments>..\..\..\TestCode\TestSolution.sln</StartArguments>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>Microsoft.SourceBrowser.HtmlGenerator</RootNamespace>
@@ -318,9 +319,9 @@
       <Project>{f13cd277-e86b-4bc6-9e93-39ed055a46db}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SourceIndexServer\SourceIndexServer.csproj">
+    <ProjectReference Include="..\SourceIndexServer\SourceIndexServerWeb.csproj">
       <Project>{1ae38cc6-18c6-4ab7-8fe3-feeb33329952}</Project>
-      <Name>SourceIndexServer</Name>
+      <Name>SourceIndexServerWeb</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -1386,5 +1387,12 @@
   </ItemGroup>
   <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(OutDir)\Microsoft.SourceBrowser.$(NuGetVersion).nupkg">
     <Exec Command="&quot;$(SolutionDir)\.nuget\NuGet.exe&quot; Pack Microsoft.SourceBrowser.nuspec -NoPackageAnalysis -BasePath &quot;$(OutDir.TrimEnd('\'))&quot; -OutputDirectory &quot;$(OutDir.TrimEnd('\'))&quot; -prop currentVersion=$(NuGetVersion)" />
+  </Target>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
 </Project>

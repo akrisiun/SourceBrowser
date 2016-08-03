@@ -5,9 +5,9 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
-using Microsoft.DotNet.ProjectModel.FileSystemGlobbing.Abstractions;
+//using Microsoft.DotNet.ProjectModel;
+//using Microsoft.DotNet.ProjectModel.FileSystemGlobbing;
+//using Microsoft.DotNet.ProjectModel.FileSystemGlobbing.Abstractions;
 
 namespace Microsoft.SourceBrowser.Common
 {
@@ -17,13 +17,16 @@ namespace Microsoft.SourceBrowser.Common
 
         private static readonly Regex assemblyNameRegex = new Regex(@"<(?:Module)?AssemblyName>((\w|\.|\$|\(|\)|-)+)</(?:Module)?AssemblyName>", RegexOptions.Compiled);
         private static readonly Regex rootNamespaceRegex = new Regex(@"<RootNamespace>((\w|\.)+)</RootNamespace>", RegexOptions.Compiled);
+        public static string BaseDir;
 
-        public static IEnumerable<string> GetAssemblyNames(string projectOrSolutionFilePath)
+        public static IEnumerable<string> GetAssemblyNames(string projectOrSolutionFilePath, string baseDir = null)
         {
             if (!File.Exists(projectOrSolutionFilePath))
             {
                 return null;
             }
+
+            BaseDir = baseDir;
 
             if (projectOrSolutionFilePath.EndsWith(".sln"))
             {

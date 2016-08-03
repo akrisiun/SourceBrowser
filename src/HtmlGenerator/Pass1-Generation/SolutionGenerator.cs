@@ -355,7 +355,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return currentBatch.Length < projectsToProcess.Length;
         }
 
-        void GenerateBatch(Project[] currentBatch, HashSet<string> processedAssemblyList)
+        public void GenerateBatch(Project[] currentBatch, HashSet<string> processedAssemblyList)
         {
             foreach (var project in currentBatch)
             {

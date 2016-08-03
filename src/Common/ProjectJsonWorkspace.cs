@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
                 folders = Path.GetDirectoryName(file).Replace(solutionDir, "")
                     .Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
             }
-            var title = string.Join("/", folders.Concat(new [] { Path.GetFileName(file) }));
+            var title = string.Join("/", folders.Concat(new[] { Path.GetFileName(file) }));
             OnDocumentAdded(DocumentInfo.Create(id, title, folders, filePath: file, loader: loader));
         }
 
@@ -174,6 +174,7 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             {
                 using (var stream = File.OpenRead(path))
                 {
+                    // D:\webstack\Mvc\SourceBrowser\packages\System.Reflection.Metadata.1.3.0\lib\portable-net45+win8\System.Reflection.Metadata.dll
                     var moduleMetadata = ModuleMetadata.CreateFromStream(stream, PEStreamOptions.PrefetchMetadata);
                     assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
                     _cache[path] = assemblyMetadata;
@@ -183,9 +184,19 @@ namespace Microsoft.DotNet.ProjectModel.Workspaces
             return assemblyMetadata.GetReference();
         }
 
+
+        [Flags]
+        internal enum _PEStreamOptions
+        {
+            Default = 0,
+            LeaveOpen = 1,
+            PrefetchMetadata = 2,
+            PrefetchEntireImage = 4
+        }
+
         private static CompilationSettings ToCompilationSettings(CommonCompilerOptions compilerOptions,
-                                                                 NuGetFramework targetFramework,
-                                                                 string projectDirectory)
+                                                                     NuGetFramework targetFramework,
+                                                                     string projectDirectory)
         {
             var options = GetCompilationOptions(compilerOptions, projectDirectory);
 

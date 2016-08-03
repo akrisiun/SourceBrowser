@@ -27,19 +27,33 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             try
             {
                 var title = Path.GetFileName(ProjectFilePath);
-                projectCollection = new ProjectCollection();
+                var destinationFileName = Path.Combine(ProjectDestinationFolder, title) + ".html";
 
-                GenerateMsBuildProject(projectCollection);
-                ExtendGenerator.GenerateConfig(this, msbuildProject); // .config
-
-                if (Configuration.ProcessContent)
+                AddDeclaredSymbolToRedirectMap(SymbolIDToListOfLocationsMap, SymbolIdService.GetId(title), title, 0);
+                if (!ProjectFilePath.EndsWith("project.json"))
                 {
-                    // process content files
-                    GenerateXamlFiles(msbuildProject);  // .xaml
+                    // ProjectCollection caches the environment variables it reads at startup
+                    // and doesn't re-get them later. We need a new project collection to read
+                    // the latest set of environment variables.
+                    projectCollection = new ProjectCollection();
+                    this.msbuildProject = new Project(
+                        ProjectFilePath,
+                        null,
+                        null,
+                        projectCollection,
+                        ProjectLoadSettings.IgnoreMissingImports);
 
-                    GenerateTypeScriptFiles(msbuildProject);   // .ts
+                    var msbuildSupport = new MSBuildSupport(this);
+                    msbuildSupport.Generate(ProjectFilePath, destinationFileName, msbuildProject, true);
+
+                    GenerateXamlFiles(msbuildProject);
 
                     ExtendGenerator.GenerateContentFiles(this, msbuildProject); // .md, .cshtml, .aspx, .xml, .xslt, .json, .sql
+                }
+                else
+                {
+                    var projectJsonSupport = new JsonSupport(this);
+                    projectJsonSupport.Generate(ProjectFilePath, destinationFileName);
                 }
 
                 OtherFiles.Add(title);

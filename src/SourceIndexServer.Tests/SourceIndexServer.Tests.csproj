@@ -21,17 +21,7 @@
     <OutputPath>$(SolutionDir)\bin\$(AssemblyName)\</OutputPath>
     <DefineConstants>TRACE;DEBUG;COREFX;</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup>
-    <Reference Include="BuildLogParser">
-      <HintPath>..\HtmlGenerator\bin\Debug\net46\BuildLogParser.dll</HintPath>
-    </Reference>
-    <Reference Include="Common">
-      <HintPath>..\HtmlGenerator\bin\Debug\net46\Common.dll</HintPath>
-    </Reference>
-    <Reference Include="HtmlGenerator">
-      <HintPath>..\HtmlGenerator\bin\Debug\net46\HtmlGenerator.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CodeAnalysis, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.CodeAnalysis.Common.1.2.1\lib\net45\Microsoft.CodeAnalysis.dll</HintPath>
       <Private>True</Private>
@@ -102,13 +92,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BuildLogParser\BuildLogParser.csproj">
+      <Project>{57002f26-8d15-4cf7-a53d-61ae8cc5e836}</Project>
+      <Name>BuildLogParser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{f13cd277-e86b-4bc6-9e93-39ed055a46db}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HtmlGenerator\HtmlGenerator.csproj">
+      <Project>{3cb763a5-a0c0-46b0-aef5-020e731253c2}</Project>
+      <Name>HtmlGenerator</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SourceIndexServer\SourceIndexServerWeb.csproj">
       <Project>{1ae38cc6-18c6-4ab7-8fe3-feeb33329952}</Project>
       <Name>SourceIndexServerWeb</Name>

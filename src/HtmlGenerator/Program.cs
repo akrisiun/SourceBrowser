@@ -224,7 +224,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static readonly Folder<Project> mergedSolutionExplorerRoot = new Folder<Project>();
 
-        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties)
+        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, string baseDir = null)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -232,14 +232,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 using (Disposable.Timing("Reading assembly names from " + path))
                 {
-                    foreach (var assemblyName in AssemblyNameExtractor.GetAssemblyNames(path))
+                    foreach (var assemblyName in AssemblyNameExtractor.GetAssemblyNames(path, baseDir))
                     {
                         assemblyNames.Add(assemblyName);
                     }
                 }
             }
 
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            baseDir = baseDir ?? AppDomain.CurrentDomain.BaseDirectory;
             Assembly.LoadFile(baseDir + "System.Reflection.Metadata.dll");
             Assembly.LoadFile(baseDir + "Microsoft.CodeAnalysis.dll");        // , Version=1.3.0.0
             Assembly.LoadFile(baseDir + "Microsoft.CodeAnalysis.CSharp.dll"); // , Version=1.3.0.0
