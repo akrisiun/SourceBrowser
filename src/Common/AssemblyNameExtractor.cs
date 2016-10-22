@@ -121,8 +121,10 @@ namespace Microsoft.SourceBrowser.Common
 
         public static IEnumerable<string> GetAssemblyNamesFromSolution(string solutionFilePath)
         {
-            var solution = SolutionFile.Parse(solutionFilePath);
-            var assemblies = new List<string>(solution.ProjectsInOrder.Count);
+			List<string> assemblies = null;
+            /* TODO
+			var solution = SolutionFile.Parse(solutionFilePath);
+            assemblies = new List<string>(solution.ProjectsInOrder.Count);
             foreach (var project in solution.ProjectsInOrder)
             {
                 if (project.ProjectType == SolutionProjectType.SolutionFolder)
@@ -139,7 +141,7 @@ namespace Microsoft.SourceBrowser.Common
                 {
                 }
             }
-
+*/
             return assemblies;
         }
     }

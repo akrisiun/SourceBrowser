@@ -6,6 +6,9 @@
   </PropertyGroup>
   <Import Project="..\..\Common.props" />
   <ItemGroup>
+    <Reference Include="Common">
+      <HintPath>..\Common\bin\Debug\net46\Common.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -15,12 +18,6 @@
   <ItemGroup>
     <Compile Include="CompilerInvocation.cs" />
     <Compile Include="LogAnalyzer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{f13cd277-e86b-4bc6-9e93-39ed055a46db}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -203,6 +203,7 @@ TestCode/TestSolution/Views/*.html
 TestCode/Project3/
 *.zip
 dnx/
+.vscode/
 webfolder/content/
 srcWeb/
 srcBrowser/
