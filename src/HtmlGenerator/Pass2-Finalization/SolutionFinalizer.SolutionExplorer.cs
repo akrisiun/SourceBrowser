@@ -8,7 +8,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public partial class SolutionFinalizer
     {
-        private void WriteSolutionExplorer(Folder root = null)
+        public void WriteSolutionExplorer(Folder root = null)
         {
             if (root == null)
             {
