@@ -69,6 +69,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     var solutionGenerator = new SolutionGenerator(
                         invocation.OutputAssemblyPath,
                         Paths.SolutionDestinationFolder);
+
+                    // solutionGenerator.Create();
                     solutionGenerator.Generate();
                 }
             }

@@ -26,10 +26,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var url = localFileSystemPath + ".html";
             url = url.Replace(":", "");
             url = url.Replace(" ", "");
-
-            // need these because IIS refuses to render static files that have \bin\ in the path
             url = url.Replace(@"\bin\", @"\bin_\");
-            url = url.Replace(@"\Bin\", @"\Bin_\");
             if (url.StartsWith(@"\\"))
             {
                 url = url.Substring(2);
@@ -53,7 +50,17 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             this.project = project;
             this.isRootProject = isRootProject;
-            base.Generate(localFileSystemFilePath, htmlFilePath, SolutionDestinationFolder);
+
+            try
+            {
+                base.Generate(localFileSystemFilePath, htmlFilePath, SolutionDestinationFolder);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Language.Xml error {ex.Message}");
+                // System.IO.FileLoadException: 'Could not load file or assembly 'Microsoft.Language.Xml, Version
+                // this is not fatal error, no reason to stop here.
+            }
         }
 
         protected override string GetAssemblyName()
@@ -78,6 +85,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return result;
         }
+
+        #region Process routines
 
         protected override string ProcessRange(ClassifiedRange range, string text)
         {
@@ -674,6 +683,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             return text;
         }
+
+        #endregion
 
         private string SolutionDestinationFolder
         {

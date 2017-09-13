@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.SourceBrowser.SourceIndexServer.Models;
+using System;
 
 namespace Microsoft.SourceBrowser.SourceIndexServer
 {
@@ -21,19 +22,15 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            RootPath = Path.Combine(Environment.ContentRootPath, "Index");
+            var root = Environment.WebRootPath;
+            var folder = System.Environment.GetEnvironmentVariable("FOLDER") ?? "";
+            if (folder.Length > 0 && Directory.Exists(folder))
+                root = folder;
 
-            var subfolder = Path.Combine(RootPath, "Index");
-            if (File.Exists(Path.Combine(subfolder, "Projects.txt")))
-            {
-                RootPath = subfolder;
-            }
+            services.AddSingleton(new Index(root));
 
-            services.AddSingleton(new Index(RootPath));
             services.AddMvc();
         }
-
-        public string RootPath { get; set; }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -51,13 +48,28 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
                 app.UseDeveloperExceptionPage();
             }
 
+            var baseDir = System.AppContext.BaseDirectory;
+            var root = Index.RootPath;
+
+            //if (env.ContentRootPath != null && Directory.Exists(Path.Combine(env.ContentRootPath, "index")))
+            //    root = Path.Combine(env.ContentRootPath, "index");
+            //else if (Directory.Exists(Path.Combine(root, "wwwroot")))
+            //    root = Path.Combine(root, "wwwroot");
+
+            var feat = app.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>();
+            string addr = feat != null ? System.Linq.Enumerable.FirstOrDefault(feat.Addresses) ?? "" : "-";
+
+            Console.WriteLine($"{env.EnvironmentName} Content: {root}  Host:{addr}");
+
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = new PhysicalFileProvider(RootPath),
+                FileProvider = new PhysicalFileProvider(root)
             });
             app.UseStaticFiles();
+
             app.UseMvc();
+
         }
     }
 }

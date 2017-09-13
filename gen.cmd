@@ -1,4 +1,5 @@
+@REM cd d:\Beta\webstack\Mvc\SourceBrowser\
 
-src\HtmlGenerator\bin\Debug\net46\HtmlGenerator.exe -debug SourceBrowser.sln  /out:Index\
+bin\Debug\net46\HtmlGenerator.exe SourceBrowser.sln  -debug /out:\Beta\webstack\Mvc\SourceBrowser\web\wwwroot\
 
 @PAUSE

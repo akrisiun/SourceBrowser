@@ -4,59 +4,101 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>HtmlGenerator</AssemblyName>
     <TargetFramework>net46</TargetFramework>
-    <RootNamespace>Microsoft.SourceBrowser.HtmlGenerator</RootNamespace>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <!--<TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>-->
+    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
+    <TargetFrameworkProfile />
+    <AssemblyName>HtmlGenerator</AssemblyName>
+    <EnableDefaultCompileItems>True</EnableDefaultCompileItems>
+    <ApplicationIcon />
+    <OutputTypeEx>exe</OutputTypeEx>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <StartupObject>Microsoft.ProgramLoader</StartupObject>
   </PropertyGroup>
-  <PropertyGroup>
-    <NuSpecFile>$(MSBuildProjectDirectory)\Microsoft.SourceBrowser.nuspec</NuSpecFile>
-    <NuGetVersion>1.0.15</NuGetVersion>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <NuGetInput Include="$(MSBuildThisFile)" />
-    <NuGetInput Include="$(NuSpecFile)" />
+    <Compile Remove="TypeScriptSupport\**" />
+    <EmbeddedResource Remove="TypeScriptSupport\**" />
+    <None Remove="TypeScriptSupport\**" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Web\index\AffiliateLinks.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TypeScriptSupport\analyzer.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TypeScriptSupport\lib.d.ts">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <None Remove="HtmlGenerator.csproj.bak" />
+    <None Remove="Microsoft.SourceBrowser.nuspec.backup" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ExceptionAnalysis.Diagnostics" Version="1.0.0.39796" />
+    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <!--<PackageReference Include="Microsoft.Composition" Version="1.0.31" /> -->
+    <PackageReference Include="System.Runtime" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" /> 
+    <!--4.1" />-->
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+
+    <!--<PackageReference Include="System.Collections.Immutable" Version="1.3.1" />-->
+    <!--<PackageReference Include="System.Collections.Immutable" Version="1.2.2" />-->
+    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
+    
+    <Reference Include="Microsoft.CodeAnalysis">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CodeAnalysis\Microsoft.CodeAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpCodeAnalysis\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp.Features">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpFeatures\Microsoft.CodeAnalysis.CSharp.Features.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp.Workspaces">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpWorkspace\Microsoft.CodeAnalysis.CSharp.Workspaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Features">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\Features\Microsoft.CodeAnalysis.Features.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\Workspaces\Microsoft.CodeAnalysis.Workspaces.dll</HintPath>
+    </Reference>
+
+    <!--C:\Beta\src2\msbuild\bin\net46\Microsoft.Build.dll-->
+    <Reference Include="Microsoft.Build">
+      <HintPath>d:\Beta\src2\msbuild\bin\net46\Microsoft.Build.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.Build.Framework">
+      <HintPath>d:\Beta\src2\msbuild\bin\Debug\x86\Windows_NT\Output\Microsoft.Build.Framework.dll</HintPath>
+      <Private>true</Private>
+  </Reference>
+
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces.Desktop">
+      <HintPath>c:\Beta\src2\roslyn\src\Workspaces\Core\Desktop\Exes\Workspaces.Desktop\net46\Microsoft.CodeAnalysis.Workspaces.Desktop.dll</HintPath>
+    </Reference>
+    <!--roslyn\lib\Microsoft.CodeAnalysis.Workspaces.Desktop.dll-->
+    <!-- System.Composition.Runtime-->
+    <!--<Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+      <HintPath>..\..\lib\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>-->
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+	  <!--<PackageReference Include="System.Composition" Version="1.0.31" />-->
+    <PackageReference Include="System.Composition.AttributedModel" Version="1.0.31" />
+    <PackageReference Include="System.Composition.TypedParts" Version="1.0.31" />
+    <PackageReference Include="System.Composition.Convention" Version="1.0.31" />
+                      <!--, //, Version=4.0.1-->
     <PackageReference Include="ManagedEsent" Version="1.9.4" />
-    <PackageReference Include="Microsoft.Build" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.3.0-beta1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="2.3.1" />
-    <PackageReference Include="Microsoft.Language.Xml" Version="1.1.20" />
-    <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense" Version="15.0.26606" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense" Version="15.0.26201" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BuildLogParser\BuildLogParser.csproj" />
-    <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\MEF\MEF.csproj" />
+    <ProjectReference Include="..\Microsoft.Language.Xml\src\Microsoft.Language.Xml\Microsoft.Language.Xml.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Configuration" />
+    <Reference Update="System.IO.Compression.FileSystem">
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
-  <Target Name="PublishWebsite" AfterTargets="CoreBuild" BeforeTargets="BuildNuGet">
-    <Exec Command="dotnet publish &quot;$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\SourceIndexServer\SourceIndexServer.csproj'))&quot; -f netcoreapp1.1 -c Release -o &quot;$([System.IO.Path]::GetFullPath('$(OutDir)\Web'))&quot;" />
-  </Target>
-  <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(OutDir)\Microsoft.SourceBrowser.$(NuGetVersion).nupkg">
-    <Exec Command="&quot;$(SolutionDir)\.nuget\NuGet.exe&quot; Pack Microsoft.SourceBrowser.nuspec -NoPackageAnalysis -BasePath &quot;$(OutDir.TrimEnd('\'))&quot; -OutputDirectory &quot;$(OutDir.TrimEnd('\'))&quot; -prop currentVersion=$(NuGetVersion)" />
-  </Target>
 </Project>

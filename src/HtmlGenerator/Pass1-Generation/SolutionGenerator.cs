@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.SourceBrowser.Common;
+using System.Xml.Linq;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -23,8 +26,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public IEnumerable<string> PluginBlacklist { get; private set; }
         private readonly HashSet<string> typeScriptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         public MEF.PluginAggregator PluginAggregator;
-
-        public static Exception Errors { get; set; }
 
         /// <summary>
         /// List of all assembly names included in the index, from all solutions
@@ -43,20 +44,27 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             IReadOnlyDictionary<string, string> serverPathMappings = null,
             IEnumerable<string> pluginBlacklist = null)
         {
-            Errors = null;
-
             this.SolutionSourceFolder = Path.GetDirectoryName(solutionFilePath);
             this.SolutionDestinationFolder = solutionDestinationFolder;
             this.ProjectFilePath = solutionFilePath;
             this.ServerPath = serverPath;
             ServerPathMappings = serverPathMappings;
+
+            Exception err = null;
+            Microsoft.Build.Evaluation.Project proj = null;
+            try
+            {
+                proj = new Microsoft.Build.Evaluation.Project(solutionFilePath);
+
+            } catch (Exception ex) { err = ex.InnerException ?? ex; }
+
             this.solution = CreateSolution(solutionFilePath, properties);
             this.Federation = federation ?? new Federation();
             this.PluginBlacklist = pluginBlacklist ?? Enumerable.Empty<string>();
 
             if (LoadPlugins)
             {
-                SetupPluginAggregator();
+                // SetupPluginAggregator();
             }
         }
 
@@ -80,16 +88,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             PluginAggregator = new MEF.PluginAggregator(configs, new Utilities.PluginLogger(), PluginBlacklist);
 
-            try
-            {
-                PluginAggregator.Wrap();
+            //FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
 
-                if (PluginAggregator.Any())
-                    FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
-
-                PluginAggregator.Init();
-            }
-            catch (Exception ex) { PluginAggregator.LoadErrors = ex; }
+            //if (PluginAggregator.Plugins != null)
+            //    PluginAggregator.Init();
         }
 
         public SolutionGenerator(
@@ -132,21 +134,46 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        public static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
+        private static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null,
+            XElement csproj = null)
         {
             propertiesOpt = propertiesOpt ?? ImmutableDictionary<string, string>.Empty;
 
             // Explicitly add "CheckForSystemRuntimeDependency = true" property to correctly resolve facade references.
             // See https://github.com/dotnet/roslyn/issues/560
-            propertiesOpt = propertiesOpt.Add("CheckForSystemRuntimeDependency", "true");
-            propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "15.0");
 
-            var w = MSBuildWorkspace.Create(properties: propertiesOpt, hostServices: WorkspaceHacks.Pack);
+            csproj = csproj ?? new XElement("Project");
+            var sdk = csproj.FirstAttribute;
+
+            if (sdk != null && sdk.Value.StartsWith("Microsoft.NET"))       // VS 2017 
+            {
+                propertiesOpt = propertiesOpt.Add("CheckForSystemRuntimeDependency", "true");
+                propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "15.0");
+                // propertiesOpt = propertiesOpt.Add("OutputPath", @"..\bin\");
+                // <OutputPath>..\..\bin\</OutputPath>
+            }
+            else
+            {
+                propertiesOpt = propertiesOpt.Add("CheckForSystemRuntimeDependency", "true");
+                propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "14.0");
+            }
+
+            WorkspaceHacks.Prepare();
+            var hostServices = WorkspaceHacks.Pack;
+            if (hostServices == null)
+            {
+                Console.Write(" WorkspaceHacks failed ");
+                return null;
+            }
+
+            var w = MSBuildWorkspace.Create(properties: propertiesOpt, hostServices: hostServices);
             w.LoadMetadataForReferencedProjects = true;
             return w;
         }
 
-        public static Solution CreateSolution(
+        public static Solution SolutionInstance { get; set; }
+
+        private static Solution CreateSolution(
             string commandLineArguments,
             string projectName,
             string language,
@@ -167,6 +194,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             solution = DisambiguateSameNameLinkedFiles(solution);
 
             solution.Workspace.WorkspaceFailed += WorkspaceFailed;
+
+            SolutionInstance = solution;
 
             return solution;
         }
@@ -298,9 +327,32 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             var allProjects = solution.Projects.ToArray();
+            Solution newSolution = solution;
+
             if (allProjects.Length == 0)
             {
-                Log.Exception("Solution " + this.ProjectFilePath + " has 0 projects - this is suspicious");
+                IList<string> files = new List<string>(solution.Files);
+                string lang = "C#";
+
+                foreach (var file in files)
+                {
+                    var filePath = file;
+                    if (!File.Exists(filePath))
+                        continue;
+
+                    string name = Path.GetFileNameWithoutExtension(filePath);
+                    var info = ProjectInfo.CreateCsProj(name, lang, filePath);
+
+                    newSolution = solution.AddProject(info);
+                    solution = newSolution ?? solution;
+                }
+
+                allProjects = solution.Projects.ToArray();
+
+                if (allProjects.Length == 0)
+                {
+                    Log.Exception("Solution " + this.ProjectFilePath + " has 0 projects - this is suspicious");
+                }
             }
 
             var projectsToProcess = allProjects
@@ -402,24 +454,38 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private Solution CreateSolution(string solutionFilePath, ImmutableDictionary<string, string> properties = null)
         {
+            Solution solution = null;
+
             try
             {
-                Solution solution = null;
                 if (solutionFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
                 {
                     properties = AddSolutionProperties(properties, solutionFilePath);
                     var workspace = CreateWorkspace(properties);
                     workspace.SkipUnrecognizedProjects = true;
                     workspace.WorkspaceFailed += WorkspaceFailed;
-                    solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
+
+                    //  $$$$ OpenSolutionDebug
+                    var OpenSolutionDebug = workspace.GetType().GetMethod("OpenSolutionDebug");
+                    var task = workspace.OpenSolutionDebug(solutionFilePath);
+                    //  workspace.OpenSolutionAsync(solutionFilePath);
+
+                    var waiter = task.GetAwaiter();
+                    var err = task.Exception;
+                    solution = waiter.GetResult();
+
                     this.workspace = workspace;
                 }
                 else if (
                     solutionFilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
                     solutionFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase))
                 {
-                    var workspace = CreateWorkspace(properties);
+                    XElement doc = XDocument.Load(solutionFilePath).FirstNode as XElement;
+
+                    var workspace = CreateWorkspace(properties, doc);
                     workspace.WorkspaceFailed += WorkspaceFailed;
+                    // .nuget\packages\microsoft.codeanalysis.workspaces.common\2.1.0\lib\net46\Microsoft.CodeAnalysis.Workspaces.Desktop.dll
+
                     solution = workspace.OpenProjectAsync(solutionFilePath).GetAwaiter().GetResult().Solution;
                     this.workspace = workspace;
                 }
@@ -440,15 +506,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     return null;
                 }
-
-                return solution;
             }
             catch (Exception ex)
             {
-                Errors = ex.InnerException ?? ex;
                 Log.Exception(ex, "Failed to open solution: " + solutionFilePath);
-                return null;
             }
+
+            return solution;
         }
 
         private ImmutableDictionary<string, string> AddSolutionProperties(ImmutableDictionary<string, string> properties, string solutionFilePath)
@@ -466,6 +530,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         private static void WorkspaceFailed(object sender, WorkspaceDiagnosticEventArgs e)
         {
             var message = e.Diagnostic.Message;
+            var diag = e.Diagnostic;
             if (message.StartsWith("Could not find file") || message.StartsWith("Could not find a part of the path"))
             {
                 return;

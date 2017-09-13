@@ -23,8 +23,7 @@ namespace GitGlyph
         public string Visit(string text, IReadOnlyDictionary<string, string> context)
         {
             var path = System.IO.Path.GetFullPath(context[ContextKeys.FilePath]);
-            var zeroIndexedLineNumber = Int32.Parse(context[ContextKeys.LineNumber]) - 1;
-            var blame = GetBlame(path)?.FirstOrDefault(bh => bh.FinalStartLineNumber == zeroIndexedLineNumber);
+            var blame = GetBlame(path)?.FirstOrDefault(bh => bh.FinalStartLineNumber.ToString() == context[ContextKeys.LineNumber]);
             if (blame != null)
             {
                 var author = blame.FinalCommit.Author;

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HtmlGenerator.Tests": {
+      "commandName": "Executable",
+      "executablePath": "d:\\Beta\\webstack\\Mvc\\SourceBrowser\\bin\\Debug\\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe"
+    }
+  }
+}

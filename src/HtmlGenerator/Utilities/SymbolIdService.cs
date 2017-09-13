@@ -166,10 +166,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 case Glyph.Assembly:
                     return StandardGlyphGroup.GlyphAssembly;
 
-                case Glyph.BasicFile:
-                case Glyph.BasicProject:
-                    return StandardGlyphGroup.GlyphVBProject;
-
                 case Glyph.ClassPublic:
                 case Glyph.ClassProtected:
                 case Glyph.ClassPrivate:
@@ -185,9 +181,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 case Glyph.CSharpFile:
                     return StandardGlyphGroup.GlyphCSharpFile;
 
-                case Glyph.CSharpProject:
-                    return StandardGlyphGroup.GlyphCoolProject;
-
                 case Glyph.DelegatePublic:
                 case Glyph.DelegateProtected:
                 case Glyph.DelegatePrivate:
@@ -200,10 +193,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 case Glyph.EnumInternal:
                     return StandardGlyphGroup.GlyphGroupEnum;
 
-                case Glyph.EnumMemberPublic:
-                case Glyph.EnumMemberProtected:
-                case Glyph.EnumMemberPrivate:
-                case Glyph.EnumMemberInternal:
+                case Glyph.EnumMember:
                     return StandardGlyphGroup.GlyphGroupEnumMember;
 
                 case Glyph.Error:
@@ -296,11 +286,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 case Glyph.TypeParameter:
                     return StandardGlyphGroup.GlyphGroupType;
 
-                case Glyph.Snippet:
-                    return StandardGlyphGroup.GlyphCSharpExpansion;
-
-                case Glyph.CompletionWarning:
-                    return StandardGlyphGroup.GlyphCompletionWarning;
+                case Glyph.Up:
+                case Glyph.Down:
+                case Glyph.Left:
+                case Glyph.Right:
+                case Glyph.Dot:
+                    return StandardGlyphGroup.GlyphArrow;
 
                 default:
                     throw new ArgumentException("glyph");

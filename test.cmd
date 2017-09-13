@@ -1,5 +1,5 @@
 
-if not exist "bin\Debug\net46\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe" (
+if not exist "bin\Debug\net462\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe" (
    dotnet build src\HtmlGenerator.Tests\HtmlGenerator.Tests.csproj
 )
 :next1
@@ -14,7 +14,7 @@ if not exist "bin\Debug\net46\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe" (
 set TestWindow=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow
 @if not exist "%TestWindow%" set TestWindow=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow
 
-"%TestWindow%\vstest.console.exe" bin\Debug\net46\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe
+"%TestWindow%\vstest.console.exe" bin\Debug\net462\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe
 
 dotnet test src\SourceIndexServer.Tests\SourceIndexServer.Tests.csproj
 

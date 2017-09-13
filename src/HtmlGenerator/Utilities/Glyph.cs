@@ -2,8 +2,6 @@
 {
     public enum Glyph
     {
-        None,
-
         Assembly,
 
         BasicFile,
@@ -32,13 +30,9 @@
         EnumPrivate,
         EnumInternal,
 
-        EnumMemberPublic,
-        EnumMemberProtected,
-        EnumMemberPrivate,
-        EnumMemberInternal,
+        EnumMember,
 
         Error,
-        StatusInformation,
 
         EventPublic,
         EventProtected,
@@ -102,11 +96,12 @@
 
         TypeParameter,
 
-        Snippet,
+        Up,
+        Down,
+        Left,
+        Right,
+        Dot,
 
-        CompletionWarning,
-
-        AddReference,
-        NuGet
+        Snippet
     }
 }

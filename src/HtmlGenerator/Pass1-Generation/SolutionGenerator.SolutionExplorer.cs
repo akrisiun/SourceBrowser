@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Construction;
+//using Microsoft.Build.Construction;
 using Microsoft.CodeAnalysis;
 using Folder = Microsoft.SourceBrowser.HtmlGenerator.Folder<Microsoft.CodeAnalysis.Project>;
 
@@ -70,9 +70,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static Dictionary<string, IEnumerable<string>> GetProjectToSolutionFolderMap(string solutionFilePath)
         {
+            var result = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
+
+            /*
             var solutionFile = SolutionFile.Parse(solutionFilePath);
 
-            var result = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var project in solutionFile.ProjectsInOrder)
             {
@@ -86,35 +88,37 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 result.Add(path, parentFolderChain);
             }
+            */
 
             return result;
         }
 
-        private static string GetAbsoluteFilePath(ProjectInSolution project)
-        {
-            var path = project.AbsolutePath;
-            if (string.IsNullOrEmpty(path))
-            {
-                path = project.ProjectName;
-            }
+        //private static string GetAbsoluteFilePath(ProjectInSolution project)
+        //{
+        //    var path = project.AbsolutePath;
+        //    if (string.IsNullOrEmpty(path))
+        //    {
+        //        path = project.ProjectName;
+        //    }
 
-            return path;
-        }
+        //    return path;
+        //}
 
-        private static List<string> GetParentFolderChain(SolutionFile solutionFile, ProjectInSolution project)
-        {
-            var parentFolderChain = new List<string>();
-            var parentGuid = project.ParentProjectGuid;
-            ProjectInSolution parentFolder;
+        //private static List<string> GetParentFolderChain(
+        //    SolutionFile solutionFile,   ProjectInSolution project)
+        //{
+        //    var parentFolderChain = new List<string>();
+        //    var parentGuid = project.ParentProjectGuid;
+        //    ProjectInSolution parentFolder;
 
-            while (!string.IsNullOrEmpty(parentGuid) && solutionFile.ProjectsByGuid.TryGetValue(parentGuid, out parentFolder) && parentFolder != null)
-            {
-                parentFolderChain.Add(parentFolder.ProjectName);
-                parentGuid = parentFolder.ParentProjectGuid;
-            }
+        //    while (!string.IsNullOrEmpty(parentGuid) && solutionFile.ProjectsByGuid.TryGetValue(parentGuid, out parentFolder) && parentFolder != null)
+        //    {
+        //        parentFolderChain.Add(parentFolder.ProjectName);
+        //        parentGuid = parentFolder.ParentProjectGuid;
+        //    }
 
-            parentFolderChain.Reverse();
-            return parentFolderChain;
-        }
+        //    parentFolderChain.Reverse();
+        //    return parentFolderChain;
+        //}
     }
 }

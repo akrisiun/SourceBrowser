@@ -5,12 +5,32 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ManagedEsent" Version="1.9.4" />
-    <PackageReference Include="Microsoft.Build" Version="15.3.409" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.3.0-beta1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.3.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="2.3.1" />
     <PackageReference Include="Microsoft.Composition" Version="1.0.31" />
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
+
+    <Reference Include="Microsoft.CodeAnalysis">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CodeAnalysis\Microsoft.CodeAnalysis.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpCodeAnalysis\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp.Features">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpFeatures\Microsoft.CodeAnalysis.CSharp.Features.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp.Workspaces">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpWorkspace\Microsoft.CodeAnalysis.CSharp.Workspaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Features">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\Features\Microsoft.CodeAnalysis.Features.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\Workspaces\Microsoft.CodeAnalysis.Workspaces.dll</HintPath>
+    </Reference>
+    
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="D:\Beta\src2\roslyn\src\Compilers\Core\Portable\CodeAnalysis.csproj" />
+    <ProjectReference Include="D:\Beta\src2\roslyn\src\Workspaces\Core\Desktop\Workspaces.Desktop.csproj" />
   </ItemGroup>
 </Project>

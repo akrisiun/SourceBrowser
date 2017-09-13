@@ -5,8 +5,7 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Xml;
 using Microsoft.SourceBrowser.Common;
-using ExceptionAnalysis.Diagnostics;
-using System.Linq;
+// using ExceptionAnalysis.Diagnostics;
 using System.Reflection;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
@@ -26,6 +25,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             "Invalid cast from 'System.String' to 'System.Int32[]'.",
             "The given assembly name or codebase was invalid. (Exception from HRESULT: 0x80131047)",
             "Value was either too large or too small for a Decimal.",
+            "Microsoft.CodeAnalysis.VisualBasic.Workspaces"
         };
 
         private static bool isReentrant = false;
@@ -41,6 +41,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             try
             {
                 var ex = e.Exception;
+                #region Known 
+
 
                 if ( ex is EntryPointNotFoundException )
                 {
@@ -111,8 +113,27 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     return;
                 }
+                #endregion
 
                 string exceptionType = ex.GetType().FullName;
+                string stack = ex.StackTrace;
+                if (ex.Message.Contains("Data at the root level is invalid. Line 2, position 1.")
+                    || ex.Message.Contains("Illegal characters in path.")
+                    || ex.Message.Contains("Parameter name: keyFileSearchPaths")
+                    || ex.Message.Contains("Object reference not set to an") && stack.Contains("MSBuild.ProjectFile.Finalize()")
+                    || ex.Message.Contains("MSBuild.ProjectFile.get_FilePath()")
+                    || ex.Message.Contains("The given key was not present in the dictionary")
+                    )
+                {
+                    if (ex is XmlException || ex is ArgumentException || stack.Contains("MSBuild.ProjectFile.Finalize()"))
+                        return;
+                }
+
+                if (ex.Message.Contains("assembly 'E_SQLITE3.DLL'"))
+                {
+                    Log.Exception(ex, ex.Message.Substring(40), isSevere: false);
+                    return;
+                }
 
                 if (exceptionType.Contains("UnsupportedSignatureContent"))
                 {
@@ -130,12 +151,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     return;
                 }
 
-                var trace = new TraceFactory().Manufacture(ex);
+                //var trace = new TraceFactory().Manufacture(ex);
 
-                if ( trace.Select(f => f.Method.Module).Any(IgnoredModules.Contains) )
-                {
-                    return;
-                }
+                //if ( trace.Select(f => f.Method.Module).Any(IgnoredModules.Contains) )
+                //{
+                //    return;
+                //}
 
                 var message = DateTime.Now.ToString() + ": First chance exception";
                 if (SolutionGenerator.CurrentAssemblyName != null)

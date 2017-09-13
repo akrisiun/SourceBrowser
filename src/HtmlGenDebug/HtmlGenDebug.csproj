@@ -1,0 +1,99 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+    <RuntimeIdentifiers>win7</RuntimeIdentifiers>
+    <PlatformTarget>x64</PlatformTarget>
+    
+    <IsPackable>false</IsPackable>
+    <StartupObject>HtmlGenDebug.Load</StartupObject>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <StartupObject />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <!--<PlatformTarget>x86</PlatformTarget>-->
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Errors.txt" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="Microsoft.Build">
+      <HintPath>d:\Beta\src2\msbuild\bin\net46\Microsoft.Build.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.Build.Framework">
+      <HintPath>d:\Beta\src2\msbuild\bin\Debug\x86\Windows_NT\Output\Microsoft.Build.Framework.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.Build.Tasks.Core">
+      <HintPath>d:\Beta\src2\msbuild\bin\Debug\x86\Windows_NT\Output\Microsoft.Build.Tasks.Core.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <!--<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="1.1.8" />-->
+    <!--<PackageReference Include="SQLitePCLRaw.bundle_green" Version="1.1.7" />-->
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.6.0" />
+    <PackageReference Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
+
+    <PackageReference Include="System.Composition.AttributedModel" Version="1.0.31" />
+    <PackageReference Include="System.Composition.TypedParts" Version="1.0.31" />
+    <PackageReference Include="System.Composition.Convention" Version="1.0.31" />
+    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Composition" Version="1.0.31" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+
+    <Reference Include="Microsoft.CodeAnalysis">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CodeAnalysis\Microsoft.CodeAnalysis.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpCodeAnalysis\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp.Features">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpFeatures\Microsoft.CodeAnalysis.CSharp.Features.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    
+    <!--    C:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpWorkspace\Microsoft.CodeAnalysis.CSharp.Workspaces.dll -->
+    <Reference Include="Microsoft.CodeAnalysis.CSharp.Workspaces">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\CSharpWorkspace\Microsoft.CodeAnalysis.CSharp.Workspaces.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Features">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\Features\Microsoft.CodeAnalysis.Features.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <!--    C:\Beta\src2\roslyn\Binaries\Debug\Dlls\Workspaces\Microsoft.CodeAnalysis.Workspaces.dll-->
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces">
+      <HintPath>d:\Beta\src2\roslyn\Binaries\Debug\Dlls\Workspaces\Microsoft.CodeAnalysis.Workspaces.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces.Desktop">
+      <HintPath>d:\Beta\src2\roslyn\src\Workspaces\Core\Desktop\Exes\Workspaces.Desktop\net46\Microsoft.CodeAnalysis.Workspaces.Desktop.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--<ProjectReference Include="..\..\..\roslyn\src\Workspaces\Core\Desktop\Workspaces.Desktop.csproj" />-->
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\HtmlGenerator\HtmlGenerator.csproj" />
+    <ProjectReference Include="..\MEF\MEF.csproj" />
+    <ProjectReference Include="..\Microsoft.Language.Xml\src\Microsoft.Language.Xml\Microsoft.Language.Xml.csproj" />
+  </ItemGroup>
+
+</Project>

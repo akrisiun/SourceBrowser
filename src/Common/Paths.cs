@@ -10,7 +10,11 @@ namespace Microsoft.SourceBrowser.Common
         {
             get
             {
+#if NET46                
                 return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+#else
+                return Directory.GetCurrentDirectory();
+#endif                
             }
         }
 

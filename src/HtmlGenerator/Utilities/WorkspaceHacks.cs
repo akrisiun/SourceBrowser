@@ -5,28 +5,91 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Host.Mef;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public static class WorkspaceHacks
     {
-        public static HostServices Pack { get; set; }
+        public static HostServices Pack { get; private set; }
+        public static HostServices Pack2 { get; private set; }
 
-        static WorkspaceHacks()
+        static WorkspaceHacks() { LoadedList = new List<Assembly>(); }
+
+        public static bool Prepare()
         {
+            if (Pack != null)
+                return true;  // prepared
+
             var assemblyNames = new[]
             {
-                "Microsoft.CodeAnalysis.Workspaces",
-                "Microsoft.CodeAnalysis.Workspaces.Desktop",
-                "Microsoft.CodeAnalysis.CSharp.Workspaces",
-                "Microsoft.CodeAnalysis.VisualBasic.Workspaces",
-                "Microsoft.CodeAnalysis.Features",
-                "Microsoft.CodeAnalysis.CSharp.Features",
-                "Microsoft.CodeAnalysis.VisualBasic.Features"
+                // .dll problems list
+                "System.Collections.Immutable.dll",
+                "System.Composition.TypedParts.dll",        // 1.0.30.0
+                "System.Composition.Hosting.dll",
+                "System.Composition.AttributedModel.dll",
+
+                // https://stackoverflow.com/questions/403731/strong-name-validation-failed
+                // reg ADD "HKLM\Software\Wow6432Node\Microsoft\StrongName\Verification\*,*" /f
+                "Microsoft.Build.Framework.dll",
+                "Microsoft.Build.dll",
+
+                "Microsoft.CodeAnalysis.Workspaces.dll",
+                "Microsoft.CodeAnalysis.Workspaces.Desktop.dll",
+                "Microsoft.CodeAnalysis.CSharp.dll",
+                "Microsoft.CodeAnalysis.CSharp.Workspaces.dll",
+                "Microsoft.CodeAnalysis.Features.dll",
+                "Microsoft.CodeAnalysis.CSharp.Features.dll",
+                
             };
-            var assemblies = assemblyNames
-                .Select(n => Assembly.Load(n));
-            Pack = MefHostServices.Create(assemblies);
+
+            var assemblyNamesA = new[]
+            {
+                "System.IO.FileSystem.dll", //, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' 
+                "System.IO.FileSystem.Primitives.dll"
+            };
+
+            BaseDir = AppDomain.CurrentDomain.BaseDirectory;
+            lastDll = "???";
+            IEnumerable<Assembly> assembliesIO = null;
+            IEnumerable<Assembly> assemblies = null;
+
+            try
+            {
+                assembliesIO = assemblyNamesA
+                    .Select(n => Load(n)).ToList();
+            } catch { }
+
+            try
+            {
+                assemblies = assemblyNames
+                    .Select(n => Load(n)).ToList();
+
+                // default
+                Pack = MefHostServices.Create(MefHostServices.DefaultAssemblies);
+
+                // custom .dll pack
+                Pack2 = MefHostServices.Create(assemblies);
+                Pack = Pack2 ?? Pack;
+            }
+            catch (Exception ex) {
+                Console.Write($"Mef {lastDll} load failed: {ex.Message}");
+            } 
+
+            return Pack != null;
+        }
+
+        static string BaseDir;
+        static string lastDll;
+        static List<Assembly> LoadedList;
+        static Assembly Load(string dll)
+        {
+            lastDll = Path.Combine(BaseDir, dll);
+
+            var asm = Assembly.LoadFrom(lastDll);
+            LoadedList.Add(asm);
+            return asm;
         }
 
         public static dynamic GetSemanticFactsService(Document document)

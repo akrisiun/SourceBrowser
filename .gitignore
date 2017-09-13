@@ -231,3 +231,8 @@ webfolder/HtmlGen/Pass*/
 webfolder/HtmlGen/U*/
 webfolder/HtmlGen/T*/
 webfolder/src/netstandard*/
+repos.txt
+web[2345]/
+*.bak
+src/Microsoft.Language.Xml/
+src/csLibCheck/

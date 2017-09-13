@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>HtmlGeneratorLibCheck</AssemblyName>
+    <TargetFramework>net46</TargetFramework>
+    <RootNamespace>HtmlGeneratorLibCheck</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NuSpecFile>$(MSBuildProjectDirectory)\Microsoft.SourceBrowser.nuspec</NuSpecFile>
+    <NuGetVersion>1.0.14</NuGetVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>..\..\bin\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="TypeScriptSupport\**" />
+    <Compile Remove="Web\**" />
+    <EmbeddedResource Remove="TypeScriptSupport\**" />
+    <EmbeddedResource Remove="Web\**" />
+    <None Remove="TypeScriptSupport\**" />
+    <None Remove="Web\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <NuGetInput Include="$(MSBuildThisFile)" />
+    <NuGetInput Include="$(NuSpecFile)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ExceptionAnalysis.Diagnostics" Version="1.0.0.39796" />
+    <PackageReference Include="ManagedEsent" Version="1.9.4" />
+    <PackageReference Include="Microsoft.Build" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    <PackageReference Include="System.Composition" Version="1.0.31" />
+    <PackageReference Include="Microsoft.Language.Xml" Version="1.0.15" />
+    <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense" Version="15.0.26201" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <!--<PackageReference Include="System.Composition" Version="1.0.31" />
+    <PackageReference Include="System.Composition.AttributedModel" Version="1.0.31" />
+    <PackageReference Include="System.Composition.Hosting" Version="1.0.31" />
+    <PackageReference Include="System.Composition.Runtime" Version="1.0.31" />
+    <PackageReference Include="System.Composition.TypedParts" Version="1.0.31" />-->
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BuildLogParser\BuildLogParser.csproj" />
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\csLibCheck\src\libcheck.csproj" />
+    <ProjectReference Include="..\HtmlGenerator\HtmlGenerator.csproj" />
+    <ProjectReference Include="..\MEF\MEF.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <!--<Target Name="PublishWebsite" AfterTargets="CoreBuild" BeforeTargets="BuildNuGet">
+    <Exec Command="dotnet publish &quot;$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\SourceIndexServer\SourceIndexServer.csproj'))&quot; -f netcoreapp1.1 -c Release -o &quot;$([System.IO.Path]::GetFullPath('$(OutDir)\Web'))&quot;" />
+  </Target>-->
+  <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(OutDir)\Microsoft.SourceBrowser.$(NuGetVersion).nupkg">
+    <Exec Command="&quot;$(SolutionDir)\.nuget\NuGet.exe&quot; Pack Microsoft.SourceBrowser.nuspec -NoPackageAnalysis -BasePath &quot;$(OutDir.TrimEnd('\'))&quot; -OutputDirectory &quot;$(OutDir.TrimEnd('\'))&quot; -prop currentVersion=$(NuGetVersion)" />
+  </Target>
+</Project>

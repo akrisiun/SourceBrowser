@@ -48,7 +48,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
             var metaRefList = project.MetadataReferences;
 
             // TODO
-            /*
             var fedAssemblies = Federation.ReferenceSourceAssemblies()[0];
 
             foreach (var refItem in ref1)
@@ -63,7 +62,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
                     {
                         list.Add(refAsm);
                     }
-
                     continue;       
                 }
 
@@ -74,7 +72,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
                     list.Add(asm);
                 }
             }
-            */
+
         }
 
         public static void GenerateContentFiles(this ProjectGenerator @this, Project msbuildProject)

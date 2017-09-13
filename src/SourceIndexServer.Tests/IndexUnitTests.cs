@@ -197,7 +197,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
 
         static IndexUnitTests()
         {
-            Index.SetRootPath(Path.GetDirectoryName(typeof(IndexUnitTests).GetTypeInfo().Assembly.Location)); 
+            Index.SetRootPath(Path.GetDirectoryName(typeof(IndexUnitTests).GetTypeInfo().Assembly.Location));
         }
 
         public void EndToEnd(string queryString, string expectedHtml)
@@ -239,4 +239,40 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
             Assert.IsTrue(actualResults.SequenceEqual(expectedResults));
         }
     }
+
+}
+
+namespace RoslynTest
+{
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+
+    [TestClass]
+    public class Debug
+    {
+        [TestMethod]
+        public void Debug1()
+        {
+            var proc = new Process();
+            var dir = AppContext.BaseDirectory + @"\..\..\..\..\..";
+            var newDir = Path.GetFullPath(dir);
+            Directory.SetCurrentDirectory(newDir);
+            // src\SourceIndexServer.Tests\bin\Debug\netcoreapp1.1
+
+            proc.StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                Arguments = "",
+                FileName = "debug.cmd"
+            };
+            proc.StartInfo.UseShellExecute = false;
+
+            proc.Start();
+            var module = proc.MainModule;
+            var file = module.FileName;
+
+            proc.WaitForExit();
+        }
+    }
+
 }

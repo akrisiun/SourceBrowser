@@ -4,6 +4,15 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.SourceBrowser.Common;
 
+namespace Roslyn.NotInternal
+{
+
+    public class ProjectGeneratorCheck
+    {
+       //  DocumentFileInfoX
+    }
+}
+
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     partial class ProjectGenerator
@@ -33,6 +42,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 // and doesn't re-get them later. We need a new project collection to read
                 // the latest set of environment variables.
                 projectCollection = new ProjectCollection();
+
                 this.msbuildProject = new Project(
                     ProjectFilePath,
                     null,

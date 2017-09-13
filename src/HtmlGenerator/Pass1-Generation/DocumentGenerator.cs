@@ -13,6 +13,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public partial class DocumentGenerator
     {
+        static DocumentGenerator()
+        {
+            Microsoft.CodeAnalysis.CSharp.CSharpCompilation.ThrowIfTreeEmpty = false;
+        }
+
         public ProjectGenerator projectGenerator;
         public Document Document;
         public string documentDestinationFilePath;
@@ -44,7 +49,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 this.Text = await Document.GetTextAsync();
                 this.Root = await Document.GetSyntaxRootAsync();
-                this.SemanticModel = await Document.GetSemanticModelAsync();
+
+                Exception err = null;
+                try
+                {
+                    this.SemanticModel = await Document.GetSemanticModelAsync();
+                }
+                catch (Exception ex) { err = ex; }
+
                 this.SemanticFactsService = WorkspaceHacks.GetSemanticFactsService(this.Document);
                 this.SyntaxFactsService = WorkspaceHacks.GetSyntaxFactsService(this.Document);
 
@@ -113,7 +125,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     append: false,
                     encoding: Encoding.UTF8))
                 {
-                    await GenerateHtml(streamWriter);
+                    // await 
+                    GenerateHtml(streamWriter);
                 }
             }
             else
@@ -121,7 +134,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 using (var memoryStream = new MemoryStream())
                 using (var streamWriter = new StreamWriter(memoryStream))
                 {
-                    await GeneratePre(streamWriter);
+                    // await 
+                    GeneratePre(streamWriter);
                 }
             }
         }
@@ -137,7 +151,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             this.relativePathToRoot = Paths.CalculateRelativePathToRoot(documentDestinationFilePath, SolutionDestinationFolder);
         }
 
-        private async Task GenerateHtml(StreamWriter writer)
+        private void // async Task 
+            GenerateHtml(StreamWriter writer)
         {
             var title = Document.Name;
             var lineCount = Text.Lines.Count;
@@ -151,16 +166,24 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             writer.Write(prefix);
             GenerateHeader(writer.WriteLine);
 
-            var ranges = (await classifier.Classify(Document, Text)).ToArray();
+            Classification.Range[] ranges = null;
+            Exception err = null;
+            try
+            {
+                // (await
+                IEnumerable <Classification.Range> rangeNum = (classifier.Classify(Document, Text));
+                ranges = rangeNum?.ToArray();
+            } catch (Exception ex) { err = ex; }
 
             // pass a value larger than 0 to generate line numbers statically at HTML generation time
             var table = Markup.GetTablePrefix(
                 DocumentUrl,
                 pregenerateLineNumbers ? lineCount : 0,
-                GenerateGlyphs(ranges));
+                ranges == null ? null : GenerateGlyphs(ranges));
+
             writer.WriteLine(table);
 
-            GeneratePre(ranges, writer, lineCount);
+            GeneratePre(ranges, writer, lineCount, Document.FilePath);
             var suffix = Markup.GetDocumentSuffix();
             writer.WriteLine(suffix);
         }
@@ -221,18 +244,18 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 }
             };
 
-            Func<MEF.ISymbolVisitor, string> VisitSymbol = v =>
-            {
-                try
-                {
-                    return symbol.Accept(new MEF.SymbolVisitorWrapper(v, context));
-                }
-                catch (Exception ex)
-                {
-                    Log.Write("Exception in symbol visitor: " + ex.Message);
-                    return null;
-                }
-            };
+            //Func<MEF.ISymbolVisitor, string> VisitSymbol = v =>
+            //{
+            //    try
+            //    {
+            //        return symbol.Accept(new MEF.SymbolVisitorWrapper(v, context));
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Log.Write("Exception in symbol visitor: " + ex.Message);
+            //        return null;
+            //    }
+            //};
 
             foreach (var r in ranges)
             {
@@ -244,13 +267,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     lineNumber = nextLineNumber;
                     context[MEF.ContextKeys.LineNumber] = lineNumber.ToString();
-                    maybeLog(string.Concat(projectGenerator.PluginTextVisitors.Select(VisitText)));
+
+                    if (projectGenerator.PluginTextVisitors != null)
+                        maybeLog(string.Concat(projectGenerator.PluginTextVisitors.Select(VisitText)));
                 }
 
                 symbol = SemanticModel.GetDeclaredSymbol(token.Parent);
-                if (symbol != null)
+                if (symbol != null && projectGenerator.PluginSymbolVisitors != null)
                 {
-                    maybeLog(string.Concat(projectGenerator.PluginSymbolVisitors.Select(VisitSymbol)));
+                    // maybeLog(string.Concat(projectGenerator.PluginSymbolVisitors.Select(VisitSymbol)));
                 }
             }
 
@@ -281,13 +306,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private string DocumentUrl { get { return Document.Project.AssemblyName + "/" + documentRelativeFilePathWithoutHtmlExtension.Replace('\\', '/'); } }
 
-        private void GenerateHeader(Action<string> writeLine)
+        public string GenerateHeader(Action<string> writeLine)
         {
             string documentDisplayName = documentRelativeFilePathWithoutHtmlExtension;
+            string documentUrl = "/#" + Document.Project.AssemblyName + "/" + documentRelativeFilePathWithoutHtmlExtension.Replace('\\', '/');
             string projectDisplayName = projectGenerator.ProjectSourcePath;
             string projectUrl = "/#" + Document.Project.AssemblyName;
 
-            string documentLink = string.Format("File: <a id=\"filePath\" class=\"blueLink\" href=\"{0}\" target=\"_top\">{1}</a><br/>", DocumentUrl, documentDisplayName);
+            string documentLink = string.Format("File: <a id=\"filePath\" class=\"blueLink\" href=\"{0}\" target=\"_top\">{1}</a><br/>", documentUrl, documentDisplayName);
             string projectLink = string.Format("Project: <a id=\"projectPath\" class=\"blueLink\" href=\"{0}\" target=\"_top\">{1}</a> ({2})", projectUrl, projectDisplayName, projectGenerator.AssemblyName);
 
             string fileShareLink = GetFileShareLink();
@@ -314,13 +340,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             string secondRow = string.Format("<tr><td>{0}</td><td>{1}</td></tr>", projectLink, fileShareLink);
 
             Markup.WriteLinkPanel(writeLine, firstRow, secondRow);
+
+            return documentUrl;
         }
 
         private string GetWebLink()
         {
             var fullPath = Path.GetFullPath(Document.FilePath);
             var serverPathMapping =
-                projectGenerator.SolutionGenerator.ServerPathMappings.FirstOrDefault(p => fullPath.StartsWith(p.Key, StringComparison.OrdinalIgnoreCase));
+                projectGenerator.SolutionGenerator.ServerPathMappings.FirstOrDefault(p => fullPath.StartsWith(p.Key));
             if (serverPathMapping.Key != null)
             {
                 return serverPathMapping.Value + fullPath.Substring(serverPathMapping.Key.Length).Replace('\\', '/');
@@ -366,21 +394,30 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return filePath;
         }
 
-        private async Task GeneratePre(StreamWriter writer, int lineCount = 0)
+        private void // async Task 
+            GeneratePre(StreamWriter writer, int lineCount = 0)
         {
-            var ranges = await classifier.Classify(Document, Text);
-            GeneratePre(ranges, writer, lineCount);
+            //  await
+            var ranges = classifier.Classify(Document, Text);
+            GeneratePre(ranges, writer, lineCount, Document.FilePath);
         }
 
-        private void GeneratePre(IEnumerable<Classification.Range> ranges, StreamWriter writer, int lineCount = 0)
+        private void GeneratePre(IEnumerable<Classification.Range> ranges, StreamWriter writer,
+            int lineCount = 0, string path = null)
         {
-            if (ranges == null)
+            if (ranges == null || ranges.Count() == 0)
             {
                 // if there was an error in Roslyn, don't fail the entire index, just return
+                var lines = File.ReadAllLines(path);
+
+                lineCount = lines.Length;
+                Classification.Range range = null;
+                string html = GenerateRange(writer, range, lineCount, path, lines);
+                writer.Write(html);
                 return;
             }
 
-            foreach (var range in ranges)
+            foreach (Classification.Range range in ranges)
             {
                 string html = GenerateRange(writer, range, lineCount);
                 writer.Write(html);
@@ -392,12 +429,31 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return lineCount > 30000;
         }
 
-        private string GenerateRange(StreamWriter writer, Classification.Range range, int lineCount = 0)
+        private string GenerateRange(StreamWriter writer, Classification.Range range, int lineCount = 0
+                , string file = null, string[] lines = null)
         {
-            var html = range.Text;
-            html = Markup.HtmlEscape(html);
+            string html = null;
             bool isLargeFile = IsLargeFile(lineCount);
+
+            var sb = new StringBuilder();
+
+            if (range == null && lines == null) return html;
+            if (range == null && lines != null)
+            {
+                foreach (var line in lines)
+                {
+                    sb.AppendLine(line);
+                    // sb.AppendLine("<br>");
+                }
+
+                html = sb.ToString();
+                return html;
+            }
+
+            html = range.Text;
+            html = Markup.HtmlEscape(html);
             string classAttributeValue = GetClassAttribute(html, range);
+
             HtmlElementInfo hyperlinkInfo = GenerateLinks(range, isLargeFile);
 
             if (hyperlinkInfo == null)
@@ -413,8 +469,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 }
 
             }
-
-            var sb = new StringBuilder();
 
             var elementName = "span";
             if (hyperlinkInfo != null)

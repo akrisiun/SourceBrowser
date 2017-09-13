@@ -7,6 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+using System.Threading;
+using System.Collections.Immutable;
+using System.Xml;
+using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.MSBuild;
+using System.Diagnostics;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -39,12 +45,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             this.ImplementedInterfaceMembers = new MultiDictionary<ISymbol, ISymbol>();
             this.assemblyAttributesFileName = MetadataAsSource.GeneratedAssemblyAttributesFileName + (project.Language == LanguageNames.CSharp ? ".cs" : ".vb");
 
-            try
-            {
-                PluginSymbolVisitors = SolutionGenerator.PluginAggregator?.ManufactureSymbolVisitors(project).ToArray();
-                PluginTextVisitors = SolutionGenerator.PluginAggregator?.ManufactureTextVisitors(project).ToArray();
-            }
-            catch { }
+            var aggregator = SolutionGenerator.PluginAggregator;
+            //if (aggregator != null && aggregator.Plugins != null)
+            //{
+            //    PluginSymbolVisitors = aggregator.ManufactureSymbolVisitors(project).ToArray();
+            //    PluginTextVisitors = aggregator.ManufactureTextVisitors(project).ToArray();
+            //}
         }
 
         /// <summary>
@@ -77,6 +83,17 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     SymbolIdService.GetId(filePath),
                     new List<Tuple<string, long>> { Tuple.Create(filePath, 0L) });
             }
+        }
+
+        public ProjectGenerator SetProjectFilePath(string csproj)
+        {
+            this.ProjectFilePath = csproj ?? this.Project.FilePath;
+            return this;
+        }
+        public ProjectGenerator SetSolutionGenerator(SolutionGenerator solutionGenerator)
+        {
+            this.SolutionGenerator = solutionGenerator;
+            return this;
         }
 
         private ProjectGenerator()
@@ -121,23 +138,44 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     Directory.CreateDirectory(ProjectDestinationFolder);
                 }
 
-                var documents = Project.Documents.Where(IncludeDocument).ToList();
+                IList<Document> documents = Project.Documents.Where(IncludeDocument).ToList();
 
-                var generationTasks = Partitioner.Create(documents)
-                    .GetPartitions(Environment.ProcessorCount)
-                    .Select(partition =>
-                        Task.Run(async () =>
-                        {
-                            using (partition)
+                if (documents.Count == 0)
+                    documents = DocumentsList.Load(this, this.ProjectSourcePath,
+                                Project);
+
+                if (Debugger.IsAttached)
+                {
+                    foreach (var document in documents)
+                    {
+                        var r = GenerateDocument(document);
+                        var res = r.GetAwaiter();
+                    }
+                }
+                else
+                {
+                    var generationTasks = Partitioner.Create(documents)
+                        .GetPartitions(Environment.ProcessorCount)
+                        .Select(partition =>
+                            Task.Run(async () =>
                             {
-                                while (partition.MoveNext())
+                                using (partition)
                                 {
-                                  await GenerateDocument(partition.Current);
+                                    while (partition.MoveNext())
+                                    {
+                                        await GenerateDocument(partition.Current);
+                                    }
                                 }
-                            }
-                        }));
+                            }));
 
-                await Task.WhenAll(generationTasks);
+                    await Task.WhenAll(generationTasks);
+                }
+
+                if (documents.Count == 0)
+                {
+                    // alternative way:
+                    //var tasks = Partitioner.Create(documents);
+                }
 
                 foreach (var document in documents)
                 {
@@ -170,6 +208,86 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
+        //http://source.roslyn.io/#Microsoft.CodeAnalysis.Workspaces.Desktop/Workspace/MSBuild/ProjectFile/ProjectFileLoader.cs,8004494733583279,references
+        //static async Task<LoadedProjectInfo> LoadProjectAsync(string path, IDictionary<string, string> globalProperties,
+        //        CancellationToken cancellationToken)
+        //{
+        //    var properties = new Dictionary<string, string>(globalProperties ?? ImmutableDictionary<string, string>.Empty);
+        //    properties["DesignTimeBuild"] = "true"; // this will tell msbuild to not build the dependent projects
+        //    properties["BuildingInsideVisualStudio"] = "true"; // this will force CoreCompile task to execute even if all inputs and outputs are up to date
+
+        //    try
+        //    {
+        //        var xmlReader = XmlReader.Create(await ReadFileAsync(path, cancellationToken).ConfigureAwait(false), s_xmlSettings);
+        //        var collection = new MSB.Evaluation.ProjectCollection();
+        //        var xml = MSB.Construction.ProjectRootElement.Create(xmlReader, collection);
+
+        //        var collection = new MSB.Evaluation.ProjectCollection();
+        //        var xml = MSB.Construction.ProjectRootElement.Create(xmlReader, collection);
+
+
+        //        // When constructing a project from an XmlReader, MSBuild cannot determine the project file path.  Setting the
+        //        // path explicitly is necessary so that the reserved properties like $(MSBuildProjectDirectory) will work.
+        //        xml.FullPath = path;
+
+        //        return new LoadedProjectInfo(
+        //            new MSB.Evaluation.Project(xml, properties, toolsVersion: null, projectCollection: collection),
+        //            errorMessage: null);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return new LoadedProjectInfo(project: null, errorMessage: e.Message);
+        //    }
+        //}
+
+
+
+        public void GenerateSync(Project project = null)
+        {
+            project = project ?? this.Project;
+
+            try { 
+
+                var documents = project.Documents.Where(IncludeDocument).ToList();
+
+                // var generationTasks = Partitioner.Create(documents)
+
+                foreach (var document in documents)
+                {
+                    // await 
+                    GenerateDocument(document);
+
+                    OtherFiles.Add(Paths.GetRelativeFilePathInProject(document));
+                }
+
+                if (Configuration.WriteProjectAuxiliaryFilesToDisk)
+                {
+                    GenerateProjectFile();
+                    GenerateDeclarations();
+                    GenerateBaseMembers();
+                    GenerateImplementedInterfaceMembers();
+                    GenerateProjectInfo();
+                    GenerateReferencesDataFiles(
+                        this.SolutionGenerator.SolutionDestinationFolder,
+                        ReferencesByTargetAssemblyAndSymbolId);
+                    GenerateSymbolIDToListOfDeclarationLocationsMap(
+                        ProjectDestinationFolder,
+                        SymbolIDToListOfLocationsMap);
+                    GenerateReferencedAssemblyList();
+                    GenerateUsedReferencedAssemblyList();
+                    GenerateProjectExplorer();
+                    GenerateNamespaceExplorer();
+                    GenerateIndex();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex, "Project generation failed for: " + ProjectSourcePath);
+            }
+
+        }
+
+
         public void GenerateNonProjectFolder()
         {
             AddHtmlFilesToRedirectMap();
@@ -189,16 +307,18 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private Task GenerateDocument(Document document)
         {
+            Task t = null;
             try
             {
                 var documentGenerator = new DocumentGenerator(this, document);
-                return documentGenerator.Generate();
+                t = documentGenerator.Generate();
             }
             catch (Exception e)
             {
                 Log.Exception(e, "Document generation failed for: " + (document.FilePath ?? document.ToString()));
-                return Task.FromResult(e);
+                t =Task.FromResult(e);
             }
+            return t;
         }
 
         private void GenerateIndex()

@@ -4,8 +4,11 @@ using System.Linq;
 
 namespace Microsoft.SourceBrowser.Common
 {
+//#if NET46
+    public class AssertTraceListener
 #if NET46
-    public class AssertTraceListener : TraceListener
+        : TraceListener
+#endif
     {
         public static void Register()
         {
@@ -51,17 +54,13 @@ namespace Microsoft.SourceBrowser.Common
 
         public override void Write(string message)
         {
-            if (Log.WriteWrap == null)
-                Log.Write(message);
+            Log.Write(message);
         }
 
         public override void WriteLine(string message)
         {
-            if (Log.WriteWrap == null)
-               Log.Write(message);
-            else
-                Log.Output(message);
+            Log.Write(message);
         }
     }
-#endif
+//#endif
 }

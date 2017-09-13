@@ -1,6 +1,8 @@
 @ECHO http://localhost:58088
 set dir=%~dp0
-echo %dir%
+set FOLDER=%dir%\wwwroot
+echo %dir% WEB: %folder%
+
 set ASPNETCORE_ENVIRONMENT=Development
 
 "c:\Program Files\dotnet\dotnet.exe" Microsoft.SourceBrowser.SourceIndexServer.dll  --urls "http://*:58088"

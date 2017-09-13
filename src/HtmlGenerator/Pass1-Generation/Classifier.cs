@@ -11,14 +11,17 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public partial class Classification
     {
-        public async Task<IEnumerable<Range>> Classify(Document document, SourceText text)
+        public IEnumerable<Range> Classify(Document document, SourceText text)
         {
             var span = TextSpan.FromBounds(0, text.Length);
 
             IEnumerable<ClassifiedSpan> classifiedSpans = null;
             try
             {
-                classifiedSpans = await Classifier.GetClassifiedSpansAsync(document, span);
+                // classifiedSpans = await Classifier.GetClassifiedSpansAsync(document, span);
+
+                var wks = document.Project.Solution.Workspace;
+                classifiedSpans = Classifier.GetClassifiedSpansDebug(document, span, wks);
             }
             catch (Exception ex)
             {

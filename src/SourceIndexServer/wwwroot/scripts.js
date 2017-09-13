@@ -1,10 +1,13 @@
 ﻿var currentSelection = null;
 var currentResult = null;
-var useSolutionExplorer = /*USE_SOLUTION_EXPLORER*/true/*USE_SOLUTION_EXPLORER*/;
+var useSolutionExplorer = true;
 var anchorSplitChar = ",";
+var folder = "";
+// http://localhost:?/folder/
+var host = "http://localhost:58088/" + folder;
 
 var externalUrlMap = [
-    /*EXTERNAL_URL_MAP*/"https://referencesource.microsoft.com/", "http://source.roslyn.io/"/*EXTERNAL_URL_MAP*/
+    /*EXTERNAL_URL_MAP*/"https://referencesource.microsoft.com/", "http://source.dotnet.io/"/*EXTERNAL_URL_MAP*/
 ];
 
 var supportedFileExtensions = [
@@ -12,18 +15,45 @@ var supportedFileExtensions = [
     "vb",
     "ts",
     "csproj",
-    "vbproj",
+    "cshtml",
+    "aspx",
+    "md",
+    "txt",
+    "xml",
+    "html",
+    "xslt",
+    "sql",
+    "config",
+    "json",
+    "md",
+    "cpp",
+    "h",
+    "prg",
     "targets",
     "props",
     "xaml"
 ];
 
 function redirectLocation(frame, newLocation) {
-    if (frame.location.href == newLocation) {
-        return;
+    var access = 0;
+    try {
+        if (frame.location.pathname == newLocation) {
+            return;
+        }
+        access = 1;
+    }
+    catch (e) { console.log(e); } 
+    if (!access) {
+        newLocation = folder + newLocation;
+        frame = top.frames[1];
     }
 
+	if (newLocation == folder + "/" || newLocation.indexOf(host) == 0)
     frame.location.replace(newLocation);
+	else if (newLocation.indexOf(".html") > 0)
+        frame.location.replace(newLocation);
+    else 
+	   alert(newLocation);
 }
 
 function setHash(newHash) {
@@ -325,6 +355,7 @@ function rewriteExternalLink(link) {
     if (firstIndex > -1) {
         var indexLength = url.indexOf("@", firstIndex + 1);
         var externalIndexNumber = url.slice(firstIndex + 1, indexLength);
+
         var externalUrl = externalUrlMap[externalIndexNumber];
         url = externalUrl + url.slice(indexLength + 1);
         link.href = url;
@@ -341,13 +372,13 @@ function rewriteExternalLink(link) {
         return;
     }
 
-    if (endsWith(url, "/0000000000.html")) {
+    if (endsWith(url, folder + "/0000000000.html")) {
         var filePath = top.s.location.pathname.slice(1);
         filePath = getDisplayableFileName(filePath);
-        filePath = "/#" + filePath + anchorSplitChar + link.id;
+        filePath = folder + "/#" + filePath + anchorSplitChar + link.id;
         link.href = filePath;
         link.onclick = function () {
-            redirectLocation(top.n, "/0000000000.html");
+            redirectLocation(top.n, folder + "/0000000000.html");
             return false;
         };
         return;
@@ -359,6 +390,8 @@ function rewriteSolutionExplorerLink(link) {
     var fileName = trimFromEnd(url, ".html");
     var extension = getExtension(fileName);
     var pathname = link.pathname;
+    if (pathname.indexOf(folder) == 0)
+	pathname = pathname.substr(folder.length);
 
     var setClassName = null;
     if (isSupportedExtension(extension) && !link.className) {
@@ -452,10 +485,10 @@ function ro() {
             var collapsible = this.nextSibling;
             if (collapsible.style.display == "none") {
                 collapsible.style.display = "block";
-                this.style.backgroundImage = "url(../../content/icons/minus.png)";
+                this.style.backgroundImage = "url(" + folder + "/content/icons/minus.png)";
             } else {
                 collapsible.style.display = "none";
-                this.style.backgroundImage = "url(../../content/icons/plus.png)";
+                this.style.backgroundImage = "url(" + folder + "/content/icons/plus.png)";
             }
         };
     }
@@ -472,9 +505,9 @@ function ro() {
         var extension = fileName.substring(fileName.length - 2);
         var imageUrl = null;
         if (extension == "cs") {
-            imageUrl = "url(../../content/icons/196.png)";
+            imageUrl = "url(" + folder +  "/content/icons/196.png)";
         } else if (extension == "vb") {
-            imageUrl = "url(../../content/icons/195.png)";
+            imageUrl = "url(" + folder +  "/content/icons/195.png)";
         }
 
         if (imageUrl) {
@@ -507,7 +540,7 @@ function onDocumentOutlineLoad() {
             div.style.paddingBottom = "2px";
 
             var img = document.createElement('img');
-            img.src = '/content/icons/' + glyph + '.png';
+            img.src = folder + '/content/icons/' + glyph + '.png';
             img.style.marginRight = '8px';
             img.style.verticalAlign = 'bottom';
             div.appendChild(img);
@@ -680,7 +713,7 @@ function redirectToNextLevelRedirectFile() {
         var hashParts = anchor.split(anchorSplitChar);
         var id = hashParts[0];
 
-        var destination = "A" + id.slice(0, 1) + ".html" + "#" + createSafeLineNumber(id);
+        var destination = "a" + id.slice(0, 1) + ".html" + "#" + createSafeLineNumber(id);
         if (hashParts.length == 2) {
             destination = destination + anchorSplitChar + "references";
         }
@@ -712,7 +745,7 @@ function generateLineNumbers(id, count) {
             "<a id=\"l" +
             i +
             "\" href=\"" +
-            "/#" +
+            folder + "/#" +
             filePath + anchorSplitChar +
             i +
             "\" target=\"_self\" onclick=\"setHash('" +
@@ -803,16 +836,16 @@ function initializeHighlightReferences() {
 
 function addToolbar() {
     var documentOutlineButton = document.createElement('img');
-    documentOutlineButton.setAttribute('src', '/content/icons/DocumentOutline.png');
+    documentOutlineButton.setAttribute('src', folder + '/content/icons/DocumentOutline.png');
     documentOutlineButton.title = "Document Outline";
     documentOutlineButton.className = 'documentOutlineButton';
     documentOutlineButton.onclick = showDocumentOutline;
     document.body.appendChild(documentOutlineButton);
 
     var projectExplorerButton = document.createElement('img');
-    var projectExplorerIcon = '/content/icons/CSharpProjectExplorer.png';
+    var projectExplorerIcon = folder + '/content/icons/CSharpProjectExplorer.png';
     if (document.title.slice(document.title.length - 2) == "vb") {
-        projectExplorerIcon = '/content/icons/VBProjectExplorer.png';
+        projectExplorerIcon = folder + '/content/icons/VBProjectExplorer.png';
     }
 
     projectExplorerButton.setAttribute('src', projectExplorerIcon);
@@ -822,7 +855,7 @@ function addToolbar() {
     document.body.appendChild(projectExplorerButton);
 
     var namespaceExplorerButton = document.createElement('img');
-    namespaceExplorerButton.setAttribute('src', '/content/icons/NamespaceExplorer.png');
+    namespaceExplorerButton.setAttribute('src', folder + '/content/icons/NamespaceExplorer.png');
     namespaceExplorerButton.title = "Namespace Explorer";
     namespaceExplorerButton.className = 'namespaceExplorerButton';
     namespaceExplorerButton.onclick = showNamespaceExplorer;
@@ -830,12 +863,12 @@ function addToolbar() {
 }
 
 function showDocumentOutline() {
-    top.n.location = "/documentoutline.html";
+    top.n.location = folder + "/documentoutline.html";
 }
 
 function showNamespaceExplorer() {
     var assemblyName = getAssemblyName();
-    var namespacesUrl = "/" + assemblyName + "/namespaces.html";
+    var namespacesUrl = folder + "/" + assemblyName + "/namespaces.html";
     top.n.location = namespacesUrl;
     setHash(assemblyName + ",namespaces");
 }
@@ -1167,19 +1200,21 @@ function expandCollapseFolder(capturedFolder, capturedPlusMinus, capturedFolderI
     }
 }
 
-function setFolderImage(folder, div, firstChild, pathToIcons, folderIcon) {
+function setFolderImage(xfolder, div, firstChild, pathToIcons, folderIcon) {
+
+    pathToIcons = folder + "/content/icons/";
     var text = firstChild.textContent;
     if (text === 'References' || text === "Used By") {
-        folder.src = pathToIcons + "192.png";
+        xfolder.src = pathToIcons + "192.png";
     } else if (text === 'Properties') {
-        folder.src = pathToIcons + "102.png";
+        xfolder.src = pathToIcons + "102.png";
     } else if (div.className == "projectCSInSolution") {
-        folder.src = pathToIcons + "196.png";
+        xfolder.src = pathToIcons + "196.png";
     } else if (div.className == "projectVBInSolution") {
-        folder.src = pathToIcons + "195.png";
+        xfolder.src = pathToIcons + "195.png";
     }
     else {
-        folder.src = pathToIcons + folderIcon;
+        xfolder.src = pathToIcons + folderIcon;
     }
 }
 
@@ -1310,4 +1345,9 @@ function getExtension(filePath) {
 
 function isSupportedExtension(extension) {
     return supportedFileExtensions.indexOf(extension) != -1;
+}
+function loadSolutionExplorer() {
+    makeFoldersCollapsible(/* closed folder */"202.png", "201.png", 
+		folder + "/content/icons/", initializeSolutionExplorerFolder);
+    document.getElementById("rootFolder").style.display = "block";
 }

@@ -8,6 +8,7 @@ namespace Microsoft.SourceBrowser.Common
         private bool errorDataReceived = false;
         private readonly StringBuilder output = new StringBuilder();
 
+#if NET46
         public ProcessStartInfo CreateProcessStartInfo(string filePath, string arguments = null)
         {
             var processStartInfo = new ProcessStartInfo();
@@ -88,7 +89,7 @@ namespace Microsoft.SourceBrowser.Common
             errorDataReceived = true;
             Output(e.Data);
         }
-
+#endif
         private void Output(object o)
         {
             if (o == null)
