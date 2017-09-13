@@ -51,12 +51,16 @@ namespace Microsoft.SourceBrowser.Common
 
         public override void Write(string message)
         {
-            Log.Write(message);
+            if (Log.WriteWrap == null)
+                Log.Write(message);
         }
 
         public override void WriteLine(string message)
         {
-            Log.Write(message);
+            if (Log.WriteWrap == null)
+               Log.Write(message);
+            else
+                Log.Output(message);
         }
     }
 #endif

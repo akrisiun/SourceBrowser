@@ -38,8 +38,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             this.BaseMembers = new Dictionary<ISymbol, ISymbol>();
             this.ImplementedInterfaceMembers = new MultiDictionary<ISymbol, ISymbol>();
             this.assemblyAttributesFileName = MetadataAsSource.GeneratedAssemblyAttributesFileName + (project.Language == LanguageNames.CSharp ? ".cs" : ".vb");
-            PluginSymbolVisitors = SolutionGenerator.PluginAggregator?.ManufactureSymbolVisitors(project).ToArray();
-            PluginTextVisitors = SolutionGenerator.PluginAggregator?.ManufactureTextVisitors(project).ToArray();
+
+            try
+            {
+                PluginSymbolVisitors = SolutionGenerator.PluginAggregator?.ManufactureSymbolVisitors(project).ToArray();
+                PluginTextVisitors = SolutionGenerator.PluginAggregator?.ManufactureTextVisitors(project).ToArray();
+            }
+            catch { }
         }
 
         /// <summary>

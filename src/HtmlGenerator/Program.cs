@@ -13,7 +13,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class Program
     {
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length == 0)
             {
@@ -21,15 +21,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return;
             }
 
-            var projects = new List<string>();
-            var properties = new Dictionary<string, string>();
-            var emitAssemblyList = false;
-            var force = false;
-            var noBuiltInFederations = false;
-            var offlineFederations = new Dictionary<string, string>();
-            var federations = new HashSet<string>();
-            var serverPathMappings = new Dictionary<string, string>();
-            var pluginBlacklist = new List<string>();
+            Program p = ParseArgs(args);
+            p?.Run();
+        }
+
+        public static Program ParseArgs(string[] args)
+        {
+            var p = new Program();
 
             foreach (var arg in args)
             {
@@ -48,13 +46,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         Log.Write($"Invalid Server Path: '{mapping}'", ConsoleColor.Red);
                         continue;
                     }
-                    serverPathMappings.Add(Path.GetFullPath(parts[0]), parts[1]);
+                    p.serverPathMappings.Add(Path.GetFullPath(parts[0]), parts[1]);
                     continue;
                 }
 
                 if (arg == "/force")
                 {
-                    force = true;
+                    Force = true;
                     continue;
                 }
 
@@ -71,7 +69,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         string[] paths = File.ReadAllLines(inputPath);
                         foreach (string path in paths)
                         {
-                            AddProject(projects, path);
+                            AddProject(p.projects, path);
                         }
                     }
                     catch
@@ -89,7 +87,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     {
                         var propertyName = match.Groups["name"].Value;
                         var propertyValue = match.Groups["value"].Value;
-                        properties.Add(propertyName, propertyValue);
+
+                        p.properties.Add(propertyName, propertyValue);
                         continue;
                     }
                 }
@@ -111,7 +110,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     string server = arg.Substring("/federation:".Length);
                     Log.Message($"Adding federation '{server}'.");
-                    federations.Add(server);
+                    p.federations.Add(server);
                     continue;
                 }
 
@@ -122,7 +121,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     {
                         var server = match.Groups["server"].Value;
                         var assemblyListFileName = match.Groups["file"].Value;
-                        offlineFederations[server] = assemblyListFileName;
+
+                        p.offlineFederations[server] = assemblyListFileName;
                         Log.Message($"Adding federation '{server}' (offline from '{assemblyListFileName}').");
                         continue;
                     }
@@ -137,13 +137,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 if (arg.StartsWith("/noplugin:"))
                 {
-                    pluginBlacklist.Add(arg.Substring("/noplugin:".Length));
+                    p.pluginBlacklist.Add(arg.Substring("/noplugin:".Length));
                     continue;
                 }
 
                 try
                 {
-                    AddProject(projects, arg);
+                    AddProject(p.projects, arg);
                 }
                 catch (Exception ex)
                 {
@@ -151,12 +151,40 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 }
             }
 
-            if (projects.Count == 0)
+            if (p.projects.Count == 0)
             {
                 PrintUsage();
-                return;
+                return null;
             }
 
+            return p;
+        }
+
+        private Program()
+        {
+            projects = new List<string>();
+            properties = new Dictionary<string, string>();
+            offlineFederations = new Dictionary<string, string>();
+            federations = new HashSet<string>();
+
+            serverPathMappings = new Dictionary<string, string>();
+            pluginBlacklist = new List<string>();
+        }
+
+        List<string> projects;
+        Dictionary<string, string> properties;
+        HashSet<string> federations;
+        Dictionary<string, string> offlineFederations;
+        Dictionary<string, string> serverPathMappings;
+        List<string> pluginBlacklist;
+
+        public static bool Force = false;
+
+        public static bool emitAssemblyList = false;
+        public static bool noBuiltInFederations = false;
+
+        public void Prepare(bool force = false)
+        {
             AssertTraceListener.Register();
             AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
 
@@ -178,6 +206,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             Log.ErrorLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.ErrorLogFile);
             Log.MessageLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.MessageLogFile);
+        }
+
+        public void Run(bool prepared = false)
+        {
+            if (!prepared)
+                Prepare(Force);
+
+            var websiteDestination = Paths.SolutionDestinationFolder;
 
             using (Disposable.Timing("Generating website"))
             {
@@ -227,7 +263,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static void AddProject(List<string> projects, string path)
+        public static void AddProject(List<string> projects, string path)
         {
             var project = Path.GetFullPath(path);
             if (IsSupportedProject(project))
@@ -268,7 +304,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static readonly Folder<Project> mergedSolutionExplorerRoot = new Folder<Project>();
 
-        private static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, Federation federation, Dictionary<string, string> serverPathMappings, IEnumerable<string> pluginBlacklist)
+        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, Federation federation, Dictionary<string, string> serverPathMappings, IEnumerable<string> pluginBlacklist)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -287,6 +323,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 using (Disposable.Timing("Generating " + path))
                 {
+                    Exception error = null;
+
                     using (var solutionGenerator = new SolutionGenerator(
                         path,
                         Paths.SolutionDestinationFolder,
@@ -297,6 +335,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     {
                         solutionGenerator.GlobalAssemblyList = assemblyNames;
                         solutionGenerator.Generate(solutionExplorerRoot: mergedSolutionExplorerRoot);
+                    }
+
+                    error = SolutionGenerator.Errors;
+                    if (error != null)
+                    {
+                        var type = error.GetType().FullName; // as System.Reflection.???
+                        // loadersErrors = 
                     }
                 }
 
@@ -331,11 +376,18 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         }
     }
 
-    internal static class WebsiteFinalizer
+    public static class WebsiteFinalizer
     {
         public static void Finalize(string destinationFolder, bool emitAssemblyList, Federation federation)
         {
-            string sourcePath = Assembly.GetEntryAssembly().Location;
+            string sourcePath = AppDomain.CurrentDomain.BaseDirectory;
+            try
+            {
+                // if not test unit
+                sourcePath = Assembly.GetEntryAssembly().Location;
+            }
+            catch { }
+
             sourcePath = Path.GetDirectoryName(sourcePath);
             string basePath = sourcePath;
             sourcePath = Path.Combine(sourcePath, @"Web");

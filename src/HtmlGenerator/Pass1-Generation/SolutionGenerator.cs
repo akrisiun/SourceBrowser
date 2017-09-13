@@ -24,6 +24,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         private readonly HashSet<string> typeScriptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         public MEF.PluginAggregator PluginAggregator;
 
+        public static Exception Errors { get; set; }
+
         /// <summary>
         /// List of all assembly names included in the index, from all solutions
         /// </summary>
@@ -41,6 +43,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             IReadOnlyDictionary<string, string> serverPathMappings = null,
             IEnumerable<string> pluginBlacklist = null)
         {
+            Errors = null;
+
             this.SolutionSourceFolder = Path.GetDirectoryName(solutionFilePath);
             this.SolutionDestinationFolder = solutionDestinationFolder;
             this.ProjectFilePath = solutionFilePath;
@@ -73,9 +77,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         t => t.Item2                                    //The actual value of the setting
                     )
                 );
+
             PluginAggregator = new MEF.PluginAggregator(configs, new Utilities.PluginLogger(), PluginBlacklist);
-            FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
-            PluginAggregator.Init();
+
+            try
+            {
+                PluginAggregator.Wrap();
+
+                if (PluginAggregator.Any())
+                    FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
+
+                PluginAggregator.Init();
+            }
+            catch (Exception ex) { PluginAggregator.LoadErrors = ex; }
         }
 
         public SolutionGenerator(
@@ -118,7 +132,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
+        public static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
         {
             propertiesOpt = propertiesOpt ?? ImmutableDictionary<string, string>.Empty;
 
@@ -132,7 +146,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return w;
         }
 
-        private static Solution CreateSolution(
+        public static Solution CreateSolution(
             string commandLineArguments,
             string projectName,
             string language,
@@ -431,6 +445,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
             catch (Exception ex)
             {
+                Errors = ex.InnerException ?? ex;
                 Log.Exception(ex, "Failed to open solution: " + solutionFilePath);
                 return null;
             }

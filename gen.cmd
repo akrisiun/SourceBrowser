@@ -1,4 +1,4 @@
 
-bin\net46\HtmlGenerator.exe -debug -y SourceBrowser.sln  /out:web\wwwroot\
+src\HtmlGenerator\bin\Debug\net46\HtmlGenerator.exe -debug SourceBrowser.sln  /out:Index\
 
 @PAUSE

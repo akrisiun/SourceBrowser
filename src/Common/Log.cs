@@ -54,12 +54,37 @@ namespace Microsoft.SourceBrowser.Common
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write(DateTime.Now.ToString("HH:mm:ss") + " ");
                 Console.ForegroundColor = color;
-                Console.WriteLine(message);
+                WriteLine(message);
                 if (color != ConsoleColor.Gray)
                 {
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
             }
+        }
+
+        public static Action<string> WriteWrap { get; set; }
+
+        public static void WriteLine(string message)
+        {
+            if (WriteWrap != null)
+            {
+                WriteWrap(message);
+                if (Level == 0)
+                    Console.WriteLine(message);
+            }
+            else
+                Console.WriteLine(message);
+        }
+
+        private static int Level = 0;
+        public static void Output(string message)
+        {
+            Level++;
+            if (Level == 1)
+                Console.WriteLine(message);
+
+            if (Level > 0)
+                Level--;
         }
 
         public static string ErrorLogFilePath
