@@ -1,3 +1,4 @@
-dotnet publish -o bin -f net46
+dotnet publish -o bin 
+@REM -f net46
 
 @PAUSE

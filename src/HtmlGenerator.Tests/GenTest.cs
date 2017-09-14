@@ -48,7 +48,7 @@ namespace HtmlGenerator.Tests
             Console.WriteLine($"/Out     {args[2]}");
 
             var err = SolutionGenerator.Errors;
-            Assert.IsTrue(false);
+            Assert.IsNull(err);
         }
 
 
@@ -61,11 +61,12 @@ namespace HtmlGenerator.Tests
             path = path ?? Directory.GetCurrentDirectory();
             args[2] = "/out:" + (path + args[2]).Replace("/", @"\");
 
+            #region Prepare debug console, reflection
+
             Log.WriteWrap = (str)
                 => Debug(str);
 
-            Program.Assert = false;
-            // AssertTraceListener.Register();
+            Program.Assert = false;  // // AssertTraceListener.Register();
             Listener.Register();
 
             Console.WriteLine($"base= {AppDomain.CurrentDomain.BaseDirectory}");
@@ -78,21 +79,30 @@ namespace HtmlGenerator.Tests
             var asm1 = Assembly.LoadFile(asmDir + "System.IO.FileSystem.dll");
             var asm2 = Assembly.LoadFile(asmDir + "System.Collections.Immutable.dll");
             var asm3 = Assembly.LoadFile(asmDir + "System.ValueTuple.dll");
-            // System.IO.FileSystem 4.0.3
-            // System.IO.FileSystem.Primitives 4.0.3
+            // System.IO.FileSystem 4.0.3, System.IO.FileSystem.Primitives 4.0.3
             var asm4 = Assembly.LoadFile(asmDir + "System.IO.FileSystem.dll");
             Console.WriteLine(asm4.ToString());
             var asm5 = Assembly.LoadFile(asmDir + "System.IO.FileSystem.Primitives.dll");
             Console.WriteLine(asm5.ToString());
-
-            // "System.Security.Cryptography.Primitives" Version="4.0.3" 0.0, Culture = neutral, PublicKeyToken = b03f5f7f11d50a3a
             var asm6 = Assembly.LoadFile(asmDir + "System.Security.Cryptography.Primitives.dll");
             Console.WriteLine(asm6.ToString());
+
+            #endregion
+
+            Program.IsDebug = true;
 
             var p = Program.ParseArgs(args);
             p.Prepare(true);
 
-            p.Run(true);
+            var generator = p.Run(true);
+            
+            //  ??? retry ???
+            if (Debugger.IsAttached && SolutionGenerator.Errors != null)
+            {
+                Program.Generate(generator);
+            }
+
+            Program.Instance = null;
         }
 
         public static void Debug(string str)

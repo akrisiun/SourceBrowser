@@ -24,6 +24,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         private readonly HashSet<string> typeScriptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         public MEF.PluginAggregator PluginAggregator;
 
+        public static Exception Errors { get; set; }
+
         /// <summary>
         /// List of all assembly names included in the index, from all solutions
         /// </summary>
@@ -41,6 +43,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             IReadOnlyDictionary<string, string> serverPathMappings = null,
             IEnumerable<string> pluginBlacklist = null)
         {
+            Errors = null;
+
             this.SolutionSourceFolder = Path.GetDirectoryName(solutionFilePath);
             this.SolutionDestinationFolder = solutionDestinationFolder;
             this.ProjectFilePath = solutionFilePath;
@@ -73,9 +77,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         t => t.Item2                                    //The actual value of the setting
                     )
                 );
+
             PluginAggregator = new MEF.PluginAggregator(configs, new Utilities.PluginLogger(), PluginBlacklist);
-            FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
-            PluginAggregator.Init();
+
+            try
+            {
+                PluginAggregator.Wrap();
+
+                if (PluginAggregator.Any())
+                    FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
+
+                PluginAggregator.Init();
+            }
+            catch (Exception ex) { PluginAggregator.LoadErrors = ex; }
         }
 
         public SolutionGenerator(
@@ -118,7 +132,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
+        public static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
         {
             propertiesOpt = propertiesOpt ?? ImmutableDictionary<string, string>.Empty;
 
@@ -132,7 +146,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return w;
         }
 
-        private static Solution CreateSolution(
+        public static Solution CreateSolution(
             string commandLineArguments,
             string projectName,
             string language,
@@ -273,8 +287,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         public static string CurrentAssemblyName = null;
 
+        public IEnumerable<Project> Projects => solution?.Projects;
+
         /// <returns>true if only part of the solution was processed and the method needs to be called again, false if all done</returns>
-        public bool Generate(HashSet<string> processedAssemblyList = null, Folder<Project> solutionExplorerRoot = null)
+        public bool Generate(
+            HashSet<string> processedAssemblyList = null, Folder<Project> solutionExplorerRoot = null, 
+            IEnumerable<Project> slnProjects = null)
         {
             if (solution == null)
             {
@@ -283,7 +301,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return false;
             }
 
-            var allProjects = solution.Projects.ToArray();
+            var allProjects = (slnProjects ?? this.Projects).ToArray();
             if (allProjects.Length == 0)
             {
                 Log.Exception("Solution " + this.ProjectFilePath + " has 0 projects - this is suspicious");
@@ -292,6 +310,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var projectsToProcess = allProjects
                 .Where(p => processedAssemblyList == null || !processedAssemblyList.Contains(p.AssemblyName))
                 .ToArray();
+
             var currentBatch = projectsToProcess
                 .ToArray();
             foreach (var project in currentBatch)
@@ -431,6 +450,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
             catch (Exception ex)
             {
+                Errors = ex.InnerException ?? ex;
                 Log.Exception(ex, "Failed to open solution: " + solutionFilePath);
                 return null;
             }

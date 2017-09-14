@@ -8,11 +8,14 @@ using Microsoft.SourceBrowser.Common;
 using ExceptionAnalysis.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class FirstChanceExceptionHandler
     {
+        #region Private 
+
         private static HashSet<Module> IgnoredModules = new HashSet<Module>();
 
         public static void IgnoreModules(IEnumerable<Module> t)
@@ -30,6 +33,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static bool isReentrant = false;
 
+        #endregion
+
         public static void HandleFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
             if (isReentrant)
@@ -41,6 +46,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             try
             {
                 var ex = e.Exception;
+                ex = ex.InnerException ?? ex;
+
+                #region Known #1
 
                 if ( ex is EntryPointNotFoundException )
                 {
@@ -130,10 +138,26 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     return;
                 }
 
+                #endregion
+
                 var trace = new TraceFactory().Manufacture(ex);
 
                 if ( trace.Select(f => f.Method.Module).Any(IgnoredModules.Contains) )
                 {
+                    return;
+                }
+
+                var reflectionLoad = ex as System.Reflection.ReflectionTypeLoadException;
+                if (reflectionLoad != null)
+                {
+                    var list = reflectionLoad.LoaderExceptions;
+                    foreach (var error in list)
+                    {
+                        if (Debugger.IsAttached)
+                            Trace.WriteLine($"Failed load {error.Message}");
+                        else
+                            Console.WriteLine($"Failed load {error.Message}");
+                    }
                     return;
                 }
 

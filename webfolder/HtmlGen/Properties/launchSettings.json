@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "HtmlGenerator": {
-      "commandName": "Project",
-      "commandLineArgs": "..\\..\\TestCode\\TestSolution.sln"
-    }
-  }
-}
