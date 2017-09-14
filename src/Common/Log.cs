@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -69,8 +70,8 @@ namespace Microsoft.SourceBrowser.Common
             if (WriteWrap != null)
             {
                 WriteWrap(message);
-                if (Level == 0)
-                    Console.WriteLine(message);
+                //if (Level == 0)
+                //    Console.WriteLine(message);
             }
             else
                 Console.WriteLine(message);
@@ -80,6 +81,10 @@ namespace Microsoft.SourceBrowser.Common
         public static void Output(string message)
         {
             Level++;
+            if (Level == 1 && Debugger.IsAttached)
+                // .nuget\packages\system.diagnostics.tracesource\4.0.0\ref\netstandard1.3\System.Diagnostics.TraceSource.dll
+                Trace.TraceError(message);
+            else 
             if (Level == 1)
                 Console.WriteLine(message);
 

@@ -1,6 +1,6 @@
 
-if not exist "bin\Debug\net46\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe" (
-   dotnet build src\HtmlGenerator.Tests\HtmlGenerator.Tests.csproj
+if not exist "bin\Debug\HtmlGenerator.Tests.dll" (
+   dotnet build src\HtmlGenerator.Tests\HtmlGenerator.Tests.csproj -o ..\..\bin\Debug
 )
 :next1
 
@@ -12,9 +12,12 @@ if not exist "bin\Debug\net46\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe" (
  @REM @copy "TestCode\TestSolution\Views\web.config.md" "TestCode\TestSolution\Views\web.config"
 
 set TestWindow=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow
-@if not exist "%TestWindow%" set TestWindow=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow
+@if not exist "%TestWindow%" set TestWindow=%ProgramFiles(x86)%\Microsoft Visual Studio\Preview\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow
+@REM @if not exist "%TestWindow%" set TestWindow=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow
 
-"%TestWindow%\vstest.console.exe" bin\Debug\net46\Microsoft.SourceBrowser.HtmlGenerator.Tests.exe
+"%TestWindow%\vstest.console.exe" bin\Debug\HtmlGenerator.Tests.dll
+
+@PAUSE
 
 dotnet test src\SourceIndexServer.Tests\SourceIndexServer.Tests.csproj
 

@@ -1,4 +1,4 @@
 
-dotnet build src\HtmlGenerator\HtmlGenerator.csproj
+dotnet build src\HtmlGenerator\HtmlGenerator.csproj -o ..\..\bin
 
 @PAUSE

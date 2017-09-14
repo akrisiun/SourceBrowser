@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+using System.Diagnostics;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -121,23 +122,57 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     Directory.CreateDirectory(ProjectDestinationFolder);
                 }
 
-                var documents = Project.Documents.Where(IncludeDocument).ToList();
+                IList<Document> documents = Project.Documents.Where(IncludeDocument).ToList();
 
-                var generationTasks = Partitioner.Create(documents)
-                    .GetPartitions(Environment.ProcessorCount)
-                    .Select(partition =>
-                        Task.Run(async () =>
+                if (documents.Count == 0)
+                {
+                    Console.WriteLine($"Documents=0, failed {Project.FilePath}");
+                }
+
+                if (Debugger.IsAttached)
+                {
+                    foreach (Document doc in documents)
+                    {
+                        try
                         {
-                            using (partition)
-                            {
-                                while (partition.MoveNext())
-                                {
-                                  await GenerateDocument(partition.Current);
-                                }
-                            }
-                        }));
+                            await GenerateDocument(doc);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Exception(ex, $"Failed doc: {doc.FilePath}");
+                        }
+                    }
 
-                await Task.WhenAll(generationTasks);
+                }
+                else
+                {
+                    var generationTasks = Partitioner.Create(documents)
+                        .GetPartitions(Environment.ProcessorCount)
+                        .Select(partition =>
+                            Task.Run(async () =>
+                            {
+                                using (partition)
+                                {
+                                    while (partition.MoveNext())
+                                    {
+                                        var doc = partition.Current as Document;
+
+                                        try
+                                        {
+                                            await GenerateDocument(doc);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log.Exception(ex, $"Failed doc: {doc.FilePath}");
+                                        }
+
+                                    }
+                                }
+
+                            }));
+
+                    await Task.WhenAll(generationTasks);
+                }
 
                 foreach (var document in documents)
                 {

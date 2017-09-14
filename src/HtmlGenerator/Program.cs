@@ -179,13 +179,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         List<string> pluginBlacklist;
 
         public static bool Force = false;
+        public static bool Assert = true;
 
         public static bool emitAssemblyList = false;
         public static bool noBuiltInFederations = false;
 
         public void Prepare(bool force = false)
         {
-            AssertTraceListener.Register();
+            if (Assert)
+                AssertTraceListener.Register();
+
             AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
 
             HelpMSBuildFindToolset();
@@ -217,25 +220,33 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             using (Disposable.Timing("Generating website"))
             {
-                var federation = new Federation();
-
-                if (!noBuiltInFederations)
-                {
-                    federation.AddFederations(Federation.DefaultFederatedIndexUrls);
-                }
-
-                federation.AddFederations(federations);
-
-                foreach (var entry in offlineFederations)
-                {
-                    federation.AddFederation(entry.Key, entry.Value);
-                }
+                var federation = GetFederations();
 
                 IndexSolutions(projects, properties, federation, serverPathMappings, pluginBlacklist);
                 FinalizeProjects(emitAssemblyList, federation);
                 WebsiteFinalizer.Finalize(websiteDestination, emitAssemblyList, federation);
             }
         }
+
+        public Federation GetFederations()
+        { 
+            var federation = new Federation();
+
+            if (!noBuiltInFederations)
+            {
+            federation.AddFederations(Federation.DefaultFederatedIndexUrls);
+            }
+
+            federation.AddFederations(federations);
+
+            foreach (var entry in offlineFederations)
+            {
+                federation.AddFederation(entry.Key, entry.Value);
+            }
+
+            return federation;
+        }
+
 
         /// <summary>
         /// Workaround for a bug in MSBuild where it couldn't find the SdkResolver if run not in VS command prompt:
@@ -270,7 +281,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             {
                 projects.Add(project);
             }
-            else
+            else if (!path.EndsWith(".exe"))
             {
                 Log.Exception("Project not found or not supported: " + path, isSevere: false);
             }

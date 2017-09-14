@@ -12,7 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <NuGetInput Include="$(MSBuildThisFile)" />
-    <NuGetInput Include="$(NuSpecFile)" />
+    <!--<NuGetInput Include="$(NuSpecFile)" />-->
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web\index\AffiliateLinks.txt">
@@ -53,10 +53,10 @@
   <ItemGroup>
     <Reference Include="System.Configuration" />
   </ItemGroup>
-  <Target Name="PublishWebsite" AfterTargets="CoreBuild" BeforeTargets="BuildNuGet">
+  <!--<Target Name="PublishWebsite" AfterTargets="CoreBuild" BeforeTargets="BuildNuGet">
     <Exec Command="dotnet publish &quot;$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\SourceIndexServer\SourceIndexServer.csproj'))&quot; -f netcoreapp1.1 -c Release -o &quot;$([System.IO.Path]::GetFullPath('$(OutDir)\Web'))&quot;" />
   </Target>
   <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(OutDir)\Microsoft.SourceBrowser.$(NuGetVersion).nupkg">
     <Exec Command="&quot;$(SolutionDir)\.nuget\NuGet.exe&quot; Pack Microsoft.SourceBrowser.nuspec -NoPackageAnalysis -BasePath &quot;$(OutDir.TrimEnd('\'))&quot; -OutputDirectory &quot;$(OutDir.TrimEnd('\'))&quot; -prop currentVersion=$(NuGetVersion)" />
-  </Target>
+  </Target>-->
 </Project>
