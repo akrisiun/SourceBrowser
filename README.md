@@ -1,7 +1,21 @@
+# Dockerfile for cloud (-f netcoreapp1.2)
+
+<https://github.com/akrisiun/SourceBrowser/blob/master/docker/Dockerfile> 
+
+## TODO
+
+https://docs.microsoft.com/en-us/aspnet/core/publishing/linuxproduction
+```
+	app.UseForwardedHeaders(new ForwardedHeadersOptions
+    {
+		ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    });
+```
+
 # SourceBrowser
 Source browser website generator that powers https://referencesource.microsoft.com, http://source.roslyn.io, https://source.dot.net, and https://aspnetsource.azurewebsites.net/ (unofficial ASP.NET Core 1.0 source).
 
-Create and host your own static HTML website to browse your C#/VB/MSBuild/TypeScript source code. **Note** that it does require an ASP.NET Core website for hosting (symbol index is kept server-side), so [without ASP.NET Core the search function doesn't work](https://github.com/KirillOsenkov/SourceBrowser/wiki/Architecture#server-side).
+Create and host your own static HTML website to browse your C#/VB/MSBuild/TypeScript source code. **Note** that it does require an ASP.NET Core website for hosting (symbol index is kept server-side), so [without ASP.NET Core the search function doesn't work](https://github.com/KirillOsenkov/SourceBrowser/wiki/Why-does-generated-Html-still-require-a-server-side-ASP.NET-Web-API%3F).
 
 Of course Source Browser allows you to browse its own source code:
 [http://sourcebrowser.azurewebsites.net](http://sourcebrowser.azurewebsites.net)

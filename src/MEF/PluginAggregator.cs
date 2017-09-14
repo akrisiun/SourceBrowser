@@ -21,6 +21,8 @@ namespace Microsoft.SourceBrowser.MEF
 
         private Dictionary<string, Dictionary<string, string>> PluginConfigurations;
 
+        public Exception LoadErrors { get; set; }
+
         public int Count
         {
             get
@@ -37,15 +39,29 @@ namespace Microsoft.SourceBrowser.MEF
             //Create the CompositionContainer with the parts in the catalog
             container = new CompositionContainer(new DirectoryCatalog(AppDomain.CurrentDomain.BaseDirectory));
 
-            //Fill the imports of this object
-            container.ComposeParts(this);
-
             var blackListSet = new HashSet<string>(blackList);
+        }
 
-            Plugins = plugins
-            .Select(pair => new SourceBrowserPluginWrapper(pair.Value, pair.Metadata, Logger))
-            .Where(w => !blackListSet.Contains(w.Name))
-            .ToList();
+        private HashSet<string> blackListSet;
+
+        public void Wrap()
+        {
+            try
+            {
+
+                //Fill the imports of this object
+                container.ComposeParts(this);
+
+                Plugins = plugins
+                .Select(pair => new SourceBrowserPluginWrapper(pair.Value, pair.Metadata, Logger))
+                .Where(w => !blackListSet.Contains(w.Name))
+                .ToList();
+            }
+            catch (Exception ex)
+            {
+                // Assembly load errors
+                LoadErrors = ex.InnerException ?? ex;
+            }
         }
 
         public void Init()
@@ -81,7 +97,7 @@ namespace Microsoft.SourceBrowser.MEF
 
         public IEnumerable<ITextVisitor> ManufactureTextVisitors(Project project)
         {
-            return Plugins.SelectMany(p => p.ManufactureTextVisitors(project.FilePath));
+            return Plugins?.SelectMany(p => p.ManufactureTextVisitors(project.FilePath));
         }
 
         public void Dispose()
@@ -92,12 +108,12 @@ namespace Microsoft.SourceBrowser.MEF
 
         public IEnumerator<SourceBrowserPluginWrapper> GetEnumerator()
         {
-            return Plugins.GetEnumerator();
+            return Plugins?.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return Plugins.GetEnumerator();
+            return Plugins?.GetEnumerator();
         }
     }
 }
