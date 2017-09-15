@@ -44,10 +44,10 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
             }
 
             var host = new WebHostBuilder()
-                .UseUrls(urls)
                 .UseSetting("detailedErrors", "true")
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseUrls(urls)
                 .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();

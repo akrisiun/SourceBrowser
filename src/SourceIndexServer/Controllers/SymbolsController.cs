@@ -8,18 +8,7 @@ using Microsoft.SourceBrowser.Common;
 using Microsoft.SourceBrowser.SourceIndexServer.Models;
 
 namespace Microsoft.SourceBrowser.SourceIndexServer.Controllers
-{
-    public class IndexController : Controller
-    {
-        [HttpGet("/index")]
-        // [HttpGet("/")]
-        public IActionResult Index()
-        {
-            // ~/
-            return File("index.html", "text/html");
-        }
-    }
-
+{ 
     public class SymbolsController : Controller
     {
         private readonly IServiceProvider _provider;

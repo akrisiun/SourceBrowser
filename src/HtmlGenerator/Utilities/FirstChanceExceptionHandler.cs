@@ -127,7 +127,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     return;
                 }
 
-                string stackTrace = ex.StackTrace;
+                #endregion
+
+                var message = ex?.Message ?? "";
+                if (ex != null && ex.InnerException != null)
+                    message += $"\n{ex.InnerException.Message}";
+
+                if (message.Length == 0
+                    || message.Contains("E_SQLITE")
+                    || message.Contains(@"line switch for ""Csc.exe"".Value cannot be null"))
+                {
+                    //  "Could not load file or assembly 'E_SQLITE3.DLL'
+                    //  Csc issues
+                    return;
+                }
+
+                string stackTrace = ex.StackTrace ?? "";
                 if (stackTrace.Contains("Antlr"))
                 {
                     return;
@@ -137,8 +152,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     return;
                 }
-
-                #endregion
 
                 var trace = new TraceFactory().Manufacture(ex);
 
@@ -161,12 +174,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     return;
                 }
 
-                var message = DateTime.Now.ToString() + ": First chance exception";
+                message = DateTime.Now.ToString() + ": First chance exception";
                 if (SolutionGenerator.CurrentAssemblyName != null)
                 {
                     message += " while processing assembly: " + SolutionGenerator.CurrentAssemblyName;
 
-                    if (SolutionGenerator.CurrentAssemblyName == "Microsoft.VisualStudio.Diagnostics.ManagedHeapAnalyzerUnitTests" && ex.Message.Contains("The network path was not found"))
+                    if (SolutionGenerator.CurrentAssemblyName == "Microsoft.VisualStudio.Diagnostics.ManagedHeapAnalyzerUnitTests" 
+                        && ex.Message.Contains("The network path was not found"))
                     {
                         // their project file isn't authored correctly but we deal with it well
                         // so just ignore this one

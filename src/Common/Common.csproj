@@ -3,6 +3,10 @@
     <AssemblyName>Microsoft.SourceBrowser.Common</AssemblyName>
     <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
   </PropertyGroup>
+  <PropertyGroup>
+    <Version>1.0.15-beta1</Version>
+    <NuGetVersion>1.0.15-beta1</NuGetVersion>
+  </PropertyGroup>  
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <DefineConstants>$(DefineConstants);NET46</DefineConstants>
   </PropertyGroup>

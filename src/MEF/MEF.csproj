@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup>
+    <Version>1.0.15-beta1</Version>
+    <NuGetVersion>1.0.15-beta1</NuGetVersion>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ManagedEsent" Version="1.9.4" />
     <PackageReference Include="Microsoft.Build" Version="15.3.409" />

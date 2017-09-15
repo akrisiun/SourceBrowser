@@ -229,3 +229,7 @@ webfolder/HtmlGen/Pass*/
 webfolder/HtmlGen/U*/
 webfolder/HtmlGen/T*/
 webfolder/src/netstandard*/
+src/csLibCheck/
+src/Microsoft.Language.Xml/
+*.runtimeconfig.dev.json
+*.runtimeconfig.json

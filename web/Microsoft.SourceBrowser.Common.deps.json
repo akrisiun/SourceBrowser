@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v1.6": {},
     ".NETStandard,Version=v1.6/": {
-      "Microsoft.SourceBrowser.Common/1.0.0": {
+      "Microsoft.SourceBrowser.Common/1.0.15-beta1": {
         "dependencies": {
           "Microsoft.Build": "15.3.409",
           "NETStandard.Library": "1.6.1",
@@ -1125,7 +1125,7 @@
     }
   },
   "libraries": {
-    "Microsoft.SourceBrowser.Common/1.0.0": {
+    "Microsoft.SourceBrowser.Common/1.0.15-beta1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -1322,7 +1322,7 @@
     "System.Collections.Immutable/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-71hw5RUJRu5+q/geUY69gpXD8Upd12cH+F3MwpXV2zle7Bqqkrmc1JblOTuvUcgmdnUtQvBlV5e1d6RH+H2lvA==",
+      "sha512": "sha512-E83xz5ijTBTzxBQMjK2o31h8MDcPcqLuWPR5l9ZHN/xgqfXW2l4hkksXbtPkhmJ9eh6b3QRUqI4pFkZbf+tIOw==",
       "path": "system.collections.immutable/1.4.0",
       "hashPath": "system.collections.immutable.1.4.0.nupkg.sha512"
     },
@@ -1343,7 +1343,7 @@
     "System.Diagnostics.Contracts/4.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-HvQQjy712vnlpPxaloZYkuE78Gn353L0SJLJVeLcNASeg9c4qla2a1Xq8I7B3jZoDzKPtHTkyVO7AZ5tpeQGuA==",
+      "sha512": "sha512-Fnk7yIPe/kTudmrSzUMP+6kBsnPcT4kFAreZ0i/03r/Zoo4EeYmCH9CNjg7hLGxe28Srv4SRBkWnWIO10dCJ8w==",
       "path": "system.diagnostics.contracts/4.0.1",
       "hashPath": "system.diagnostics.contracts.4.0.1.nupkg.sha512"
     },
@@ -1462,7 +1462,7 @@
     "System.IO.Pipes/4.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-L9QVhk8hIEix5KNA0kW58Ha+Y1dNGqqqIhAaJkhcGCWeQzUmN0njzI7SG/XAazpMecboOdFFlH3pH/qbwXLJAg==",
+      "sha512": "sha512-9E1eywqXenQIArZczOmePXj1ArGh3hQXZPhXIzEMXQUJDLCaWMg2t6rxRqI9RqVIuU5pIVNyLNg/ZRY+J8kIQw==",
       "path": "system.io.pipes/4.0.0",
       "hashPath": "system.io.pipes.4.0.0.nupkg.sha512"
     },
@@ -1679,7 +1679,7 @@
     "System.Security.Principal/4.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-On+SKhXY5rzxh/S8wlH1Rm0ogBlu7zyHNxeNBiXauNrhHRXAe9EuX8Yl5IOzLPGU5Z4kLWHMvORDOCG8iu9hww==",
+      "sha512": "sha512-lePmCiQbRz2uii05W+PsTXrmqV721dWKZdfoBvyO2quw3Y8oKL7YQ4iELRvzIo5gXBG42iy6DpRpR+6EVApO+A==",
       "path": "system.security.principal/4.0.1",
       "hashPath": "system.security.principal.4.0.1.nupkg.sha512"
     },

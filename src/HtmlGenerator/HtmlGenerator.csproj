@@ -8,8 +8,9 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <PropertyGroup>
-    <NuSpecFile>$(MSBuildProjectDirectory)\Microsoft.SourceBrowser.nuspec</NuSpecFile>
+    <Version>1.0.15-beta1</Version>
     <NuGetVersion>1.0.15-beta1</NuGetVersion>
+    <!-- <NuSpecFile>$(MSBuildProjectDirectory)\Microsoft.SourceBrowser.nuspec</NuSpecFile> -->
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

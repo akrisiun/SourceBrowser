@@ -22,7 +22,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            RootPath = Environment.WebRootPath;
+            RootPath = Environment.WebRootPath ?? Directory.GetCurrentDirectory();
             var folder = System.Environment.GetEnvironmentVariable("FOLDER") ?? "";
             if (folder.Length > 0 && Directory.Exists(folder))
                 RootPath = folder;
@@ -39,7 +39,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
             services.AddMvc();
         }
 
-        public string RootPath { get; set; }
+        public static string RootPath { get; set; }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

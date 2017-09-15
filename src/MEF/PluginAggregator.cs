@@ -12,6 +12,7 @@ namespace Microsoft.SourceBrowser.MEF
     {
         private CompositionContainer container;
 
+        // Assembly System.ComponentModel.Composition, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
         [ImportMany]
 #pragma warning disable CS0649
         IEnumerable<Lazy<ISourceBrowserPlugin, ISourceBrowserPluginMetadata>> plugins;
@@ -39,10 +40,11 @@ namespace Microsoft.SourceBrowser.MEF
             //Create the CompositionContainer with the parts in the catalog
             container = new CompositionContainer(new DirectoryCatalog(AppDomain.CurrentDomain.BaseDirectory));
 
-            var blackListSet = new HashSet<string>(blackList);
+            var BlackListSet = new HashSet<string>(blackList);
         }
-
-        private HashSet<string> blackListSet;
+#pragma warning disable CS0649
+        public  HashSet<string> BlackListSet {get; set;}
+#pragma warning restore CS0649
 
         public void Wrap()
         {
@@ -54,7 +56,7 @@ namespace Microsoft.SourceBrowser.MEF
 
                 Plugins = plugins
                 .Select(pair => new SourceBrowserPluginWrapper(pair.Value, pair.Metadata, Logger))
-                .Where(w => !blackListSet.Contains(w.Name))
+                .Where(w => !BlackListSet.Contains(w.Name))
                 .ToList();
             }
             catch (Exception ex)
