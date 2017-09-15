@@ -13,12 +13,14 @@
     <NuGetVersion>1.0.15-beta1</NuGetVersion>
     <!-- <NuSpecFile>$(MSBuildProjectDirectory)\Microsoft.SourceBrowser.nuspec</NuSpecFile> -->
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference 
-         Include="Microsoft.TargetingPack.NETFramework.v4.6"
-         Version="1.0.1" ExcludeAssets="All" PrivateAssets="All" />
     <!-- 
-         dotnet add package Microsoft.TargetingPack.NETFramework.v4.6 - - version 1.0.1
+    <PackageReference Include="Microsoft.TargetingPack.NETFramework.v4.6" Version="1.0.1" ExcludeAssets="All" PrivateAssets="All" />
+
+    dotnet add package Microsoft.TargetingPack.NETFramework.v4.6 - - version 1.0.1
          -source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
          https://dotnet.myget.org/feed/dotnet-core/package/nuget/Microsoft.TargetingPack.NETFramework.v4.6
     -->

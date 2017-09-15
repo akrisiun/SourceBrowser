@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using System;
 
 namespace Microsoft.SourceBrowser.Common
 {
@@ -72,9 +73,11 @@ namespace Microsoft.SourceBrowser.Common
             {
                 try
                 {
+                    var envVS = Environment.GetEnvironmentVariable("VisualStudioVersion");
+
                     var project = ProjectCollection.GlobalProjectCollection.LoadProject(
                         projectFilePath,
-                        toolsVersion: "15.0");
+                        toolsVersion: envVS ?? "15.0");
 
                     assemblyName = project.GetPropertyValue("AssemblyName");
                     if (assemblyName == "")

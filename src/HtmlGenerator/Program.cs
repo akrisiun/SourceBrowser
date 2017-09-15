@@ -262,6 +262,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             if (Environment.GetEnvironmentVariable("VSINSTALLDIR") == null)
             {
                 var root = @"C:\Program Files (x86)\Microsoft Visual Studio\2017";
+                if (!Directory.Exists(root) 
+                    && Directory.Exists(@"C:\Program Files(x86)\Microsoft Visual Studio\Preview"))
+                    root = @"C:\Program Files(x86)\Microsoft Visual Studio\Preview";
+
                 if (Directory.Exists(root))
                 {
                     foreach (var sku in Directory.GetDirectories(root))
