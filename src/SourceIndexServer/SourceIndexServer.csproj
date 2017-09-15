@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <AssemblyName>Microsoft.SourceBrowser.SourceIndexServer</AssemblyName>
+    <AssemblyName>SourceIndexServer</AssemblyName>
     <RootNamespace>Microsoft.SourceBrowser.SourceIndexServer</RootNamespace>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>

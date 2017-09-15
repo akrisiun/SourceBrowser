@@ -11,10 +11,6 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
     {
         public static void Main(string[] args)
         {
-            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/hosting
-            // Microsoft.Extensions.Configuration.CommandLine 1.1.1
-            // http://aspnetsource.azurewebsites.net/#Microsoft.Extensions.Configuration.CommandLine
-            
             Console.WriteLine("Starting program..");
 
             string[] urls = new[] { "http://0.0.0.0:5000" }; // default
@@ -30,7 +26,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
                         Debugger.Break();
                 }
 
-                // --urls "http://*:58088"
+                // --urls "http://*:5001"
                 var list = args.GetEnumerator();
                 while (list.MoveNext())
                 {
@@ -48,14 +44,12 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
             }
 
             var host = new WebHostBuilder()
-                // .UseConfiguration(config)
                 .UseUrls(urls)
                 .UseSetting("detailedErrors", "true")
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
-                // .UseApplicationInsights()
                 .Build();
 
             host.Run();

@@ -1,8 +1,24 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>    
     <TargetFramework>net46</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile  Include="GenTest.cs" />
+    <Compile  Include="GitBlameVisitorTests.cs" />
+    <Compile  Include="Listener.cs" />
+    <Compile  Include="MetadataAsSourceUnitTests.cs" />
+    <Compile  Include="MSBuildExpressionParserTests.cs" />
+    <Compile  Include="PathsUnitTests.cs" />
+    <Compile  Include="PrepareRangesTests.cs" />
+    <Compile  Include="RedirectFileTests.cs" />
+    <Compile  Include="SerializationUnitTests.cs" />
+    <Compile  Include="SymbolIdUnitTests.cs" />
+    <Compile  Include="TestNormalize.cs" />
+    <Compile  Include="TextUtilitiesTests.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.24.0" />

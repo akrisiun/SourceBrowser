@@ -287,8 +287,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         public static string CurrentAssemblyName = null;
 
+        public IEnumerable<Project> Projects => solution?.Projects;
+
         /// <returns>true if only part of the solution was processed and the method needs to be called again, false if all done</returns>
-        public bool Generate(HashSet<string> processedAssemblyList = null, Folder<Project> solutionExplorerRoot = null)
+        public bool Generate(
+            HashSet<string> processedAssemblyList = null, Folder<Project> solutionExplorerRoot = null, 
+            IEnumerable<Project> slnProjects = null)
         {
             if (solution == null)
             {
@@ -297,7 +301,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return false;
             }
 
-            var allProjects = solution.Projects.ToArray();
+            var allProjects = (slnProjects ?? this.Projects).ToArray();
             if (allProjects.Length == 0)
             {
                 Log.Exception("Solution " + this.ProjectFilePath + " has 0 projects - this is suspicious");
@@ -306,6 +310,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             var projectsToProcess = allProjects
                 .Where(p => processedAssemblyList == null || !processedAssemblyList.Contains(p.AssemblyName))
                 .ToArray();
+
             var currentBatch = projectsToProcess
                 .ToArray();
             foreach (var project in currentBatch)

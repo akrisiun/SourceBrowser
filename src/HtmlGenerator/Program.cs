@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+using System.Linq;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -211,7 +212,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             Log.MessageLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.MessageLogFile);
         }
 
-        public void Run(bool prepared = false)
+        public SolutionGenerator Run(bool prepared = false)
         {
             if (!prepared)
                 Prepare(Force);
@@ -226,6 +227,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 FinalizeProjects(emitAssemblyList, federation);
                 WebsiteFinalizer.Finalize(websiteDestination, emitAssemblyList, federation);
             }
+
+            SolutionGenerator gen = Instance;
+            return gen;
         }
 
         public Federation GetFederations()
@@ -315,7 +319,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static readonly Folder<Project> mergedSolutionExplorerRoot = new Folder<Project>();
 
-        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, Federation federation, Dictionary<string, string> serverPathMappings, IEnumerable<string> pluginBlacklist)
+        public static bool IsDebug = false;
+        public static SolutionGenerator Instance = null;
+
+        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, 
+            Federation federation, Dictionary<string,    string> serverPathMappings, IEnumerable<string> pluginBlacklist)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -344,8 +352,20 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         serverPathMappings: serverPathMappings,
                         pluginBlacklist: pluginBlacklist))
                     {
+                        if (IsDebug)
+                            Instance = solutionGenerator;
+
                         solutionGenerator.GlobalAssemblyList = assemblyNames;
-                        solutionGenerator.Generate(solutionExplorerRoot: mergedSolutionExplorerRoot);
+                        Generate(solutionGenerator);
+
+                        error = SolutionGenerator.Errors ?? error;     // get Last one error
+                    }
+
+                    if (error != null)
+                    {
+                        error = error.InnerException ?? error;
+                        var type = error.GetType().FullName; // as System.Reflection.???
+                        Console.WriteLine($"Generator error {type} \n {error.ToString()}");
                     }
 
                     error = SolutionGenerator.Errors;
@@ -361,6 +381,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 GC.Collect();
             }
         }
+
+        public static void Generate(SolutionGenerator sln)
+        {
+            var slnProjects = sln?.Projects.ToList();
+
+            sln.Generate(solutionExplorerRoot: mergedSolutionExplorerRoot, slnProjects: slnProjects);
+        }
+
 
         private static void FinalizeProjects(bool emitAssemblyList, Federation federation)
         {
