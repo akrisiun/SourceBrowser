@@ -16,6 +16,9 @@ namespace HtmlGenerator.Tests
         [TestMethod]
         public void _Run_1()
         {
+            if (!Debugger.IsAttached)
+                return;   // ignore myget run
+
             string[] args = new[] { "HtmlGenerator.exe", "SourceBrowser.sln", "web4/Index" };
             var dir = AppDomain.CurrentDomain.BaseDirectory + @"..\..\..\..\..\..\";
             var path = Path.GetFullPath(dir);
@@ -34,6 +37,9 @@ namespace HtmlGenerator.Tests
         [TestMethod]
         public void _Run_TestCode()
         {
+            if (!Debugger.IsAttached)
+                return;   // ignore myget run
+
             // \src2\master\SourceBrowser\TestCode\TestSolution.sln
             string[] args = new[] { "HtmlGenerator.exe", @"TestCode\TestSolution.sln", "webTest/Index" };
             var dir = AppDomain.CurrentDomain.BaseDirectory + @"..\..\..\..\..\..\";
@@ -104,7 +110,6 @@ namespace HtmlGenerator.Tests
 
             Program.Instance = null;
         }
-
         public static void Debug(string str)
         {
             // F9 ?
