@@ -14,9 +14,11 @@ set MsTestExe=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBu
   @set MsBuildExe=%ProgramFiles%\MSBuild\15.0\Bin\MSBuild.exe
 )
 
+dotnet restore SourceBrowser.sln
+
 "%MsBuildExe%" /p:Configuration="%cfg%" /v:m /m src\Common\Common.csproj
 "%MsBuildExe%" /p:Configuration="%cfg%" /v:m /m src\BuildLogParser\BuildLogParser.csproj
-"%MsBuildExe%" /p:Configuration="%cfg%" /v:m /m src\Microsoft.Language.Xml\src\Microsoft.Language.Xml\Microsoft.Language.Xml.csproj
+"%MsBuildExe%" /p:Configuration="%cfg%" /v:m /m src\Mef\Mef.csproj
 "%MsBuildExe%" /p:Configuration="%cfg%" /v:m /m src\HtmlGenerator\HtmlGenerator.csproj
 
 :after
