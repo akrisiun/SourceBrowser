@@ -1,3 +1,8 @@
+[![andriusk MyGet Build Status](https://www.myget.org/BuildSource/Badge/andriusk?identifier=1739964b-be8c-442f-a02c-270d08b595e4)](https://www.myget.org/)
+
+Beta package build on myget:
+https://www.myget.org/feed/andriusk/package/nuget/HtmlGenerator
+
 # Dockerfile for cloud (-f netcoreapp1.2)
 
 <https://github.com/akrisiun/SourceBrowser/blob/master/docker/Dockerfile> 
