@@ -39,7 +39,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="-._~!%24%27%28%29+,=%40.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Class1.Partial.cs" />
   </ItemGroup>

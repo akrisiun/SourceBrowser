@@ -115,15 +115,12 @@ class A
     {
     }
 
-    public abstract string Name
-    {
-        get;
-    }
+    // public abstract string Name     {        get;    }
 
     protected virtual event Action Event;
 }
 
-class B : A, System.ICloneable
+class B // : A, System.ICloneable
 {
     System.ICloneable c;
     A a = new A();
@@ -132,20 +129,16 @@ class B : A, System.ICloneable
     {
     }
 
-    public override void M()
+    public // override 
+        void M()
     {
-        base.M();
-        Name = Name;
+        // base.M();
+        // Name = Name;
         var b = new B();
     }
 
-    protected override string Name
-    {
-        get
-        {
-            return base.Name;
-        }
-    }
+    // protected override string Name     {   get  {     return base.Name;         }     }
 
-    protected internal override event Action Event;
+    protected internal //  override
+       event Action Event;
 }
