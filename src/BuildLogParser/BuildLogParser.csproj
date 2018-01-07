@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.SourceBrowser.BuildLogParser</AssemblyName>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <Version>1.0.15-beta1</Version>
     <NuGetVersion>1.0.15-beta1</NuGetVersion>
   </PropertyGroup>  
   <ItemGroup>
+    <PackageReference Include="System.Runtime" Version="4.3.0" />  
     <PackageReference Include="Microsoft.Build" Version="15.3.409" />
   </ItemGroup>
   <ItemGroup>

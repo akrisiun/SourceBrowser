@@ -1,16 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.SourceBrowser.Common</AssemblyName>
-    <TargetFrameworks>netstandard1.6;net46</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net461</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
     <Version>1.0.15-beta1</Version>
     <NuGetVersion>1.0.15-beta1</NuGetVersion>
   </PropertyGroup>  
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
-    <DefineConstants>$(DefineConstants);NET46</DefineConstants>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <DefineConstants>$(DefineConstants);NET46;NET461</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="System.Runtime" Version="4.3.0" />  
     <PackageReference Include="Microsoft.Build" Version="15.3.409" />
     <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
   </ItemGroup>

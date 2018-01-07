@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -32,6 +33,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             foreach (var arg in args)
             {
+                if (arg.StartsWith("-debug"))
+                {
+                    Debugger.Break();
+                }
+
                 if (arg.StartsWith("/out:"))
                 {
                     Paths.SolutionDestinationFolder = Path.GetFullPath(arg.Substring("/out:".Length).StripQuotes());

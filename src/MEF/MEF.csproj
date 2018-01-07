@@ -1,19 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <Version>1.0.15-beta1</Version>
     <NuGetVersion>1.0.15-beta1</NuGetVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="System.Runtime" Version="4.3.0" />
+
     <PackageReference Include="ManagedEsent" Version="1.9.4" />
     <PackageReference Include="Microsoft.Build" Version="15.3.409" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.3.0-beta1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.3.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="2.3.1" />
     <PackageReference Include="Microsoft.Composition" Version="1.0.31" />
+
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
   </ItemGroup>

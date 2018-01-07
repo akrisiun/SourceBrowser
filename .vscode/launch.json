@@ -5,6 +5,14 @@
    "version": "0.2.0",
    "configurations": [
         {
+            // mono --debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555 bin/Program.exe
+            "name": "Attach to Mono",
+            "request": "attach",
+            "type": "mono",
+            "address": "localhost",
+            "port": 55555
+        },
+        {
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",

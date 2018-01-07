@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}/src/SourceIndexServer/SourceIndexServer.csproj"
+                "${workspaceRoot}/SourceBrowser.sln"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"

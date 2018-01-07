@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.23.1" />
