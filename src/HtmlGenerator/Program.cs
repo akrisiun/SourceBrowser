@@ -33,16 +33,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             foreach (var arg in args)
             {
-                if (arg.StartsWith("-debug"))
+                if (arg.StartsWith("-debug") || arg.StartsWith("/debug"))
                 {
                     Debugger.Break();
                 }
+
+                if (arg == "/force" || arg == "-force")
+                {
+                    Force = true;
+                    continue;
+                }                
 
                 if (arg.StartsWith("/out:"))
                 {
                     Paths.SolutionDestinationFolder = Path.GetFullPath(arg.Substring("/out:".Length).StripQuotes());
                     continue;
-                }
+                }            
 
                 if (arg.StartsWith("/serverPath:"))
                 {
@@ -54,12 +60,6 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         continue;
                     }
                     p.serverPathMappings.Add(Path.GetFullPath(parts[0]), parts[1]);
-                    continue;
-                }
-
-                if (arg == "/force")
-                {
-                    Force = true;
                     continue;
                 }
 
@@ -224,6 +224,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 Prepare(Force);
 
             var websiteDestination = Paths.SolutionDestinationFolder;
+            var args = ";" + String.Join(";", Environment.GetCommandLineArgs()) ?? "";
+            Console.WriteLine($"Debug: {args}");
+            //  if (args.Contains(";-debug")) Debugger.Break();
 
             using (Disposable.Timing("Generating website"))
             {

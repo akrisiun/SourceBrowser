@@ -271,6 +271,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return null;
             }
 
+            assemblyName = Path.GetFileName(assemblyName);
             AssemblyName = SymbolIdService.GetAssemblyId(assemblyName);
             string subfolder = Path.Combine(solutionDestinationPath, AssemblyName);
             return subfolder;

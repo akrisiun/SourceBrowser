@@ -6,14 +6,30 @@
    "configurations": [
         {
             // mono --debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555 bin/Program.exe
+            "name": "Mono--debug",
+            "type": "mono",
+			"request": "launch",
+            "program": "${workspaceRoot}/bin/HtmlGenerator.exe",
+			"cwd": "${workspaceRoot}",            
+            "args": [ 
+                "-debug",
+                "-force",
+                "SourceBrowser.sln",
+                "/out:web5f"
+            ],
+            "preLaunchTask": "fast-build"
+        },
+        {
+            // mono --debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555 bin/Program.exe
             "name": "Attach to Mono",
             "request": "attach",
             "type": "mono",
             "address": "localhost",
-            "port": 55555
+            "port": 55555,
+            "preLaunchTask": "debug",
         },
         {
-            "name": ".NET Core Launch (web)",
+            "name": "netcoreapp1.1 Launch (web)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
@@ -43,12 +59,6 @@
             "sourceFileMap": {
                 "/Views": "${workspaceRoot}/Views"
             }
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
         }
     ]
 }

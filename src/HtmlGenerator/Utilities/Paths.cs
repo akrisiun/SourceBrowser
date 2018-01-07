@@ -144,22 +144,24 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return Path.GetFileName(filePath);
             }
 
-            if (relativeToPath.EndsWith("\\"))
+            if (relativeToPath.EndsWith($"{Path.DirectorySeparatorChar}")) // "\\"))
             {
-                relativeToPath = relativeToPath.TrimEnd('\\');
+                relativeToPath = relativeToPath.TrimEnd(Path.DirectorySeparatorChar);
             }
 
             StringBuilder result = new StringBuilder();
             while (!EnsureTrailingSlash(filePath).StartsWith(EnsureTrailingSlash(relativeToPath), StringComparison.OrdinalIgnoreCase))
             {
-                result.Append(@"..\");
+                result.Append($"..{Path.DirectorySeparatorChar}");
                 relativeToPath = Path.GetDirectoryName(relativeToPath);
+                if (relativeToPath == null)
+                    result.ToString();
             }
 
             if (filePath.Length > relativeToPath.Length)
             {
-                filePath = filePath.Substring(relativeToPath.Length);
-                if (filePath.StartsWith("\\"))
+                filePath = filePath.Substring(relativeToPath.Length) ?? "";
+                if (filePath.Length > 0 && filePath[0].Equals(Path.DirectorySeparatorChar)) 
                 {
                     filePath = filePath.Substring(1);
                 }
@@ -263,9 +265,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return path;
             }
 
-            if (!path.EndsWith("\\"))
+            if (!path.EndsWith("\\") && !path.EndsWith("/"))
             {
-                path += "\\";
+                path += Path.DirectorySeparatorChar.ToString(); // "\\";
             }
 
             return path;
