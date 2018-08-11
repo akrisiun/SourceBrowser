@@ -8,7 +8,7 @@ using Microsoft.SourceBrowser.Common;
 using Microsoft.SourceBrowser.SourceIndexServer.Models;
 
 namespace Microsoft.SourceBrowser.SourceIndexServer.Controllers
-{
+{ 
     public class SymbolsController : Controller
     {
         private readonly IServiceProvider _provider;

@@ -8,11 +8,14 @@ using Microsoft.SourceBrowser.Common;
 using ExceptionAnalysis.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class FirstChanceExceptionHandler
     {
+        #region Private 
+
         private static HashSet<Module> IgnoredModules = new HashSet<Module>();
 
         public static void IgnoreModules(IEnumerable<Module> t)
@@ -30,6 +33,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static bool isReentrant = false;
 
+        #endregion
+
         public static void HandleFirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
             if (isReentrant)
@@ -41,6 +46,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             try
             {
                 var ex = e.Exception;
+                ex = ex.InnerException ?? ex;
+
+                #region Known #1
 
                 if ( ex is EntryPointNotFoundException )
                 {
@@ -119,7 +127,22 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     return;
                 }
 
-                string stackTrace = ex.StackTrace;
+                #endregion
+
+                var message = ex?.Message ?? "";
+                if (ex != null && ex.InnerException != null)
+                    message += $"\n{ex.InnerException.Message}";
+
+                if (message.Length == 0
+                    || message.Contains("E_SQLITE")
+                    || message.Contains(@"line switch for ""Csc.exe"".Value cannot be null"))
+                {
+                    //  "Could not load file or assembly 'E_SQLITE3.DLL'
+                    //  Csc issues
+                    return;
+                }
+
+                string stackTrace = ex.StackTrace ?? "";
                 if (stackTrace.Contains("Antlr"))
                 {
                     return;
@@ -137,12 +160,27 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     return;
                 }
 
-                var message = DateTime.Now.ToString() + ": First chance exception";
+                var reflectionLoad = ex as System.Reflection.ReflectionTypeLoadException;
+                if (reflectionLoad != null)
+                {
+                    var list = reflectionLoad.LoaderExceptions;
+                    foreach (var error in list)
+                    {
+                        if (Debugger.IsAttached)
+                            Trace.WriteLine($"Failed load {error.Message}");
+                        else
+                            Console.WriteLine($"Failed load {error.Message}");
+                    }
+                    return;
+                }
+
+                message = DateTime.Now.ToString() + ": First chance exception";
                 if (SolutionGenerator.CurrentAssemblyName != null)
                 {
                     message += " while processing assembly: " + SolutionGenerator.CurrentAssemblyName;
 
-                    if (SolutionGenerator.CurrentAssemblyName == "Microsoft.VisualStudio.Diagnostics.ManagedHeapAnalyzerUnitTests" && ex.Message.Contains("The network path was not found"))
+                    if (SolutionGenerator.CurrentAssemblyName == "Microsoft.VisualStudio.Diagnostics.ManagedHeapAnalyzerUnitTests" 
+                        && ex.Message.Contains("The network path was not found"))
                     {
                         // their project file isn't authored correctly but we deal with it well
                         // so just ignore this one

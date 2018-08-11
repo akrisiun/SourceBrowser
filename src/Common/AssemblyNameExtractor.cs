@@ -68,6 +68,10 @@ namespace Microsoft.SourceBrowser.Common
 
             var projectFileName = Path.GetFileNameWithoutExtension(projectFilePath);
 
+            // $env: VSINSTALLDIR = "C:\Program Files (x86)\Microsoft Visual Studio\Preview\Community"
+            // $env: VisualStudioVersion = "15.0"
+            // $env: MSBUILD_EXE_PATH = "$env:VSINSTALLDIR\MSBuild\15.0\Bin\MSBuild.exe";
+
             lock (projectCollectionLock)
             {
                 try
@@ -87,6 +91,12 @@ namespace Microsoft.SourceBrowser.Common
                         return assemblyName;
                     }
                 }
+                /*
+                    WTF:  MSB0001: Internal MSBuild Error: Type information 
+                    for Microsoft.Build.Utilities.ToolLocationHelper was present in the whitelist cache as 
+                    Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core,
+                    Version = 15.1.0.0, Culture = neutral, PublicKeyToken = b03f5f7f11d50a3a but the type could not be loaded.unexpectedly null
+                */
                 finally
                 {
                     ProjectCollection.GlobalProjectCollection.UnloadAllProjects();

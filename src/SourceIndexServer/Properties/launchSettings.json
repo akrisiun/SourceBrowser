@@ -1,4 +1,4 @@
-﻿{
+{
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -12,14 +12,16 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
       }
     },
     "SourceIndexServer": {
       "commandName": "Project",
+      "commandLineArgs": "--urls \"http://*:5001\"",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "FOLDER": "d:\\Beta\\webstack\\Mvc\\SourceBrowser\\webfolder\\wwwroot"
       },
       "applicationUrl": "http://localhost:58321"
     }

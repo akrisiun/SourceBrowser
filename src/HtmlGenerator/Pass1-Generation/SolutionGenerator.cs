@@ -8,6 +8,8 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.SourceBrowser.Common;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
@@ -23,6 +25,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public IEnumerable<string> PluginBlacklist { get; private set; }
         private readonly HashSet<string> typeScriptFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         public MEF.PluginAggregator PluginAggregator;
+
+        public IList<Microsoft.CodeAnalysis.Project> Projects { get; set; }
+        public static List<Exception> Errors { get; protected set; }
 
         /// <summary>
         /// List of all assembly names included in the index, from all solutions
@@ -41,6 +46,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             IReadOnlyDictionary<string, string> serverPathMappings = null,
             IEnumerable<string> pluginBlacklist = null)
         {
+            this.Projects = new List<Microsoft.CodeAnalysis.Project>();
+            Errors = Errors ?? new List<Exception>();
+
             this.SolutionSourceFolder = Path.GetDirectoryName(solutionFilePath);
             this.SolutionDestinationFolder = solutionDestinationFolder;
             this.ProjectFilePath = solutionFilePath;
@@ -73,9 +81,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         t => t.Item2                                    //The actual value of the setting
                     )
                 );
-            PluginAggregator = new MEF.PluginAggregator(configs, new Utilities.PluginLogger(), PluginBlacklist);
-            FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
-            PluginAggregator.Init();
+            try
+            {
+                PluginAggregator = new MEF.PluginAggregator(configs, new Utilities.PluginLogger(), PluginBlacklist);
+                // FirstChanceExceptionHandler.IgnoreModules(PluginAggregator?.Select(p => p.PluginModule));
+                PluginAggregator.Init();
+            }
+            catch { } // Null reference happens..
         }
 
         public SolutionGenerator(
@@ -87,6 +99,9 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             string serverPath,
             string networkShare)
         {
+            this.Projects = new List<Microsoft.CodeAnalysis.Project>();
+            Errors = Errors ?? new List<Exception>();
+
             this.ProjectFilePath = projectFilePath;
             string projectName = Path.GetFileNameWithoutExtension(projectFilePath);
             string language = projectFilePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase) ?
@@ -118,7 +133,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
+        static MSBuildWorkspace CreateWorkspace(ImmutableDictionary<string, string> propertiesOpt = null)
         {
             propertiesOpt = propertiesOpt ?? ImmutableDictionary<string, string>.Empty;
 
@@ -128,12 +143,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             propertiesOpt = propertiesOpt.Add("VisualStudioVersion", "15.0");
             propertiesOpt = propertiesOpt.Add("AlwaysCompileMarkupFilesInSeparateDomain", "false");
 
-            var w = MSBuildWorkspace.Create(properties: propertiesOpt);
+            var w = Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.Create(properties: propertiesOpt);
             w.LoadMetadataForReferencedProjects = true;
             return w;
         }
 
-        private static Solution CreateSolution(
+        static Solution CreateSolution(
             string commandLineArguments,
             string projectName,
             string language,
@@ -392,10 +407,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 if (solutionFilePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
                 {
                     properties = AddSolutionProperties(properties, solutionFilePath);
-                    var workspace = CreateWorkspace(properties);
+                    // var workspace = CreateWorkspace(properties);
+                    var workspace = Create();
+
                     workspace.SkipUnrecognizedProjects = true;
                     workspace.WorkspaceFailed += WorkspaceFailed;
-                    solution = workspace.OpenSolutionAsync(solutionFilePath).GetAwaiter().GetResult();
+
+                    var slnTask = workspace.OpenSolutionAsync(solutionFilePath);
+                    solution = slnTask.GetAwaiter().GetResult();
                     this.workspace = workspace;
                 }
                 else if (
@@ -404,7 +423,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     var workspace = CreateWorkspace(properties);
                     workspace.WorkspaceFailed += WorkspaceFailed;
-                    solution = workspace.OpenProjectAsync(solutionFilePath).GetAwaiter().GetResult().Solution;
+
+                    try
+                    {
+                        var loader = workspace.OpenProjectAsync(solutionFilePath);
+                        var res = loader.GetAwaiter().GetResult();
+                        solution = res.Solution;
+                    } catch (Exception ex) {
+                        Console.WriteLine(ex.ToString());
+                        Console.WriteLine(Environment.StackTrace);
+                    }
                     this.workspace = workspace;
                 }
                 else if (
@@ -434,15 +462,77 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private ImmutableDictionary<string, string> AddSolutionProperties(ImmutableDictionary<string, string> properties, string solutionFilePath)
+        public static MSBuildWorkspace Create() { 
+            var workspace = CreateMSBuildWorkspace(("AlwaysCompileMarkupFilesInSeparateDomain", "false"));
+            return workspace;
+        }
+        
+
+        protected static MSBuildWorkspace CreateMSBuildWorkspace(params (string key, string value)[] additionalProperties)
         {
+            return MSBuildWorkspace.Create(CreateProperties(additionalProperties));
+        }
+
+        private static Dictionary<string, string> CreateProperties((string key, string value)[] additionalProperties)
+        {
+            var properties = new Dictionary<string, string>();
+
+            foreach (var (k, v) in additionalProperties)
+            {
+                properties.Add(k, v);
+            }
+
+            return properties;
+        }
+
+        /*
+        // http://source.roslyn.io/#Microsoft.CodeAnalysis.Workspaces.MSBuild.UnitTests/MSBuildWorkspaceTests.cs,3511
+        public async Task TestOpenProject_CommandLineArgsHaveNoErrors(string path)
+        {
+            // CreateFiles(GetSimpleCSharpSolutionFiles());
+
+            using (var workspace = CreateMSBuildWorkspace())
+            {
+                var loader = workspace.Services
+                    .GetLanguageServices(LanguageNames.CSharp)
+                    .GetRequiredService<IProjectFileLoader>();
+
+                var projectFilePath = path;
+
+                var properties = ImmutableDictionary<string, string>.Empty;
+                var buildManager = new ProjectBuildManager();
+                buildManager.Start();
+
+                var projectFile = await loader.LoadProjectFileAsync(projectFilePath, properties, buildManager, CancellationToken.None);
+                var projectFileInfo = (await projectFile.GetProjectFileInfosAsync(CancellationToken.None)).Single();
+                buildManager.Stop();
+
+                //var commandLineParser = workspace.Services
+                //    .GetLanguageServices(loader.Language)
+                //    .GetRequiredService<ICommandLineParserService>();
+            }
+         }
+         */
+
+        private ImmutableDictionary<string, string> AddSolutionProperties(ImmutableDictionary<string, string> properties, string solutionFilePath)
+            {
             // http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.CurrentVersion.targets,296
+
             properties = properties ?? ImmutableDictionary<string, string>.Empty;
             properties = properties.Add("SolutionName", Path.GetFileNameWithoutExtension(solutionFilePath));
             properties = properties.Add("SolutionFileName", Path.GetFileName(solutionFilePath));
             properties = properties.Add("SolutionPath", solutionFilePath);
             properties = properties.Add("SolutionDir", Path.GetDirectoryName(solutionFilePath));
             properties = properties.Add("SolutionExt", Path.GetExtension(solutionFilePath));
+
+            var plat = Environment.OSVersion.Platform;
+            if (plat == PlatformID.Win32NT)
+            {
+                var MSBuildSDKsPath = Environment.GetEnvironmentVariable("MSBuildSDKsPath");
+                if (string.IsNullOrWhiteSpace(MSBuildSDKsPath))
+                    Environment.SetEnvironmentVariable("MSBuildSDKsPath", @"C:\Program Files\dotnet\sdk\2.1.200\Sdks");
+            }
+
             return properties;
         }
 

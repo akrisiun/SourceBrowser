@@ -1,0 +1,6 @@
+{
+  "projects": [ "./src/common"]
+  "sdk": {
+    "version": "2.1.200"
+  }
+}

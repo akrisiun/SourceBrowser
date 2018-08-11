@@ -3,6 +3,7 @@ using System.Text;
 
 namespace Microsoft.SourceBrowser.Common
 {
+    [DebuggerDisplay("ProcessLaunchService: {output?.ToString()}")]
     public class ProcessLaunchService
     {
         private bool errorDataReceived = false;
@@ -52,6 +53,7 @@ namespace Microsoft.SourceBrowser.Common
             return RunAndRedirectOutput(processStartInfo);
         }
 
+        [DebuggerDisplay("ProcessRunResult: {Output}")]
         public class ProcessRunResult
         {
             public Process Process { get; set; }

@@ -6,15 +6,35 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Locator;
+// using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+using System.Diagnostics;
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class Program
     {
-        private static void Main(string[] args)
+        public static bool IsDebug = false;
+
+        static bool emitAssemblyList = false;
+        static bool force = false;
+        static bool noBuiltInFederations = false;
+
+        public static string websiteDestination;
+
+        public static HashSet<string> federations;
+        public static Dictionary<string, string> offlineFederations;
+
+        // projects, properties, federation, serverPathMappings, pluginBlacklist, emitAssemblyList
+        public static List<string> projects;
+        public static Dictionary<string, string> properties;
+
+        public static Dictionary<string, string> serverPathMappings;
+        public static List<string> pluginBlacklist;
+
+
+        public static void Main(string[] args)
         {
             if (args.Length == 0)
             {
@@ -22,15 +42,54 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return;
             }
 
-            var projects = new List<string>();
-            var properties = new Dictionary<string, string>();
-            var emitAssemblyList = false;
-            var force = false;
-            var noBuiltInFederations = false;
-            var offlineFederations = new Dictionary<string, string>();
-            var federations = new HashSet<string>();
-            var serverPathMappings = new Dictionary<string, string>();
-            var pluginBlacklist = new List<string>();
+            if (!ParseArgs(args)) {
+                return;
+            }
+
+            AssertTraceListener.Register();
+            AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
+
+            if (IsDebug && !Debugger.IsAttached)
+            {
+                try { Debugger.Launch(); }
+                catch { }
+            }
+
+            // This loads the real MSBuild from the toolset so that all targets and SDKs can be found
+            // as if a real build is happening
+            // MSBuildLocator.RegisterDefaults();
+
+            if (Paths.SolutionDestinationFolder == null)
+            {
+                Paths.SolutionDestinationFolder = Path.Combine(Microsoft.SourceBrowser.Common.Paths.BaseAppFolder, "Index");
+            }
+
+            websiteDestination = Paths.SolutionDestinationFolder;
+
+            // Warning, this will delete and recreate your destination folder
+            Paths.PrepareDestinationFolder(force);
+
+            Paths.SolutionDestinationFolder = Path.Combine(Paths.SolutionDestinationFolder, "index"); //The actual index files need to be written to the "index" subdirectory
+
+            Directory.CreateDirectory(Paths.SolutionDestinationFolder);
+
+            Log.ErrorLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.ErrorLogFile);
+            Log.MessageLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.MessageLogFile);
+
+            new Program()
+                .Prepare(args)
+                .Generate();
+        }
+
+        public static bool ParseArgs(string[] args)
+        {
+            projects = new List<string>();
+            properties = new Dictionary<string, string>();
+
+            offlineFederations = new Dictionary<string, string>();
+            federations = new HashSet<string>();
+            serverPathMappings = new Dictionary<string, string>();
+            pluginBlacklist = new List<string>();
 
             foreach (var arg in args)
             {
@@ -83,6 +142,11 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     continue;
                 }
 
+                if (arg.StartsWith("/debug") || arg.StartsWith("-debug"))
+                {
+                    IsDebug = true;
+                    continue;
+                }
                 if (arg.StartsWith("/p:"))
                 {
                     var match = Regex.Match(arg, "/p:(?<name>[^=]+)=(?<value>.+)");
@@ -144,47 +208,33 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
                 try
                 {
-                    AddProject(projects, arg);
+                    if (!arg.EndsWith(".exe"))
+                        AddProject(projects, arg);
                 }
                 catch (Exception ex)
                 {
                     Log.Write("Exception: " + ex.ToString(), ConsoleColor.Red);
+                    Log.Write(ex.StackTrace, ConsoleColor.Red);
                 }
             }
 
             if (projects.Count == 0)
             {
                 PrintUsage();
-                return;
+                return false;
             }
+            return true;
+        }
 
-            AssertTraceListener.Register();
-            AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
+        static Federation federation;
 
-            // This loads the real MSBuild from the toolset so that all targets and SDKs can be found
-            // as if a real build is happening
-            MSBuildLocator.RegisterDefaults();
+        public static SolutionGenerator gen;
 
-            if (Paths.SolutionDestinationFolder == null)
-            {
-                Paths.SolutionDestinationFolder = Path.Combine(Microsoft.SourceBrowser.Common.Paths.BaseAppFolder, "Index");
-            }
-
-            var websiteDestination = Paths.SolutionDestinationFolder;
-
-            // Warning, this will delete and recreate your destination folder
-            Paths.PrepareDestinationFolder(force);
-
-            Paths.SolutionDestinationFolder = Path.Combine(Paths.SolutionDestinationFolder, "index"); //The actual index files need to be written to the "index" subdirectory
-
-            Directory.CreateDirectory(Paths.SolutionDestinationFolder);
-
-            Log.ErrorLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.ErrorLogFile);
-            Log.MessageLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.MessageLogFile);
-
+        public SolutionGenerator Generate(bool isDebug = false)
+        {
             using (Disposable.Timing("Generating website"))
             {
-                var federation = new Federation();
+                federation = new Federation();
 
                 if (!noBuiltInFederations)
                 {
@@ -198,10 +248,31 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     federation.AddFederation(entry.Key, entry.Value);
                 }
 
-                IndexSolutions(projects, properties, federation, serverPathMappings, pluginBlacklist);
-                FinalizeProjects(emitAssemblyList, federation);
-                WebsiteFinalizer.Finalize(websiteDestination, emitAssemblyList, federation);
+                Run(isDebug);
             }
+
+            return gen;
+        }
+
+        public static Program Instance { get; set; }
+        // TODO
+        public Program Prepare(string[] args, bool debug = false)
+        {
+            args = args ?? Environment.GetCommandLineArgs();
+            ParseArgs(args ?? new string[] { });
+
+            return this;
+        }
+
+        public void Run(bool isDebug = false)
+        {
+            federation = federation ?? new Federation();
+
+            IndexSolutions(projects, properties, federation, serverPathMappings, pluginBlacklist);
+            FinalizeProjects(emitAssemblyList, federation);
+
+            websiteDestination = websiteDestination ?? Paths.SolutionDestinationFolder;
+            WebsiteFinalizer.Finalize(websiteDestination, emitAssemblyList, federation);
         }
 
         private static void AddProject(List<string> projects, string path)
@@ -225,8 +296,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             return filePath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) ||
-                   filePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) ||
-                   filePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase);
+                   filePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase);
+                   // || filePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void PrintUsage()
@@ -245,7 +316,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
         private static readonly Folder<Project> mergedSolutionExplorerRoot = new Folder<Project>();
 
-        private static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, Federation federation, Dictionary<string, string> serverPathMappings, IEnumerable<string> pluginBlacklist)
+        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, Federation federation, Dictionary<string, string> serverPathMappings, IEnumerable<string> pluginBlacklist)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -274,6 +345,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         serverPathMappings: serverPathMappings,
                         pluginBlacklist: pluginBlacklist))
                     {
+                        Program.gen = solutionGenerator;
+
                         solutionGenerator.GlobalAssemblyList = assemblyNames;
                         solutionGenerator.Generate(processedAssemblyList, mergedSolutionExplorerRoot);
                     }
@@ -285,7 +358,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static void FinalizeProjects(bool emitAssemblyList, Federation federation)
+        public static void FinalizeProjects(bool emitAssemblyList, Federation federation)
         {
             GenerateLooseFilesProject(Constants.MSBuildFiles, Paths.SolutionDestinationFolder);
             GenerateLooseFilesProject(Constants.TypeScriptFiles, Paths.SolutionDestinationFolder);
@@ -303,7 +376,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private static void GenerateLooseFilesProject(string projectName, string solutionDestinationPath)
+        public static void GenerateLooseFilesProject(string projectName, string solutionDestinationPath)
         {
             var projectGenerator = new ProjectGenerator(projectName, solutionDestinationPath);
             projectGenerator.GenerateNonProjectFolder();
@@ -314,7 +387,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
     {
         public static void Finalize(string destinationFolder, bool emitAssemblyList, Federation federation)
         {
-            string sourcePath = Assembly.GetEntryAssembly().Location;
+            var entry = Assembly.GetEntryAssembly();
+            entry = entry ?? Assembly.GetCallingAssembly();
+
+            string sourcePath = entry.Location;
             sourcePath = Path.GetDirectoryName(sourcePath);
             string basePath = sourcePath;
             sourcePath = Path.Combine(sourcePath, @"Web");
