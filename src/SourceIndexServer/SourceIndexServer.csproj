@@ -1,9 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>Microsoft.SourceBrowser.SourceIndexServer</AssemblyName>
     <RootNamespace>Microsoft.SourceBrowser.SourceIndexServer</RootNamespace>
+
+    <UsingMicrosoftNETSdkWeb>true</UsingMicrosoftNETSdkWeb>
+    <EnableTypeScriptNuGetTarget>false</EnableTypeScriptNuGetTarget>
   </PropertyGroup>
 
   <ItemGroup>

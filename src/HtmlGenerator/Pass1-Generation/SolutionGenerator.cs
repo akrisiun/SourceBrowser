@@ -73,6 +73,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                         t => t.Item2                                    //The actual value of the setting
                     )
                 );
+
             PluginAggregator = new MEF.PluginAggregator(configs, new Utilities.PluginLogger(), PluginBlacklist);
             FirstChanceExceptionHandler.IgnoreModules(PluginAggregator.Select(p => p.PluginModule));
             PluginAggregator.Init();

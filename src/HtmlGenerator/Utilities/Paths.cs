@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -48,7 +49,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             if (Directory.Exists(SolutionDestinationFolder))
             {
-                if (!forceOverwrite)
+                if (!forceOverwrite && !Debugger.IsAttached)
                 {
                     Log.Write(string.Format("Warning, {0} will be deleted! Are you sure? (y/n)", SolutionDestinationFolder), ConsoleColor.Red);
                     if (Console.ReadKey().KeyChar != 'y')
