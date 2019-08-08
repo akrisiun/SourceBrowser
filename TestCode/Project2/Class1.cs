@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
 
 public static class Extensions
 {
-    public static void ExtensionMethod(this string s)
-    {
-        var s1 = new string(new char[0]);
-        var s2 = new string(' ', 42);
-    }
+    public static void ExtensionMethod(this string s) { }
 }
 
 #if TESTDEFINE

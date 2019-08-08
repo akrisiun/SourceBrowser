@@ -39,10 +39,21 @@
       <Project>{c714bcf5-8eea-4ac8-a030-8d7b1f57e122}</Project>
       <Name>Project2</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Project2\Project2.csproj">
-      <Project>{c714bcf5-8eea-4ac8-a030-8d7b1f57e122}</Project>
-      <Name>Project2</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="NuGet.config" />
+    <None Include="README.md" />
+    <None Include="test-build.cmd" />
+    <None Include="Views\LayoutDirective.cshtml" />
+    <None Include="Views\ParserError.cshtml" />
+    <None Include="Views\web.config" />
+    <None Include="Views\web.config.md" />
+    <None Include="Views\_ViewStart.cshtml" />
+    <None Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\transform.xslt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

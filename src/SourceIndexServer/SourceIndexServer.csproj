@@ -4,10 +4,13 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>Microsoft.SourceBrowser.SourceIndexServer</AssemblyName>
     <RootNamespace>Microsoft.SourceBrowser.SourceIndexServer</RootNamespace>
+
+    <UsingMicrosoftNETSdkWeb>true</UsingMicrosoftNETSdkWeb>
+    <EnableTypeScriptNuGetTarget>false</EnableTypeScriptNuGetTarget>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" />
   </ItemGroup>
 
   <ItemGroup>

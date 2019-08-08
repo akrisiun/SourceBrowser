@@ -2,11 +2,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net471</TargetFramework>
+	<NETStandardInbox>true</NETStandardInbox>
+    
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\mono.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System.ComponentModel.Composition" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.25.3" />
   </ItemGroup>

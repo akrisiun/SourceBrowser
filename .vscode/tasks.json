@@ -1,0 +1,55 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "fast-build",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "\"dotnet build ./src/HtmlGenerator/HtmlGenerator.csproj -o $PWD/bin --no-restore --no-dependencies\""
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ]
+        },
+        {
+            "label": "debug",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-file",
+                "gen5.ps1"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": 
+            [            ]
+        },
+        {
+            "label": "slow-build",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ]
+        }
+    ]
+}
