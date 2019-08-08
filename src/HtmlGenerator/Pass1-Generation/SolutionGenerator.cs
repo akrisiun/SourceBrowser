@@ -143,12 +143,16 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             string outputAssemblyPath)
         {
             var workspace = CreateWorkspace();
-            var projectInfo = CommandLineProject.CreateProjectInfo(
+
+            // microsoft.codeanalysis.workspaces.common\3.0.0
+            
+            Microsoft.CodeAnalysis.ProjectInfo projectInfo = CommandLineProject.CreateProjectInfo(
                 projectName,
                 language,
                 commandLineArguments,
                 projectSourceFolder,
                 workspace);
+
             var solution = workspace.CurrentSolution.AddProject(projectInfo);
 
             solution = RemoveNonExistingFiles(solution);

@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD_20 // NET461
+﻿#if NET472 // !NETSTANDARD_20 // NET461
 
 using System;
 using System.Diagnostics;

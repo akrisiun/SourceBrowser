@@ -1,15 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.SourceBrowser.BuildLogParser</AssemblyName>
-	  <TargetFramework>net472</TargetFramework>
-	  <NETStandardInbox>true</NETStandardInbox>
-	
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\mono.snk</AssemblyOriginatorKeyFile>
+    <TargetFrameworks>net472;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
-  <ItemGroup>
-    <!--<PackageReference Include="Microsoft.Build" Version="15.9.20" />-->
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>

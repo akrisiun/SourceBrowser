@@ -1,19 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.SourceBrowser.Common</AssemblyName>
-    <TargetFrameworks>netcoreapp2.1;net472</TargetFrameworks>
-	  <NETStandardInbox>false</NETStandardInbox>
-    
+    <TargetFrameworks>net472;netstandard2.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\mono.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net472'">
-    <DefineConstants>$(DefineConstants);NET461;NET472</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <DefineConstants>$(DefineConstants);NETSTANDARD_20</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET472</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" Version="16.0.461" />
+    <PackageReference Include="Microsoft.Build" Version="15.9.20" />
   </ItemGroup>
 </Project>

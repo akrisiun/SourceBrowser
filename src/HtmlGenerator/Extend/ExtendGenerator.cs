@@ -148,7 +148,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Extend
             if (afterError) // || !Configuration.ProcessAll)
             {
                 var solutionExplorerRoot = mergedSolutionExplorerRoot;
-                solutionFinalizer.WriteSolutionExplorer(solutionExplorerRoot);
+                // solutionFinalizer.WriteSolutionExplorer(solutionExplorerRoot);
 
                 try
                 {
