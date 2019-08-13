@@ -82,28 +82,29 @@ namespace Microsoft.SourceBrowser.MEF
 
         public IEnumerable<ISymbolVisitor> ManufactureSymbolVisitors(Project project)
         {
-            try
-            {
-                return Plugins?.SelectMany(p => p.ManufactureSymbolVisitors(project.FilePath));
-            }
-            catch (Exception ex)
-            {
-                Logger.Info("Plugin failed to manufacture ISymbolVisitor visitors", ex);
-                return Enumerable.Empty<ISymbolVisitor>();
-            }
+            return Enumerable.Empty<ISymbolVisitor>();
+            //try
+            //{
+            //    return Plugins?.SelectMany(p => p.ManufactureSymbolVisitors(project.FilePath));
+            //}
+            //catch (Exception ex)
+            //{
+            //    Logger.Info("Plugin failed to manufacture ISymbolVisitor visitors", ex);
+            //    return Enumerable.Empty<ISymbolVisitor>();
+            //}
         }
 
         private IEnumerable<ISymbolVisitor> ManufactureSymbolVisitors(string name, ISourceBrowserPlugin plugin, Project project)
         {
-            try
-            {
-                return plugin.ManufactureSymbolVisitors(project.FilePath);
-            }
-            catch (Exception ex)
-            {
-                Logger.Info(name + " Plugin failed to manufacture symbol visitors", ex);
+            //try
+            //{
+            //    return plugin.ManufactureSymbolVisitors(project.FilePath);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Logger.Info(name + " Plugin failed to manufacture symbol visitors", ex);
                 return Enumerable.Empty<ISymbolVisitor>();
-            }
+            //}
         }
 
         public IEnumerable<ITextVisitor> ManufactureTextVisitors(Project project)

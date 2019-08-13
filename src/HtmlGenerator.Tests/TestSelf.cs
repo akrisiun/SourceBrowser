@@ -19,12 +19,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
             if (Debugger.IsAttached) {
                 ProgramLoad.isDebug = true;
                 // DebugConsole.Redirect();
-                ConsoleOut.SetOut();
-                Console.WriteLine("Testing VS 2017 console....");
+                // ConsoleOut.SetOut();
+                Console.WriteLine("Testing VS 2019 console....");
             }
 
-            var sln = @"E:\Beta\mono64\SourceBrowser\SourceBrowser.sln";
-            var baseDir = @"E:\Beta\mono64\SourceBrowser";
+            var sln = @"d:\Beta\OmniX\SourceBrowser\SourceBrowser.sln";
+            var baseDir = @"d:\Beta\OmniX\SourceBrowser";
 
             // E:\Beta\mono64\SourceBrowser\src\HtmlGenerator.Tests\bin\Debug\net461\
             ProgramLoad.isDebug = false;
@@ -34,7 +34,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
                 ProgramLoad.isDebug = false;
                 ProgramLoad.Main(new string[] { ".exe", sln, $"/out:{baseDir}\\srcWeb" });
             } else
-                Program.Run(new string[] { ".exe", sln, "/debug", $"/out:{baseDir}\\srcWeb" });
+                Program.Run(new string[] { sln, "/debug", $"/out:{baseDir}\\srcWeb" });
         }
     }
 }

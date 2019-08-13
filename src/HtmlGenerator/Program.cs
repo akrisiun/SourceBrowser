@@ -7,14 +7,34 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Locator;
-using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+
+namespace SourceBrowser {
+using Microsoft.SourceBrowser.HtmlGenerator;
+
+    public class ProgramLoad
+    {
+        public static bool isDebug { get; set; }
+        public static string BasePath  { get; set; }
+
+        public static void Main(string[] args = null) {
+
+            //if (BasePath != null)
+            //    Directory.SetCurrentDirectory(BasePath);
+            
+            Program.Run(args ?? Environment.GetCommandLineArgs());
+        }
+        public static void Run(string[] args = null) {
+            Program.Run(args ?? Environment.GetCommandLineArgs());
+        }
+    }
+}
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class Program
     {
-        private static void Main(string[] args)
+        public static void Run(string[] args)
         {
             if (args.Length == 0)
             {
@@ -330,7 +350,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
     {
         public static void Finalize(string destinationFolder, bool emitAssemblyList, Federation federation)
         {
-            string sourcePath = Assembly.GetEntryAssembly().Location;
+            string sourcePath = AppDomain.CurrentDomain.BaseDirectory; // Assembly.GetEntryAssembly().Location;
             sourcePath = Path.GetDirectoryName(sourcePath);
             string basePath = sourcePath;
             sourcePath = Path.Combine(sourcePath, "Web");
