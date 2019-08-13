@@ -192,17 +192,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             using (Disposable.Timing("Generating website"))
             {
                 var federation = new Federation();
+                try {
+                    if (!noBuiltInFederations) {
+                        federation.AddFederations(Federation.DefaultFederatedIndexUrls);
+                    }
 
-                if (!noBuiltInFederations)
-                {
-                    federation.AddFederations(Federation.DefaultFederatedIndexUrls);
+                    federation.AddFederations(federations);
+
+                    foreach (var entry in offlineFederations) {
+                        federation.AddFederation(entry.Key, entry.Value);
+                    }
                 }
-
-                federation.AddFederations(federations);
-
-                foreach (var entry in offlineFederations)
-                {
-                    federation.AddFederation(entry.Key, entry.Value);
+                catch (Exception ex) {
+                    Console.WriteLine($"Offline federation: {ex}");
                 }
 
                 IndexSolutions(projects, properties, federation, serverPathMappings, pluginBlacklist, doNotIncludeReferencedProjects);

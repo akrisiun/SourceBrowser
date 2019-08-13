@@ -198,3 +198,4 @@ FakesAssemblies/
 srcWeb/
 Errors.txt
 web/
+nuget.exe

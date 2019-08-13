@@ -54,7 +54,7 @@
     
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Desktop" Version="3.0.0" />
+    <!--<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Desktop" Version="3.0.0" />-->
     <PackageReference Include="GuiLabs.Language.Xml" Version="1.2.27" />
     
     <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense" Version="16.0.467" />

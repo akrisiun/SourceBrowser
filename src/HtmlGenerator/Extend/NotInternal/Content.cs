@@ -902,7 +902,7 @@ namespace Roslyn.Utilities
     }
 
     // internal 
-    public enum PathKind
+    public enum PathKindX
     {
         //
         // Summary:
