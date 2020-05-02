@@ -196,6 +196,6 @@ FakesAssemblies/
 *.opt
 /src/SourceIndexServer/Index
 srcWeb/
-Errors.txt
-web/
-nuget.exe
+*.txt
+*.exe
+wwwroot/
