@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +30,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
                 RootPath = subfolder;
             }
 
-            services.AddSingleton(new Index(RootPath));
+            services.AddSingleton(new Models.Index(RootPath));
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
@@ -51,6 +52,8 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
             }
 
             app.UseDefaultFiles();
+            
+            Console.WriteLine("RootPath=" + Path.GetFullPath(RootPath));
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(RootPath),

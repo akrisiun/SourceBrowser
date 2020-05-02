@@ -196,6 +196,12 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             Log.ErrorLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.ErrorLogFile);
             Log.MessageLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.MessageLogFile);
 
+
+            Console.WriteLine($"VSINSTALLDIR={Environment.GetEnvironmentVariable("VSINSTALLDIR")}");
+            Console.WriteLine($"VisualStudioVersion={Environment.GetEnvironmentVariable("VisualStudioVersion")}");
+            Console.WriteLine($"MSBUILD_EXE_PATH={Environment.GetEnvironmentVariable("MSBUILD_EXE_PATH")}");
+            Console.WriteLine($"CscToolPath={Environment.GetEnvironmentVariable("CscToolPath")}");
+
             using (Disposable.Timing("Generating website"))
             {
                 var federation = new Federation();
