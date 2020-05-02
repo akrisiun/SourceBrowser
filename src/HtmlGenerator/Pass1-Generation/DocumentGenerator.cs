@@ -230,6 +230,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 }
             }
 
+            Exception err = null;
+
             foreach (var r in ranges)
             {
                 var pos = r.ClassifiedSpan.TextSpan.Start;
@@ -240,14 +242,25 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 {
                     lineNumber = nextLineNumber;
                     context[MEF.ContextKeys.LineNumber] = lineNumber.ToString();
-                    maybeLog(string.Concat(projectGenerator.PluginTextVisitors.Select(VisitText)));
+                    try {
+                        if (projectGenerator.PluginTextVisitors != null)
+                            maybeLog(string.Concat(projectGenerator.PluginTextVisitors.Select(VisitText)));
+                    }
+                    catch (Exception ex) { 
+                        err = ex;
+                    }
                 }
 
                 symbol = SemanticModel.GetDeclaredSymbol(token.Parent);
-                if (symbol != null)
+                if (symbol != null && projectGenerator.PluginSymbolVisitors != null)
                 {
                     maybeLog(string.Concat(projectGenerator.PluginSymbolVisitors.Select(VisitSymbol)));
+                    // -> maybeLog(string.Concat(VisitSymbol));
                 }
+            }
+
+            if (err != null) {
+                Console.WriteLine($"Failed {err}");
             }
 
             if (lines.Any())

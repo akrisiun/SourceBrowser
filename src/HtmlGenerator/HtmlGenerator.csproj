@@ -75,9 +75,9 @@
 
   <PropertyGroup>
     <NupkgFilePath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)$(OutDir)$(NuGetPackageId).$(NuGetVersion).nupkg'))</NupkgFilePath>
+    <StartupObject>SourceBrowser.ProgramLoad</StartupObject>
   </PropertyGroup>
-  <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" 
-	DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(NupkgFilePath)">
+  <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(NupkgFilePath)">
 	<!--
     <PropertyGroup>
       <NuGetOutputRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)$(OutDir.TrimEnd('\'))'))</NuGetOutputRoot>

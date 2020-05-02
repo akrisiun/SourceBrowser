@@ -1,1 +1,1 @@
-src\HtmlGenerator\bin\Debug\net472\HtmlGenerator.exe TestCode\TestSolution.sln /out:src\HtmlGenerator\bin\Debug\net472\Web\Index
+src\HtmlGenerator\bin\Debug\net48\HtmlGenerator.exe TestCode\TestSolution.sln /out:src\HtmlGenerator\bin\Debug\net48\Web\Index

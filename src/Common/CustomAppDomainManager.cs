@@ -1,6 +1,7 @@
-﻿#if NET472
+﻿#if NET472 // !NETSTANDARD_20 // NET461
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Security.Policy;
@@ -41,16 +42,25 @@ namespace Microsoft.SourceBrowser.Common
 
         private void NotifyEntrypointAssembly()
         {
+            if (Debugger.IsAttached) {
+                Debugger.Break();
+            }
+
+
             if (AppDomain.CurrentDomain.IsDefaultAppDomain())
             {
+                Console.WriteLine("AppDomain IsDefault");
                 return;
             }
 
             var assembly = Assembly.Load("HtmlGenerator");
             if (assembly == null)
             {
+                Console.WriteLine($"ASM: fails HtmlGenerator");
                 return;
             }
+
+            Console.WriteLine($"ASM: {assembly}");
 
             var type = assembly.GetType("Microsoft.SourceBrowser.HtmlGenerator.AppDomainInitializer");
             if (type == null)

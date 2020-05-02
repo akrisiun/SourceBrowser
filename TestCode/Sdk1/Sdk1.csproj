@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <MicrosoftCodeAnalysisCommonVersion>2.4.0</MicrosoftCodeAnalysisCommonVersion>
+    <MicrosoftCodeAnalysisCSharpVersion>2.4.0</MicrosoftCodeAnalysisCSharpVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisCommonVersion)" private="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.3.0-beta1" /> 
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Build" Version="15.3.409" />
+
+    <PackageReference Include="ManagedEsent" Version="1.9.4" />
+    <PackageReference Include="Microsoft.Composition" Version="1.0.31" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="OmniSharp.Abstractions">
+      <HintPath>..\..\lib\OmniSharp.Abstractions.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="OmniSharp.MSBuild">
+      <HintPath>..\..\lib\OmniSharp.MSBuild.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

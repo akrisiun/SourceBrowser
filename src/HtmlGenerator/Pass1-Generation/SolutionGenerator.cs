@@ -148,6 +148,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             string outputAssemblyPath)
         {
             var workspace = CreateWorkspace();
+            //  lib\Microsoft.CodeAnalysis.Workspaces.Desktop
             var projectInfo = CommandLineProject.CreateProjectInfo(
                 projectName,
                 language,

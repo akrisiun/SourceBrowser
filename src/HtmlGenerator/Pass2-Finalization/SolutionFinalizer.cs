@@ -156,7 +156,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        private void CreateReferencingProjectLists()
+        public void CreateReferencingProjectLists()
         {
             using (Disposable.Timing("Writing referencing assemblies"))
             {

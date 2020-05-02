@@ -8,14 +8,40 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Locator;
-using Microsoft.CodeAnalysis;
 using Microsoft.SourceBrowser.Common;
+
+namespace SourceBrowser {
+    using Microsoft.SourceBrowser.HtmlGenerator;
+
+    public class ProgramLoad
+    {
+        public static bool isDebug { get; set; }
+        public static string BasePath  { get; set; }
+
+        public static void Main(string[] args = null) {
+
+            //if (BasePath != null)
+            //    Directory.SetCurrentDirectory(BasePath);
+
+            var dll = AppDomain.CurrentDomain.BaseDirectory + "Microsoft.SourceBrowser.Common.dll";
+            Assembly.LoadFile(dll);
+
+            dll = AppDomain.CurrentDomain.BaseDirectory + "Microsoft.CodeAnalysis.Workspaces.Desktop.dll";
+            Assembly.LoadFile(dll);
+            
+            Program.Run(args ?? Environment.GetCommandLineArgs());
+        }
+        public static void Run(string[] args = null) {
+            Program.Run(args ?? Environment.GetCommandLineArgs());
+        }
+    }
+}
 
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
     public class Program
     {
-        private static void Main(string[] args)
+        public static void Run(string[] args)
         {
             if (args.Length == 0)
             {
@@ -205,17 +231,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             using (Disposable.Timing("Generating website"))
             {
                 var federation = new Federation();
+                try {
+                    if (!noBuiltInFederations) {
+                        federation.AddFederations(Federation.DefaultFederatedIndexUrls);
+                    }
 
-                if (!noBuiltInFederations)
-                {
-                    federation.AddFederations(Federation.DefaultFederatedIndexUrls);
+                    federation.AddFederations(federations);
+
+                    foreach (var entry in offlineFederations) {
+                        federation.AddFederation(entry.Key, entry.Value);
+                    }
                 }
-
-                federation.AddFederations(federations);
-
-                foreach (var entry in offlineFederations)
-                {
-                    federation.AddFederation(entry.Key, entry.Value);
+                catch (Exception ex) {
+                    Console.WriteLine($"Offline federation: {ex}");
                 }
 
                 IndexSolutions(projects, properties, federation, serverPathMappings, pluginBlacklist, doNotIncludeReferencedProjects);
@@ -378,7 +406,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
     {
         public static void Finalize(string destinationFolder, bool emitAssemblyList, Federation federation)
         {
-            string sourcePath = Assembly.GetEntryAssembly().Location;
+            string sourcePath = AppDomain.CurrentDomain.BaseDirectory; // Assembly.GetEntryAssembly().Location;
             sourcePath = Path.GetDirectoryName(sourcePath);
             string basePath = sourcePath;
             sourcePath = Path.Combine(sourcePath, "Web");

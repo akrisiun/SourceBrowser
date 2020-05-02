@@ -1,0 +1,64 @@
+{
+   // Use IntelliSense to find out which attributes exist for C# debugging
+   // Use hover for the description of the existing attributes
+   // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+   "version": "0.2.0",
+   "configurations": [
+        {
+            // mono --debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555 bin/Program.exe
+            "name": "Mono--debug",
+            "type": "mono",
+			"request": "launch",
+            "program": "${workspaceRoot}/bin/HtmlGenerator.exe",
+			"cwd": "${workspaceRoot}",            
+            "args": [ 
+                "-debug",
+                "-force",
+                "SourceBrowser.sln",
+                "/out:web5f"
+            ],
+            "preLaunchTask": "fast-build"
+        },
+        {
+            // mono --debug --debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555 bin/Program.exe
+            "name": "Attach to Mono",
+            "request": "attach",
+            "type": "mono",
+            "address": "localhost",
+            "port": 55555,
+            "preLaunchTask": "debug",
+        },
+        {
+            "name": "netcoreapp1.1 Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceRoot}/src/SourceIndexServer/bin/Debug/netcoreapp1.1/SourceIndexServer.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/src/SourceIndexServer",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "launchBrowser": {
+                "enabled": true,
+                "args": "${auto-detect-url}",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start ${auto-detect-url}"
+                },
+                "osx": {
+                    "command": "open"
+                },
+                "linux": {
+                    "command": "xdg-open"
+                }
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceRoot}/Views"
+            }
+        }
+    ]
+}
