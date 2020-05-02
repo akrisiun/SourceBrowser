@@ -49,7 +49,7 @@ namespace Microsoft.SourceBrowser.Common
 
             if (AppDomain.CurrentDomain.IsDefaultAppDomain())
             {
-                Console.WriteLine("AppDomain IsDefualt");
+                Console.WriteLine("AppDomain IsDefault");
                 return;
             }
 
