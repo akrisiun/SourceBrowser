@@ -39,14 +39,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             ImmutableDictionary<string, string> properties = null,
             Federation federation = null,
             IReadOnlyDictionary<string, string> serverPathMappings = null,
-            IEnumerable<string> pluginBlacklist = null)
+            IEnumerable<string> pluginBlacklist = null,
+            bool doNotIncludeReferencedProjects = false)
         {
             this.SolutionSourceFolder = Path.GetDirectoryName(solutionFilePath);
             this.SolutionDestinationFolder = solutionDestinationFolder;
             this.ProjectFilePath = solutionFilePath;
             this.ServerPath = serverPath;
             ServerPathMappings = serverPathMappings;
-            this.solution = CreateSolution(solutionFilePath, properties);
+            this.solution = CreateSolution(solutionFilePath, properties, doNotIncludeReferencedProjects);
             this.Federation = federation ?? new Federation();
             this.PluginBlacklist = pluginBlacklist ?? Enumerable.Empty<string>();
 
@@ -131,6 +132,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             var w = MSBuildWorkspace.Create(properties: propertiesOpt);
             w.LoadMetadataForReferencedProjects = true;
+            w.AssociateFileExtensionWithLanguage("depproj", LanguageNames.CSharp);
             return w;
         }
 
@@ -300,7 +302,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         public static string CurrentAssemblyName = null;
 
         /// <returns>true if only part of the solution was processed and the method needs to be called again, false if all done</returns>
-        public bool Generate(HashSet<string> processedAssemblyList = null, Folder<Project> solutionExplorerRoot = null)
+        public bool Generate(HashSet<string> processedAssemblyList = null, Folder<ProjectSkeleton> solutionExplorerRoot = null)
         {
             if (solution == null)
             {
@@ -316,7 +318,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             var projectsToProcess = allProjects
-                .Where(p => processedAssemblyList == null || !processedAssemblyList.Contains(p.AssemblyName))
+                .Where(p => processedAssemblyList == null || processedAssemblyList.Add(p.AssemblyName))
                 .ToArray();
             var currentBatch = projectsToProcess
                 .ToArray();
@@ -330,11 +332,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     generator.Generate().GetAwaiter().GetResult();
 
                     File.AppendAllText(Paths.ProcessedAssemblies, project.AssemblyName + Environment.NewLine, Encoding.UTF8);
-                    processedAssemblyList?.Add(project.AssemblyName);
                 }
                 finally
                 {
                     CurrentAssemblyName = null;
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
                 }
             }
 
@@ -407,7 +411,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             return Federation.GetExternalAssemblyIndex(assemblyName);
         }
 
-        private Solution CreateSolution(string solutionFilePath, ImmutableDictionary<string, string> properties = null)
+        private Solution CreateSolution(string solutionFilePath, ImmutableDictionary<string, string> properties = null, bool doNotIncludeReferencedProjects = false)
         {
             try
             {
@@ -430,6 +434,15 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     workspace.WorkspaceFailed += WorkspaceFailed;
                     solution = workspace.OpenProjectAsync(solutionFilePath).GetAwaiter().GetResult().Solution;
                     solution = DeduplicateProjectReferences(solution);
+                    if (doNotIncludeReferencedProjects)
+                    {
+                        var keepPrimaryProject = solution.Projects.First(p => string.Equals(p.FilePath, solutionFilePath, StringComparison.OrdinalIgnoreCase));
+                        foreach (var projectIdToRemove in solution.ProjectIds.Where(id => id != keepPrimaryProject.Id).ToArray())
+                        {
+                            solution = solution.RemoveProject(projectIdToRemove);
+                        }
+                    }
+
                     this.workspace = workspace;
                 }
                 else if (

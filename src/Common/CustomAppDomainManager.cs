@@ -1,10 +1,10 @@
-﻿#if !NETSTANDARD_20 // NET461
+﻿#if NET472
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Security.Policy;
+using System.Diagnostics;
 
 namespace Microsoft.SourceBrowser.Common
 {
@@ -49,7 +49,7 @@ namespace Microsoft.SourceBrowser.Common
 
             if (AppDomain.CurrentDomain.IsDefaultAppDomain())
             {
-                Console.WriteLine("AppDomain IsDefualt");
+                Console.WriteLine("AppDomain IsDefault");
                 return;
             }
 

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Reflection;
-using Console = SourceBrowser.DebugConsole;
+using System.Diagnostics;
 
 // here non ms hacks
 namespace SourceBrowser
 {
-    public class DebugConsole {
+    public class DebugConsole
+    {
 
         private const int MY_CODE_PAGE = 437;
         public static void Redirect()
@@ -22,17 +21,20 @@ namespace SourceBrowser
             global::System.Console.SetOut(standardOutput);
         }
 
-        public static void WriteLine(string str, params object[] args) {
+        public static void WriteLine(string str, params object[] args)
+        {
 
             global::System.Console.WriteLine(str);
-            if (ProgramLoad.isDebug) {
+            if (ProgramLoad.isDebug)
+            {
                 Debugger.Log(0, "", str);
             }
         }
 
         public static ConsoleKeyInfo ReadKey()
         {
-            if (ProgramLoad.isDebug) {
+            if (ProgramLoad.isDebug)
+            {
                 return new ConsoleKeyInfo('\n', ConsoleKey.Enter, false, false, false);
             }
             return global::System.Console.ReadKey();
@@ -48,13 +50,15 @@ namespace SourceBrowser
         public static void Main(string[] args)
         {
             AsmList = new List<Assembly>();
-            if (args.Length == 0) {
+            if (args.Length == 0)
+            {
                 PrintUsage();
                 return;
             }
 
             var argList = String.Join(" ", args);
-            if (argList.Contains("-debug") || Debugger.IsAttached) {
+            if (argList.Contains("-debug") || Debugger.IsAttached)
+            {
                 isDebug = true;
             }
 
@@ -80,17 +84,21 @@ namespace SourceBrowser
         public static void LoadDll(string name)
         {
             var dll = Path.Combine(BasePath, name + ".dll");
-            if (!File.Exists(dll)) {
+            if (!File.Exists(dll))
+            {
                 Console.WriteLine($"no dll {dll}");
             }
             Assembly asm = null;
-            try {
+            try
+            {
                 asm = Assembly.LoadFile(dll);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Fails {dll} : {ex.InnerException ?? ex}");
             }
-            if (asm != null) {
+            if (asm != null)
+            {
                 if (isDebug)
                     Console.WriteLine($"asm: {asm}");
 
@@ -125,61 +133,52 @@ namespace SourceBrowser
 // Origin Microsoft source here
 namespace Microsoft.SourceBrowser.HtmlGenerator
 {
-    using SourceBrowser;
     using System.Collections.Generic;
     using System.Collections.Immutable;
-    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
     using Microsoft.Build.Locator;
-    using Microsoft.CodeAnalysis;
     using Microsoft.SourceBrowser.Common;
-    using global::SourceBrowser;
+    // using global::SourceBrowser;
 
     public class Program
     {
         public static void Run(string[] args)
         {
+            if (args.Length == 0)
+            {
+                PrintUsage();
+                return;
+            }
+
             var projects = new List<string>();
             var properties = new Dictionary<string, string>();
             var emitAssemblyList = false;
+            var doNotIncludeReferencedProjects = false;
             var force = false;
             var noBuiltInFederations = false;
             var offlineFederations = new Dictionary<string, string>();
             var federations = new HashSet<string>();
             var serverPathMappings = new Dictionary<string, string>();
             var pluginBlacklist = new List<string>();
-            var isDebug = ProgramLoad.isDebug;
-            var argBefore = "";
 
-            #region Parse args
-
-            foreach (var arg in args) {
-                if (arg.StartsWith("/out:")) {
+            foreach (var arg in args)
+            {
+                if (arg.StartsWith("/out:"))
+                {
                     Paths.SolutionDestinationFolder = Path.GetFullPath(arg.Substring("/out:".Length).StripQuotes());
                     continue;
                 }
-                if (arg.StartsWith("-o")) {
-                    argBefore = arg;
-                    continue;
-                }
-                if (argBefore.StartsWith("-o")) {
-                    Paths.SolutionDestinationFolder = Path.GetFullPath(arg).StripQuotes();
-                    continue;
-                }
-                argBefore = arg;
-                if (arg.StartsWith("/debug") || arg.StartsWith("-debug")) {
-                    isDebug = true;
-                    continue;
-                }
 
-                if (arg.StartsWith("/serverPath:")) {
+                if (arg.StartsWith("/serverPath:"))
+                {
                     var mapping = arg.Substring("/serverPath:".Length).StripQuotes();
                     var parts = mapping.Split('=');
-                    if (parts.Length != 2) {
+                    if (parts.Length != 2)
+                    {
                         Log.Write($"Invalid Server Path: '{mapping}'", ConsoleColor.Red);
                         continue;
                     }
@@ -187,33 +186,41 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     continue;
                 }
 
-                if (arg == "/force") {
+                if (arg == "/force")
+                {
                     force = true;
                     continue;
                 }
 
-                if (arg.StartsWith("/in:")) {
+                if (arg.StartsWith("/in:"))
+                {
                     string inputPath = arg.Substring("/in:".Length).StripQuotes();
-                    try {
-                        if (!File.Exists(inputPath)) {
+                    try
+                    {
+                        if (!File.Exists(inputPath))
+                        {
                             continue;
                         }
 
                         string[] paths = File.ReadAllLines(inputPath);
-                        foreach (string path in paths) {
+                        foreach (string path in paths)
+                        {
                             AddProject(projects, path);
                         }
                     }
-                    catch {
+                    catch
+                    {
                         Log.Write("Invalid argument: " + arg, ConsoleColor.Red);
                     }
 
                     continue;
                 }
 
-                if (arg.StartsWith("/p:")) {
+                if (arg.StartsWith("/p:"))
+                {
                     var match = Regex.Match(arg, "/p:(?<name>[^=]+)=(?<value>.+)");
-                    if (match.Success) {
+                    if (match.Success)
+                    {
                         var propertyName = match.Groups["name"].Value;
                         var propertyValue = match.Groups["value"].Value;
                         properties.Add(propertyName, propertyValue);
@@ -221,27 +228,38 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     }
                 }
 
-                if (arg == "/assemblylist") {
+                if (arg == "/assemblylist")
+                {
                     emitAssemblyList = true;
                     continue;
                 }
 
-                if (arg == "/nobuiltinfederations") {
+                if (string.Equals(arg, "/donotincludereferencedprojects", StringComparison.OrdinalIgnoreCase))
+                {
+                    doNotIncludeReferencedProjects = true;
+                    continue;
+                }
+
+                if (arg == "/nobuiltinfederations")
+                {
                     noBuiltInFederations = true;
                     Log.Message("Disabling built-in federations.");
                     continue;
                 }
 
-                if (arg.StartsWith("/federation:")) {
+                if (arg.StartsWith("/federation:"))
+                {
                     string server = arg.Substring("/federation:".Length);
                     Log.Message($"Adding federation '{server}'.");
                     federations.Add(server);
                     continue;
                 }
 
-                if (arg.StartsWith("/offlinefederation:")) {
+                if (arg.StartsWith("/offlinefederation:"))
+                {
                     var match = Regex.Match(arg, "/offlinefederation:(?<server>[^=]+)=(?<file>.+)");
-                    if (match.Success) {
+                    if (match.Success)
+                    {
                         var server = match.Groups["server"].Value;
                         var assemblyListFileName = match.Groups["file"].Value;
                         offlineFederations[server] = assemblyListFileName;
@@ -251,52 +269,43 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     continue;
                 }
 
-                if (string.Equals(arg, "/noplugins", StringComparison.OrdinalIgnoreCase)) {
+                if (string.Equals(arg, "/noplugins", StringComparison.OrdinalIgnoreCase))
+                {
                     SolutionGenerator.LoadPlugins = false;
                     continue;
                 }
 
-                if (arg.StartsWith("/noplugin:")) {
+                if (arg.StartsWith("/noplugin:"))
+                {
                     pluginBlacklist.Add(arg.Substring("/noplugin:".Length));
                     continue;
                 }
 
-                try {
+                try
+                {
                     AddProject(projects, arg);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Log.Write("Exception: " + ex.ToString(), ConsoleColor.Red);
                 }
             }
 
-            #endregion
-
-            if (isDebug) {
-                ProgramLoad.isDebug = true;
-                ConsoleKeyInfo key = Console.ReadKey();
-                if (key.KeyChar == '\n') { // Enter
-                    if (!Debugger.IsAttached)
-                        Debugger.Launch();
-                    else
-                        Debugger.Break();
-                }
-
-                Console.WriteLine($"Debuging {Environment.CurrentDirectory}");
-            }
-
-            if (projects.Count == 0) {
-                ProgramLoad.PrintUsage();
+            if (projects.Count == 0)
+            {
+                PrintUsage();
                 return;
             }
 
-            // AssertTraceListener.Register();
+            AssertTraceListener.Register();
             AppDomain.CurrentDomain.FirstChanceException += FirstChanceExceptionHandler.HandleFirstChanceException;
 
             // This loads the real MSBuild from the toolset so that all targets and SDKs can be found
             // as if a real build is happening
             MSBuildLocator.RegisterDefaults();
 
-            if (Paths.SolutionDestinationFolder == null) {
+            if (Paths.SolutionDestinationFolder == null)
+            {
                 Paths.SolutionDestinationFolder = Path.Combine(Microsoft.SourceBrowser.Common.Paths.BaseAppFolder, "Index");
             }
 
@@ -312,38 +321,45 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             Log.ErrorLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.ErrorLogFile);
             Log.MessageLogFilePath = Path.Combine(Paths.SolutionDestinationFolder, Log.MessageLogFile);
 
-            using (Disposable.Timing("Generating website")) {
+            using (Disposable.Timing("Generating website"))
+            {
                 var federation = new Federation();
 
-                if (!noBuiltInFederations) {
+                if (!noBuiltInFederations)
+                {
                     federation.AddFederations(Federation.DefaultFederatedIndexUrls);
                 }
 
                 federation.AddFederations(federations);
 
-                foreach (var entry in offlineFederations) {
+                foreach (var entry in offlineFederations)
+                {
                     federation.AddFederation(entry.Key, entry.Value);
                 }
 
-                IndexSolutions(projects, properties, federation, serverPathMappings, pluginBlacklist);
+                IndexSolutions(projects, properties, federation, serverPathMappings, pluginBlacklist, doNotIncludeReferencedProjects);
                 FinalizeProjects(emitAssemblyList, federation);
                 WebsiteFinalizer.Finalize(websiteDestination, emitAssemblyList, federation);
             }
         }
 
-        public static void AddProject(List<string> projects, string path)
+        private static void AddProject(List<string> projects, string path)
         {
             var project = Path.GetFullPath(path);
-            if (IsSupportedProject(project)) {
+            if (IsSupportedProject(project))
+            {
                 projects.Add(project);
-            } else {
+            }
+            else
+            {
                 Log.Exception("Project not found or not supported: " + path, isSevere: false);
             }
         }
 
         private static bool IsSupportedProject(string filePath)
         {
-            if (!File.Exists(filePath)) {
+            if (!File.Exists(filePath))
+            {
                 return false;
             }
 
@@ -352,16 +368,38 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                    filePath.EndsWith(".vbproj", StringComparison.OrdinalIgnoreCase);
         }
 
-        
-        private static readonly Folder<Project> mergedSolutionExplorerRoot = new Folder<Project>();
+        private static void PrintUsage()
+        {
+            Console.WriteLine("Usage: HtmlGenerator "
+                + "[/out:<outputdirectory>] "
+                + "[/force] "
+                + "[/noplugins] "
+                + "[/noplugin:Git] "
+                + "<pathtosolution1.csproj|vbproj|sln> [more solutions/projects..] "
+                + "[/in:<filecontaingprojectlist>] "
+                + "[/nobuiltinfederations] "
+                + "[/offlinefederation:server=assemblyListFile] "
+                + "[/assemblylist]");
+        }
 
-        public static void IndexSolutions(IEnumerable<string> solutionFilePaths, Dictionary<string, string> properties, Federation federation, Dictionary<string, string> serverPathMappings, IEnumerable<string> pluginBlacklist)
+        private static readonly Folder<ProjectSkeleton> mergedSolutionExplorerRoot = new Folder<ProjectSkeleton>();
+
+        private static void IndexSolutions(
+            IEnumerable<string> solutionFilePaths,
+            Dictionary<string, string> properties,
+            Federation federation,
+            Dictionary<string, string> serverPathMappings,
+            IEnumerable<string> pluginBlacklist,
+            bool doNotIncludeReferencedProjects = false)
         {
             var assemblyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var path in solutionFilePaths) {
-                using (Disposable.Timing("Reading assembly names from " + path)) {
-                    foreach (var assemblyName in AssemblyNameExtractor.GetAssemblyNames(path)) {
+            foreach (var path in solutionFilePaths)
+            {
+                using (Disposable.Timing("Reading assembly names from " + path))
+                {
+                    foreach (var assemblyName in AssemblyNameExtractor.GetAssemblyNames(path))
+                    {
                         assemblyNames.Add(assemblyName);
                     }
                 }
@@ -369,15 +407,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             var processedAssemblyList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var path in solutionFilePaths) {
-                using (Disposable.Timing("Generating " + path)) {
+            foreach (var path in solutionFilePaths)
+            {
+                using (Disposable.Timing("Generating " + path))
+                {
                     using (var solutionGenerator = new SolutionGenerator(
                         path,
                         Paths.SolutionDestinationFolder,
                         properties: properties.ToImmutableDictionary(),
                         federation: federation,
                         serverPathMappings: serverPathMappings,
-                        pluginBlacklist: pluginBlacklist)) {
+                        pluginBlacklist: pluginBlacklist,
+                        doNotIncludeReferencedProjects: doNotIncludeReferencedProjects))
+                    {
                         solutionGenerator.GlobalAssemblyList = assemblyNames;
                         solutionGenerator.Generate(processedAssemblyList, mergedSolutionExplorerRoot);
                     }
@@ -389,16 +431,19 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
         }
 
-        public static void FinalizeProjects(bool emitAssemblyList, Federation federation)
+        private static void FinalizeProjects(bool emitAssemblyList, Federation federation)
         {
             GenerateLooseFilesProject(Constants.MSBuildFiles, Paths.SolutionDestinationFolder);
             GenerateLooseFilesProject(Constants.TypeScriptFiles, Paths.SolutionDestinationFolder);
-            using (Disposable.Timing("Finalizing references")) {
-                try {
+            using (Disposable.Timing("Finalizing references"))
+            {
+                try
+                {
                     var solutionFinalizer = new SolutionFinalizer(Paths.SolutionDestinationFolder);
                     solutionFinalizer.FinalizeProjects(emitAssemblyList, federation, mergedSolutionExplorerRoot);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Log.Exception(ex, "Failure while finalizing projects");
                 }
             }
@@ -415,24 +460,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
     {
         public static void Finalize(string destinationFolder, bool emitAssemblyList, Federation federation)
         {
-            string sourcePath = AppDomain.CurrentDomain.BaseDirectory;
-            try {
-                sourcePath = Assembly.GetEntryAssembly().Location;
-                // getEntry...
-            }
-            catch (Exception ex) {
-                Console.WriteLine($"Entry failure {ex}");
-            }
-
+            string sourcePath = Assembly.GetEntryAssembly().Location;
             sourcePath = Path.GetDirectoryName(sourcePath);
             string basePath = sourcePath;
-
             sourcePath = Path.Combine(sourcePath, "Web");
-            Console.WriteLine($"\nWeb: {sourcePath}");
-            if (!Directory.Exists(sourcePath)) {
-                sourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Web");
-                if (!Directory.Exists(sourcePath)) 
-                    return;
+            if (!Directory.Exists(sourcePath))
+            {
+                return;
             }
 
             sourcePath = Path.GetFullPath(sourcePath);
@@ -440,7 +474,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
 
             StampOverviewHtmlWithDate(destinationFolder);
 
-            if (emitAssemblyList) {
+            if (emitAssemblyList)
+            {
                 ToggleSolutionExplorerOff(destinationFolder);
             }
 
@@ -451,7 +486,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             var source = Path.Combine(destinationFolder, "wwwroot", "overview.html");
             var dst = Path.Combine(destinationFolder, "index", "overview.html");
-            if (File.Exists(source)) {
+            if (File.Exists(source))
+            {
                 var text = File.ReadAllText(source);
                 text = StampOverviewHtmlText(text);
                 File.WriteAllText(dst, text);
@@ -467,7 +503,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             var source = Path.Combine(destinationFolder, "wwwroot/scripts.js");
             var dst = Path.Combine(destinationFolder, "index/scripts.js");
-            if (File.Exists(source)) {
+            if (File.Exists(source))
+            {
                 var text = File.ReadAllText(source);
                 text = text.Replace("/*USE_SOLUTION_EXPLORER*/true/*USE_SOLUTION_EXPLORER*/", "false");
                 File.WriteAllText(dst, text);
@@ -478,10 +515,13 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
         {
             var source = Path.Combine(destinationFolder, "wwwroot/scripts.js");
             var dst = Path.Combine(destinationFolder, "index/scripts.js");
-            if (File.Exists(source)) {
+            if (File.Exists(source))
+            {
                 var sb = new StringBuilder();
-                foreach (var server in federation.GetServers()) {
-                    if (sb.Length > 0) {
+                foreach (var server in federation.GetServers())
+                {
+                    if (sb.Length > 0)
+                    {
                         sb.Append(",");
                     }
 
@@ -490,7 +530,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                     sb.Append("\"");
                 }
 
-                if (sb.Length > 0) {
+                if (sb.Length > 0)
+                {
                     var text = File.ReadAllText(source);
                     text = Regex.Replace(text, @"/\*EXTERNAL_URL_MAP\*/.*/\*EXTERNAL_URL_MAP\*/", sb.ToString());
                     File.WriteAllText(dst, text);
