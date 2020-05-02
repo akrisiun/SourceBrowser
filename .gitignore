@@ -195,7 +195,7 @@ FakesAssemblies/
 # Visual Studio 6 workspace options file
 *.opt
 /src/SourceIndexServer/Index
-srcWeb/
-*.txt
+*.binlog
 *.exe
 wwwroot/
+Errors.txt
