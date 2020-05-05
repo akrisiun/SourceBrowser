@@ -110,6 +110,9 @@ namespace Microsoft.SourceBrowser.Common
         {
             var solution = SolutionFile.Parse(solutionFilePath);
             var assemblies = new List<string>(solution.ProjectsInOrder.Count);
+
+            // System.Runtime, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+
             foreach (var project in solution.ProjectsInOrder)
             {
                 if (project.ProjectType == SolutionProjectType.SolutionFolder)

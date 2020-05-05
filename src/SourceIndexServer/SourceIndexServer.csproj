@@ -4,10 +4,15 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>Microsoft.SourceBrowser.SourceIndexServer</AssemblyName>
     <RootNamespace>Microsoft.SourceBrowser.SourceIndexServer</RootNamespace>
+    
+    <GenerateErrorForMissingTargetingPacks>true</GenerateErrorForMissingTargetingPacks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="[4.3.0,)" />
+    <!-- NETSDK1073: The FrameworkReference 'Microsoft.AspNetCore.App' -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>

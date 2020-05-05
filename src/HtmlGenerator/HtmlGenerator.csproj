@@ -66,9 +66,14 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Runtime">
+      <HintPath>..\..\lib\System.Runtime.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
   <Target Name="PublishWebsite" AfterTargets="CoreBuild" BeforeTargets="BuildNuGet">
-    <MSBuild Targets="Publish" Projects="$(MSBuildThisFileDirectory)..\SourceIndexServer\SourceIndexServer.csproj" Properties="PublishDir=$(TargetDir)\Web;Configuration=Release" RemoveProperties="TargetFramework" />
+    <!--<MSBuild Targets="Publish" Projects="$(MSBuildThisFileDirectory)..\SourceIndexServer\SourceIndexServer.csproj" 
+             Properties="PublishDir=$(TargetDir)\Web;Configuration=Release" RemoveProperties="TargetFramework" />-->
   </Target>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
@@ -76,6 +81,10 @@
   <PropertyGroup>
     <NupkgFilePath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)$(OutDir)$(NuGetPackageId).$(NuGetVersion).nupkg'))</NupkgFilePath>
     <StartupObject>SourceBrowser.ProgramLoad</StartupObject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>c:\bin\html\</OutputPath>
   </PropertyGroup>
   <Target Name="BuildNuGet" AfterTargets="CoreBuild" Condition="Exists('$(NuSpecFile)')" DependsOnTargets="CopyFilesToOutputDirectory" Inputs="@(NuGetInput)" Outputs="$(NupkgFilePath)">
 	<!--

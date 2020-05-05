@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -28,7 +29,10 @@ namespace SourceBrowser {
 
             dll = AppDomain.CurrentDomain.BaseDirectory + "Microsoft.CodeAnalysis.Workspaces.Desktop.dll";
             Assembly.LoadFile(dll);
-            
+
+            dll = AppDomain.CurrentDomain.BaseDirectory + "System.Runtime.dll";
+            Assembly.LoadFile(dll);
+
             Program.Run(args ?? Environment.GetCommandLineArgs());
         }
         public static void Run(string[] args = null) {
@@ -84,6 +88,14 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 if (arg == "/force")
                 {
                     force = true;
+                    continue;
+                }
+
+                if (arg == "/debug")
+                {
+                    Console.WriteLine(arg);
+                    Console.ReadKey();
+                    Debugger.Break();
                     continue;
                 }
 

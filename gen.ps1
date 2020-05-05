@@ -14,4 +14,4 @@ echo VisualStudioVersion $env:VisualStudioVersion
 echo MSBUILD_EXE_PATH $env:MSBUILD_EXE_PATH
 echo CscToolPath $env:CscToolPath
 
-.\src\HtmlGenerator\bin\Debug\net48\HtmlGenerator.exe /out:../srcWeb/Index SourceBrowser.sln
+.\src\HtmlGenerator\bin\Debug\net48\HtmlGenerator.exe /out:../srcWeb/Index SourceBrowser.sln /debug /force
