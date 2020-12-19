@@ -1,0 +1,1 @@
+xcopy wwwroot\*  Index\* /Y

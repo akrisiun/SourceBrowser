@@ -2,6 +2,7 @@
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
@@ -23,6 +24,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
         public void ConfigureServices(IServiceCollection services)
         {
             RootPath = Path.Combine(Environment.ContentRootPath, "Index");
+			Console.WriteLine("ConfigureServices RootPath=" + RootPath);
 
             var subfolder = Path.Combine(RootPath, "Index");
             if (File.Exists(Path.Combine(subfolder, "Projects.txt")))
@@ -40,6 +42,10 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            // loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            // loggerFactory.AddDebug();
+
             app.Use(async (context, next) =>
             {
                 context.Response.Headers["X-UA-Compatible"] = "IE=edge";
@@ -54,6 +60,14 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
             app.UseDefaultFiles();
             
             Console.WriteLine("RootPath=" + Path.GetFullPath(RootPath));
+
+            // app.UseWebRoot(RootPath);
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(RootPath),
+                RequestPath = new PathString("/index.html")
+            });
+			
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(RootPath),

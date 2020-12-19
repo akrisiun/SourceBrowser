@@ -10,6 +10,7 @@
   "profiles": {
     "SourceIndexServer": {
       "commandName": "Project",
+      "workingDirectory": "c:\\Beta\\dotnet\\srcWeb\\",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -23,6 +24,5 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
-
   }
 }

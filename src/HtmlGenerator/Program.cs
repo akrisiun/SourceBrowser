@@ -19,22 +19,33 @@ namespace SourceBrowser {
         public static bool isDebug { get; set; }
         public static string BasePath  { get; set; }
 
-        public static void Main(string[] args = null) {
+        public static void Main(string[] args = null)
+        {
 
             //if (BasePath != null)
             //    Directory.SetCurrentDirectory(BasePath);
 
-            var dll = AppDomain.CurrentDomain.BaseDirectory + "Microsoft.SourceBrowser.Common.dll";
-            Assembly.LoadFile(dll);
+            var dll = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Microsoft.SourceBrowser.Common.dll");
+            try
+            {
+                Assembly.LoadFile(dll);
+            }
+            catch (FileNotFoundException e) { Console.WriteLine($"no dll {dll}", e); }
 
-            dll = AppDomain.CurrentDomain.BaseDirectory + "Microsoft.CodeAnalysis.Workspaces.Desktop.dll";
-            Assembly.LoadFile(dll);
+            dll = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Microsoft.CodeAnalysis.Workspaces.Desktop.dll");
+            try
+            {
+                Assembly.LoadFile(dll);
+            }
+            catch (FileNotFoundException e) { Console.WriteLine($"no dll {dll}", e); }
 
-            dll = AppDomain.CurrentDomain.BaseDirectory + "System.Runtime.dll";
-            Assembly.LoadFile(dll);
+            dll = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "System.Runtime.dll");
+            if (File.Exists(dll))
+                Assembly.LoadFile(dll);
 
             Program.Run(args ?? Environment.GetCommandLineArgs());
         }
+
         public static void Run(string[] args = null) {
             Program.Run(args ?? Environment.GetCommandLineArgs());
         }
@@ -94,7 +105,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 if (arg == "/debug")
                 {
                     Console.WriteLine(arg);
-                    Console.ReadKey();
+                    if (!global::SourceBrowser.ProgramLoad.isDebug)
+                        Console.ReadKey();
                     Debugger.Break();
                     continue;
                 }

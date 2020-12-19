@@ -4,6 +4,7 @@ using SourceBrowser;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using TraceOut;
@@ -24,17 +25,26 @@ namespace Microsoft.SourceBrowser.HtmlGenerator.Tests
             }
 
             var sln = @"d:\Beta\OmniX\SourceBrowser\SourceBrowser.sln";
-            var baseDir = @"d:\Beta\OmniX\SourceBrowser";
+            if (!File.Exists(sln))
+                sln = @"c:\Beta\dotnet\SourceBrowser\SourceBrowser.sln";  // v2
 
-            // E:\Beta\mono64\SourceBrowser\src\HtmlGenerator.Tests\bin\Debug\net461\
+            var baseDir = Path.GetDirectoryName(sln);
+
             ProgramLoad.isDebug = false;
             ProgramLoad.BasePath = typeof(ProgramLoad).Assembly.Location;
 
-            if (!Debugger.IsAttached) {
+            var dll = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Microsoft.SourceBrowser.Common.dll");
+            Assembly.LoadFile(dll);
+
+            if (!Debugger.IsAttached)
+            {
                 ProgramLoad.isDebug = false;
                 ProgramLoad.Main(new string[] { ".exe", sln, $"/out:{baseDir}\\srcWeb" });
             } else
+            {
+                ProgramLoad.isDebug = true;
                 Program.Run(new string[] { sln, "/debug", $"/out:{baseDir}\\srcWeb" });
+            }
         }
     }
 }
