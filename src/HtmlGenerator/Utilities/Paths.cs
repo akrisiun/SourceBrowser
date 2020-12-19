@@ -47,6 +47,8 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 return;
             }
 
+            var indexDir = Path.Combine(SolutionDestinationFolder, "Index");
+
             if (Directory.Exists(SolutionDestinationFolder))
             {
                 if (!forceOverwrite && !Debugger.IsAttached)
@@ -81,7 +83,10 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
                 Log.Write("Deleting " + SolutionDestinationFolder);
                 try
                 {
-                    Directory.Delete(SolutionDestinationFolder, recursive: true);
+                    if (Directory.Exists(indexDir))
+                    {
+                        Directory.Delete(indexDir, recursive: true);
+                    }
                 }
                 catch (Exception)
                 {
@@ -89,6 +94,7 @@ namespace Microsoft.SourceBrowser.HtmlGenerator
             }
 
             Directory.CreateDirectory(SolutionDestinationFolder);
+            Directory.CreateDirectory(indexDir);
         }
 
         /// <summary>

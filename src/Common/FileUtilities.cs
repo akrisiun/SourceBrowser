@@ -46,7 +46,7 @@ namespace Microsoft
             }
         }
 
-          private static string GetWindowsRoot(string path)
+        private static string GetWindowsRoot(string path)
         {
             // Windows
             int length = path.Length;
@@ -96,15 +96,13 @@ namespace Microsoft
                     // We hit the second separator.  The root is the path up to this point.
                     return path.Substring(0, i);
                 }
-            }
-            else if (length >= 2 && path[1] == VolumeSeparatorChar)
+            } else if (length >= 2 && path[1] == VolumeSeparatorChar)
             {
                 // handles c: and c:\
                 return length >= 3 && IsDirectorySeparator(path[2])
                     ? path.Substring(0, 3)
                     : path.Substring(0, 2);
-            }
-            else
+            } else
             {
                 // No path root.
                 return "";
@@ -352,13 +350,13 @@ namespace Microsoft.SourceBrowser.Common
 
     public static class FileUtilities
     {
-          // internal 
-          public static string ResolveRelativePath(
-            string path,
-            string basePath,
-            string baseDirectory,
-            IEnumerable<string> searchPaths,
-            Func<string, bool> fileExists)
+        // internal 
+        public static string ResolveRelativePath(
+          string path,
+          string basePath,
+          string baseDirectory,
+          IEnumerable<string> searchPaths,
+          Func<string, bool> fileExists)
         {
             Debug.Assert(baseDirectory == null || searchPaths != null || PathUtilities.IsAbsolute(baseDirectory));
             Debug.Assert(searchPaths != null);
@@ -426,7 +424,7 @@ namespace Microsoft.SourceBrowser.Common
         {
             return ResolveRelativePath(path, null, baseDirectory);
         }
-        
+
         internal static string ResolveRelativePath(string path, string basePath, string baseDirectory)
         {
             Debug.Assert(baseDirectory == null || PathUtilities.IsAbsolute(baseDirectory));
@@ -461,8 +459,7 @@ namespace Microsoft.SourceBrowser.Common
                     {
                         // "."
                         return baseDirectory;
-                    }
-                    else
+                    } else
                     {
                         // ".\path"
                         return PathUtilities.CombinePathsUnchecked(baseDirectory, path);
@@ -483,12 +480,10 @@ namespace Microsoft.SourceBrowser.Common
                     if (basePath != null)
                     {
                         baseRoot = PathUtilities.GetPathRoot(basePath);
-                    }
-                    else if (baseDirectory != null)
+                    } else if (baseDirectory != null)
                     {
                         baseRoot = PathUtilities.GetPathRoot(baseDirectory);
-                    }
-                    else
+                    } else
                     {
                         return null;
                     }

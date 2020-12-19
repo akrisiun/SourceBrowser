@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>Microsoft.SourceBrowser.SourceIndexServer</AssemblyName>
     <RootNamespace>Microsoft.SourceBrowser.SourceIndexServer</RootNamespace>
+    <OutputType>Exe</OutputType>
     
     <GenerateErrorForMissingTargetingPacks>true</GenerateErrorForMissingTargetingPacks>
   </PropertyGroup>
