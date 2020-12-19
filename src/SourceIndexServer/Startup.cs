@@ -42,10 +42,6 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
-            // loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            // loggerFactory.AddDebug();
-
             app.Use(async (context, next) =>
             {
                 context.Response.Headers["X-UA-Compatible"] = "IE=edge";
@@ -61,7 +57,7 @@ namespace Microsoft.SourceBrowser.SourceIndexServer
             
             Console.WriteLine("RootPath=" + Path.GetFullPath(RootPath));
 
-            // app.UseWebRoot(RootPath);
+            // UseWebRoot: Index/index.html
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(RootPath),
